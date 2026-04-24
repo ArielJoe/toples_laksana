@@ -1,6 +1,7 @@
-// ============================================================
-// GET /api/products/facets — Distinct filter values with counts
-// ============================================================
+/**
+ * GET /api/products/facets
+ * Aggregates distinct filter values (categories, materials, etc.) and their respective product counts.
+ */
 
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";

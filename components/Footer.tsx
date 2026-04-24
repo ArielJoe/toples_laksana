@@ -20,9 +20,9 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Links Column 1 */}
+        {/* Navigation Links (Column 1) */}
         <div className="md:col-span-4 lg:col-span-2">
-          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Jelajahi</h5>
+          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Explore</h5>
           <ul className="space-y-4 font-semibold text-text-secondary">
             <li><Link className="hover:text-primary-500 transition-colors" href="/catalog">Katalog Produk</Link></li>
             <li><Link className="hover:text-primary-500 transition-colors" href="/compare">Bandingkan</Link></li>
@@ -30,9 +30,9 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Links Column 2 */}
+        {/* Help & Information (Column 2) */}
         <div className="md:col-span-4 lg:col-span-2">
-          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Bantuan & Info</h5>
+          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Help & Info</h5>
           <ul className="space-y-4 font-semibold text-text-secondary">
             <li><Link className="hover:text-primary-500 transition-colors" href="#">Pembelian Grosir</Link></li>
             <li><Link className="hover:text-primary-500 transition-colors" href="#">Syarat Pengiriman</Link></li>
@@ -40,9 +40,9 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contact Column */}
+        {/* Contact Information (Column 3) */}
         <div className="md:col-span-4 lg:col-span-3">
-          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Hubungi Kami</h5>
+          <h5 className="font-black text-text-primary mb-6 uppercase tracking-[0.15em] text-[0.7rem]">Contact Us</h5>
           <div className="space-y-4 text-text-secondary">
             <div className="flex items-start gap-3">
               <span className="material-symbols-outlined text-primary-500 text-xl">location_on</span>

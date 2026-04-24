@@ -33,7 +33,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-[110] transition-all duration-300 ${
+        className={`fixed top-0 w-full z-110 transition-all duration-300 ${
           isScrolled || mobileMenuOpen
             ? "bg-white/90 backdrop-blur-xl shadow-md py-3"
             : "bg-transparent py-5"
@@ -95,7 +95,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed inset-0 z-[100] bg-white pt-24 px-6 pb-6 lg:hidden flex flex-col"
+            className="fixed inset-0 z-100 bg-white pt-24 px-6 pb-6 lg:hidden flex flex-col"
           >
             <div className="flex flex-col gap-2 mb-8">
               {navLinks.map((link) => {

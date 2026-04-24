@@ -1,6 +1,7 @@
-// ============================================================
-// GET /api/products — Fetch products with filters & pagination
-// ============================================================
+/**
+ * GET /api/products
+ * Fetches a list of products with support for advanced filtering, text search, and pagination.
+ */
 
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
@@ -11,8 +12,6 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = request.nextUrl;
-
-    // ---- Parse Query Parameters ----
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(50, parseInt(searchParams.get("limit") || "10"));
     const sort = searchParams.get("sort") || "popular";
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
     const priceMin = searchParams.get("price_min");
     const priceMax = searchParams.get("price_max");
 
-    // ---- Build MongoDB Filter ----
+    // Build MongoDB query filter
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: Record<string, any> = { is_active: true };
 
@@ -79,7 +78,7 @@ export async function GET(request: NextRequest) {
       filter["variants.pricing.retail.price"] = priceMatch;
     }
 
-    // ---- Sort ----
+    // Determine sort order
     let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
     switch (sort) {
       case "price_asc":

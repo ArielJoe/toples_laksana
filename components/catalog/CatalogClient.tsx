@@ -44,7 +44,7 @@ function CatalogContent() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // Fetch facets once on mount
+  // Fetch filter facets (categories, tags, etc.) once on component mount
   useEffect(() => {
     fetch("/api/products/facets")
       .then((r) => r.json())
@@ -52,9 +52,8 @@ function CatalogContent() {
       .catch(console.error);
   }, []);
 
-  // Fetch products when filters/page change
+  // Re-fetch product list whenever filters or page change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!loading) setLoading(true);
     fetch(apiUrl)
       .then((r) => r.json())
@@ -66,6 +65,9 @@ function CatalogContent() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
+  /**
+   * Toggles a product in the comparison list (max 3 products).
+   */
   const handleCompareToggle = useCallback((id: string) => {
     setCompareIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 3 ? [...prev, id] : prev

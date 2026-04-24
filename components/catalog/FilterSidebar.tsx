@@ -26,7 +26,7 @@ export default function FilterSidebar({
 
   return (
     <aside className="space-y-10">
-      {/* ── Search ── */}
+      {/* Search Input */}
       <section>
         <div className="relative">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-xl">
@@ -46,7 +46,7 @@ export default function FilterSidebar({
         </div>
       </section>
 
-      {/* ── Primary Filter 1: Category ── */}
+      {/* Primary Filter: Packaging Type (Category) */}
       <section>
         <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-primary-600 mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-base">category</span>
@@ -78,7 +78,7 @@ export default function FilterSidebar({
         </div>
       </section>
 
-      {/* ── Primary Filter 2: Use-Case ── */}
+      {/* Primary Filter: Use-Case (Best For) */}
       <section>
         <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-primary-600 mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-base">local_offer</span>
@@ -165,7 +165,7 @@ export default function FilterSidebar({
         </div>
       </section>
 
-      {/* ── Advanced Filters Toggle ── */}
+      {/* Advanced Filters Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="w-full flex items-center justify-between px-5 py-4 bg-white rounded-2xl border border-border hover:border-primary-500/30 transition-all group shadow-sm active:scale-[0.98]"
@@ -183,7 +183,7 @@ export default function FilterSidebar({
         </span>
       </button>
 
-      {/* ── Advanced Filters Panel ── */}
+      {/* Advanced Filters Panel */}
       <div
         className={`space-y-8 overflow-hidden transition-all duration-500 ease-in-out ${
           showAdvanced ? "max-h-[1000px] opacity-100 mt-6 pb-6" : "max-h-0 opacity-0"
@@ -279,7 +279,7 @@ export default function FilterSidebar({
         </section>
       </div>
 
-      {/* ── Trust Badge ── */}
+      {/* Trust Badge / Certification */}
       <div className="p-6 bg-primary-50 rounded-2xl border border-primary-100 shadow-inner">
         <span className="material-symbols-outlined text-primary-500 mb-3 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
           verified

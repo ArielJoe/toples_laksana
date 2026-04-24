@@ -23,9 +23,9 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
     const idArray = ids.split(",").slice(0, 3); // Max 3
     await connectDB();
     const fetched = await ProductModel.find({ _id: { $in: idArray }, is_active: true }).lean();
-    // Serialize object IDs
+    // Serialize MongoDB objects for Client Component compatibility
     products = JSON.parse(JSON.stringify(fetched));
-    
+
     // Sort to match the requested ID order
     products.sort((a, b) => idArray.indexOf(a._id) - idArray.indexOf(b._id));
   }
@@ -39,15 +39,15 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             <div className="flex items-center">
               <span className="text-secondary-500 font-black text-[0.65rem] tracking-[0.3em] uppercase">Katalog Perbandingan</span>
             </div>
-            <Link 
-              href="/catalog" 
+            <Link
+              href="/catalog"
               className="flex items-center gap-2 text-[0.65rem] font-black uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors"
             >
               <span className="material-symbols-outlined text-sm">arrow_back</span>
               Kembali ke Katalog
             </Link>
           </div>
-          
+
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface leading-tight mb-4">
             Bandingkan Produk
           </h1>
@@ -73,12 +73,12 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
         ) : (
           <div className="overflow-x-auto no-scrollbar pb-8 -mx-6 px-6 lg:-mx-12 lg:px-12">
             <div className="w-full">
-              {/* Product Headers */}
+              {/* Product Header Cards */}
               <div className="grid grid-cols-4 items-stretch gap-4 mb-6">
                 <div className="flex flex-col justify-end pb-8">
                   <span className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted">Matriks Spesifikasi</span>
                 </div>
-                
+
                 {products.map((product) => (
                   <div key={product._id} className="bg-white p-4 sm:p-6 flex flex-col items-center text-center shadow-sm border border-border/50 rounded-2xl relative min-w-[200px] sm:min-w-0">
                     <Link href={`/catalog?ids=${ids?.split(',').filter(id => id !== product._id).join(',')}`} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-high hover:bg-error/10 text-on-surface-variant hover:text-error flex items-center justify-center transition-colors">
@@ -116,9 +116,9 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                 ))}
               </div>
 
-              {/* Matrix Table */}
+              {/* Technical Specifications Matrix */}
               <div className="flex flex-col border border-black rounded-2xl overflow-hidden shadow-sm bg-white">
-                
+
                 {/* Visual Row Renderer */}
                 {[
                   { label: "Volume Kapasitas", getter: (p: Product) => `${getSpecValue(p.specifications, 'volume_ml') || '-'} ml` },
@@ -144,22 +144,22 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
 
                 {/* Price Row (Highlight) */}
                 <div className="grid grid-cols-4 items-stretch bg-primary-500/5">
-                   <div className="px-4 sm:px-6 py-8 text-[0.6rem] sm:text-[0.65rem] font-black text-primary-600 uppercase tracking-widest border-r border-black flex items-center bg-primary-500/[0.02] min-w-[120px] sm:min-w-0">
-                    Harga Ecer Terendah 
-                   </div>
-                   {products.map((p) => (
-                      <div key={`${p._id}-price`} className="px-4 sm:px-6 py-8 text-center border-r border-black last:border-r-0 flex flex-col items-center justify-center min-w-[150px] sm:min-w-0">
-                        <span className="text-2xl font-black text-primary-600 tracking-tight">
-                          {formatPrice(getLowestRetailPrice(p.variants))}
-                        </span>
-                        <span className="text-[0.6rem] font-bold text-text-muted mt-1 uppercase tracking-widest">
-                          / pcs
-                        </span>
-                      </div>
-                    ))}
-                    {Array.from({ length: 3 - products.length }).map((_, i) => (
-                      <div key={`empty-price-${i}`} className="border-r border-black last:border-r-0 min-w-[150px] sm:min-w-0" />
-                    ))}
+                  <div className="px-4 sm:px-6 py-8 text-[0.6rem] sm:text-[0.65rem] font-black text-primary-600 uppercase tracking-widest border-r border-black flex items-center bg-primary-500/2 min-w-[120px] sm:min-w-0">
+                    Harga Ecer Terendah
+                  </div>
+                  {products.map((p) => (
+                    <div key={`${p._id}-price`} className="px-4 sm:px-6 py-8 text-center border-r border-black last:border-r-0 flex flex-col items-center justify-center min-w-[150px] sm:min-w-0">
+                      <span className="text-2xl font-black text-primary-600 tracking-tight">
+                        {formatPrice(getLowestRetailPrice(p.variants))}
+                      </span>
+                      <span className="text-[0.6rem] font-bold text-text-muted mt-1 uppercase tracking-widest">
+                        / pcs
+                      </span>
+                    </div>
+                  ))}
+                  {Array.from({ length: 3 - products.length }).map((_, i) => (
+                    <div key={`empty-price-${i}`} className="border-r border-black last:border-r-0 min-w-[150px] sm:min-w-0" />
+                  ))}
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                     Tanya Admin
                   </a>
                 ))}
-                 {Array.from({ length: 3 - products.length }).map((_, i) => (
+                {Array.from({ length: 3 - products.length }).map((_, i) => (
                   <div key={`empty-cta-${i}`} />
                 ))}
               </div>
@@ -194,7 +194,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             Catatan Teknis Industrial
           </h4>
           <p className="text-sm text-on-surface-variant leading-relaxed">
-            *Semua dimensi produk diukur dengan toleransi manufaktur ±0.5mm. Kapasitas volume didasarkan pada tingkat pengisian wajar produk (*fill to shoulder*). 
+            *Semua dimensi produk diukur dengan toleransi manufaktur ±0.5mm. Kapasitas volume didasarkan pada tingkat pengisian wajar produk (*fill to shoulder*).
             Harga grosir skala besar berlaku. Silakan hubungi admin kami untuk permintaan kustomisasi warna khusus atau logo pada tutup kemasan dengan Minimum Order Quantity (MOQ) pabrik.
           </p>
         </div>

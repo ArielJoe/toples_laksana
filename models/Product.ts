@@ -1,8 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
-// ============================================================
-// Sub-Schemas
-// ============================================================
+/**
+ * Sub-Schemas for Product Structure
+ */
 
 const SpecificationSchema = new Schema(
   {
@@ -23,9 +23,9 @@ const RetailPricingSchema = new Schema(
 
 const WholesalePricingSchema = new Schema(
   {
-    price: { type: Number, required: true },      // per pcs (grosir)
-    unit_type: { type: String, required: true },   // "kardus" | "bal" | "shrink"
-    qty_per_unit: { type: Number, required: true }, // pcs per unit
+    price: { type: Number, required: true },      // per pcs (wholesale)
+    unit_type: { type: String, required: true },   // "carton" | "bundle" | "shrink"
+    qty_per_unit: { type: Number, required: true }, // pieces per unit
   },
   { _id: false }
 );
@@ -73,9 +73,9 @@ const MaterialsSchema = new Schema(
   { _id: false }
 );
 
-// ============================================================
-// Main Product Schema
-// ============================================================
+/**
+ * Main Product Schema
+ */
 
 const ProductSchema = new Schema(
   {
