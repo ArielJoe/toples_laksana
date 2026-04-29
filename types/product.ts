@@ -1,109 +1,175 @@
 // ============================================================
-// Product Types — Mirroring MongoDB Schema
+// Product Types — Matching MongoDB Schema (new structure)
 // ============================================================
 
 export interface ProductSpecification {
-  key: string;    // "volume_ml", "tinggi_cm", "diameter_badan_cm", "berat_total_gr"
+  key: string;
   value: number;
   type: "number";
 }
 
-export interface VariantPricing {
-  retail: {
-    price: number;    // Harga per pcs (ecer)
-    min_qty: number;  // Always 1
-  };
-  wholesale: {
-    price: number;        // Harga per pcs (grosir) — BUKAN total per kardus
-    unit_type: string;    // "kardus" | "bal" | "shrink"
-    qty_per_unit: number; // 42, 240, 99, etc.
-  };
+export interface ProductPrice {
+  lidColorId: string;
+  priceTypeId: string;
+  price: number;
+  validFrom?: string;
+  validUntil?: string;
 }
 
-export interface ProductVariant {
-  sku_variant: string;
-  color: string;       // "Gold", "Bening", "Rose", "Silver", etc.
-  pricing: VariantPricing;
+export interface ProductImage {
+  imageUrl: string;
+  order: number;
+  isPrimary: boolean;
+  createdAt?: string;
 }
 
-export interface PackagingLogistics {
-  box_weight_kg: number;
-  dimensions: {
-    length_cm: number;
-    width_cm: number;
-    height_cm: number;
-  };
+export interface ProductPackaging {
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  weightKg?: number;
+  quantityPerPack: number;
 }
 
-export interface ProductMaterials {
-  body: string;        // "Tin kaleng", "Polyethylene Terephthalate (PET) no.1"
-  lid_type: string;    // "slide on", "twist off", "tutup ulir"
-  lid_material: string; // "Alumunium", "Polypropylene(PP) no.3"
+export interface ProductDimension {
+  heightCm: number;
+  diameterCm: number;
+  volumeMl: number;
+  weightGram: number;
 }
 
 export interface Product {
-  _id: string;
+  _id?: string;
+  id: string;
   sku: string;
   name: string;
-  category: string;     // "Tin Kaleng", "Jar Plastik", "Jar Kaca", "Jar Cylinder", "Botol"
-  tags: string[];       // ["nastar", "kue kering"]
-  images: string[];     // Array of UploadThing URLs
-  materials: ProductMaterials;
-  specifications: ProductSpecification[];
-  variants: ProductVariant[];
-  packaging_logistics: PackagingLogistics;
-  is_active: boolean;
+  categoryId: string;
+  productTypeId?: string;
+  unitId: string;
+  lidMaterial: string;
+  lidVariant: string;
+  bodyMaterial: string;
+  lidType: string;
   description?: string;
+  dimension?: ProductDimension;
+  specifications?: ProductSpecification[];
+  packaging?: ProductPackaging[];
+  images?: ProductImage[];
+  prices?: ProductPrice[];
+  deletedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============================================================
-// Utility Types for UI State
+// Lookup Tables
 // ============================================================
 
-/** Serialized product from API (with string _id) */
-export type SerializedProduct = Product;
+export const CATEGORY_LABELS: Record<string, string> = {
+  cat_tin: "Tin Kaleng",
+  cat_jar_plastik: "Jar Plastik",
+  cat_jar_kaca: "Jar Kaca",
+  cat_jar_cylinder: "Jar Cylinder",
+  cat_botol: "Botol",
+  cat_botol_plastik: "Botol Plastik",
+};
 
-/** Spec keys used in the specifications[] Attribute Pattern */
-export type SpecKey = 
-  | "volume_ml"
-  | "tinggi_cm"
-  | "diameter_badan_cm"
-  | "diameter_mulut_cm"
-  | "berat_total_gr";
+export const LID_COLOR_LABELS: Record<string, string> = {
+  color_bening: "Bening",
+  color_putih: "Putih",
+  color_cling: "Cling",
+  color_silver: "Silver",
+  color_emas: "Emas",
+  color_rose: "Rose",
+  color_hitam: "Hitam",
+};
 
-/** Helper to extract a specific spec value from specifications[] */
-export function getSpecValue(
-  specs: ProductSpecification[],
-  key: SpecKey
-): number | undefined {
-  return specs.find((s) => s.key === key)?.value;
+export const PRICE_TYPE_IDS = {
+  withLid: "price_with_lid",
+  perBal: "price_per_bal",
+} as const;
+
+const PRODUCT_TYPE_LABELS: Record<string, string> = {
+  type_reguler: "Reguler",
+  type_premium: "Premium",
+};
+
+// ============================================================
+// Helper Functions
+// ============================================================
+
+/** Get human-readable category label from categoryId */
+export function getCategoryLabel(categoryId: string): string {
+  return CATEGORY_LABELS[categoryId] || categoryId || "-";
 }
 
-/** Get the lowest retail price across all variants ("Mulai dari" price) */
-export function getLowestRetailPrice(variants: ProductVariant[]): number {
-  if (variants.length === 0) return 0;
-  return Math.min(...variants.map((v) => v.pricing.retail.price));
+/** Get human-readable lid color label from lidColorId */
+export function getLidColorLabel(lidColorId?: string): string {
+  if (!lidColorId) return "-";
+  return LID_COLOR_LABELS[lidColorId] || lidColorId;
 }
 
-/** Get the lowest wholesale price across all variants */
-export function getLowestWholesalePrice(variants: ProductVariant[]): number {
-  if (variants.length === 0) return 0;
-  return Math.min(...variants.map((v) => v.pricing.wholesale.price));
+/** Get human-readable product type label from productTypeId */
+export function getProductTypeLabel(productTypeId?: string): string {
+  if (!productTypeId) return "Reguler";
+  return PRODUCT_TYPE_LABELS[productTypeId] || productTypeId;
 }
 
-/** Get all unique colors from variants */
-export function getVariantColors(variants: ProductVariant[]): string[] {
-  return [...new Set(variants.map((v) => v.color))];
+/** Extract a spec value from dimension or specifications array */
+export function getSpecValue(product: Product, key: string): number | undefined {
+  // Try dimension object first
+  if (product.dimension) {
+    const dimMap: Record<string, number | undefined> = {
+      volume_ml: product.dimension.volumeMl,
+      tinggi_cm: product.dimension.heightCm,
+      diameter_badan_cm: product.dimension.diameterCm,
+      berat_total_gr: product.dimension.weightGram,
+    };
+    if (dimMap[key] !== undefined) return dimMap[key];
+  }
+  // Fallback to specifications array
+  return product.specifications?.find((s) => s.key === key)?.value;
+}
+
+/** Get the primary image URL from a product */
+export function getPrimaryImage(product: Product): string {
+  return "/toples.png";
+}
+
+/** Get the lowest retail (withLid) price across all color variants */
+export function getLowestRetailPrice(product: Product): number {
+  const retail = (product.prices || []).filter(
+    (p) => p.priceTypeId === PRICE_TYPE_IDS.withLid
+  );
+  if (retail.length === 0) {
+    // Fallback: use all prices
+    const all = product.prices || [];
+    return all.length > 0 ? Math.min(...all.map((p) => p.price)) : 0;
+  }
+  return Math.min(...retail.map((p) => p.price));
+}
+
+/** Get the lowest wholesale (perBal) price across all color variants */
+export function getLowestWholesalePrice(product: Product): number {
+  const wholesale = (product.prices || []).filter(
+    (p) => p.priceTypeId === PRICE_TYPE_IDS.perBal
+  );
+  if (wholesale.length === 0) return 0;
+  return Math.min(...wholesale.map((p) => p.price));
+}
+
+/** Get prices filtered by priceTypeId */
+export function getPricesByType(product: Product, priceTypeId: string): ProductPrice[] {
+  return (product.prices || []).filter((p) => p.priceTypeId === priceTypeId);
 }
 
 // ============================================================
-// Filter Types
+// Filter & Pagination Types
 // ============================================================
 
 export interface CatalogFilters {
   search?: string;
   category?: string[];
-  tags?: string[];
   volume_min?: number;
   volume_max?: number;
   price_min?: number;
@@ -130,7 +196,6 @@ export interface PaginatedResponse<T> {
 
 export interface FacetCounts {
   categories: { value: string; count: number }[];
-  tags: { value: string; count: number }[];
   materials: { value: string; count: number }[];
   lid_types: { value: string; count: number }[];
   colors: { value: string; count: number }[];

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import LayoutShell from "@/components/LayoutShell";
 import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -22,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={cn("h-full", "antialiased", jakarta.variable, "font-sans", geist.variable)}>
+    <html lang="id" className={cn("h-full", "antialiased", jakarta.variable, "font-sans")}>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"

@@ -1,163 +1,123 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
-/**
- * Sub-Schemas for Product Structure
- */
+export interface IDimension {
+  heightCm: number;
+  diameterCm: number;
+  volumeMl: number;
+  weightGram: number;
+}
 
-const SpecificationSchema = new Schema(
+export interface IPackaging {
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  weightKg?: number;
+  quantityPerPack: number;
+}
+
+export interface IProductImage {
+  imageUrl: string;
+  order: number;
+  isPrimary: boolean;
+  createdAt?: Date;
+}
+
+export interface IProductPrice {
+  lidColorId: string;
+  priceTypeId: string;
+  price: number;
+  validFrom: Date;
+  validUntil?: Date;
+}
+
+export interface IProduct {
+  id: string;
+  sku: string;
+  name: string;
+  categoryId: string;
+  productTypeId?: string;
+  unitId: string;
+  lidMaterial: string;
+  lidVariant: string;
+  bodyMaterial: string;
+  lidType: string;
+  description?: string;
+  dimension?: IDimension;
+  packaging?: IPackaging[];
+  images?: IProductImage[];
+  prices?: IProductPrice[];
+  deletedAt?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const DimensionSchema = new Schema<IDimension>(
   {
-    key: { type: String, required: true },
-    value: { type: Number, required: true },
-    type: { type: String, default: "number" },
+    heightCm: { type: Number, required: true, default: 0 },
+    diameterCm: { type: Number, required: true, default: 0 },
+    volumeMl: { type: Number, required: true, default: 0 },
+    weightGram: { type: Number, required: true, default: 0 },
   },
   { _id: false }
 );
 
-const RetailPricingSchema = new Schema(
+const PackagingSchema = new Schema<IPackaging>(
   {
+    lengthCm: { type: Number, default: null },
+    widthCm: { type: Number, default: null },
+    heightCm: { type: Number, default: null },
+    weightKg: { type: Number, default: null },
+    quantityPerPack: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const ProductImageSchema = new Schema<IProductImage>(
+  {
+    imageUrl: { type: String, required: true },
+    order: { type: Number, default: 0 },
+    isPrimary: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+const ProductPriceSchema = new Schema<IProductPrice>(
+  {
+    lidColorId: { type: String, required: true },
+    priceTypeId: { type: String, required: true },
     price: { type: Number, required: true },
-    min_qty: { type: Number, default: 1 },
+    validFrom: { type: Date, required: true, default: Date.now },
+    validUntil: { type: Date, default: null },
   },
   { _id: false }
 );
 
-const WholesalePricingSchema = new Schema(
+const ProductSchema = new Schema<IProduct>(
   {
-    price: { type: Number, required: true },      // per pcs (wholesale)
-    unit_type: { type: String, required: true },   // "carton" | "bundle" | "shrink"
-    qty_per_unit: { type: Number, required: true }, // pieces per unit
+    id: { type: String, required: true, unique: true },
+    sku: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    categoryId: { type: String, required: true },
+    productTypeId: { type: String, default: null },
+    unitId: { type: String, required: true },
+    lidMaterial: { type: String, required: true, default: "" },
+    lidVariant: { type: String, required: true, default: "" },
+    bodyMaterial: { type: String, required: true, default: "" },
+    lidType: { type: String, required: true, default: "" },
+    description: { type: String, default: "" },
+    dimension: { type: DimensionSchema, default: null },
+    packaging: { type: [PackagingSchema], default: [] },
+    images: { type: [ProductImageSchema], default: [] },
+    prices: { type: [ProductPriceSchema], default: [] },
+    deletedAt: { type: Date, default: null },
   },
-  { _id: false }
+  { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
 );
 
-const VariantPricingSchema = new Schema(
-  {
-    retail: { type: RetailPricingSchema, required: true },
-    wholesale: { type: WholesalePricingSchema, required: true },
-  },
-  { _id: false }
-);
+ProductSchema.index({ categoryId: 1 });
+ProductSchema.index({ productTypeId: 1 });
 
-const VariantSchema = new Schema(
-  {
-    sku_variant: { type: String, required: true },
-    color: { type: String, required: true },
-    pricing: { type: VariantPricingSchema, required: true },
-  },
-  { _id: false }
-);
-
-const DimensionsSchema = new Schema(
-  {
-    length_cm: { type: Number },
-    width_cm: { type: Number },
-    height_cm: { type: Number },
-  },
-  { _id: false }
-);
-
-const PackagingLogisticsSchema = new Schema(
-  {
-    box_weight_kg: { type: Number },
-    dimensions: { type: DimensionsSchema },
-  },
-  { _id: false }
-);
-
-const MaterialsSchema = new Schema(
-  {
-    body: { type: String, required: true },
-    lid_type: { type: String, required: true },
-    lid_material: { type: String, required: true },
-  },
-  { _id: false }
-);
-
-/**
- * Main Product Schema
- */
-
-const ProductSchema = new Schema(
-  {
-    sku: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    category: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    tags: {
-      type: [String],
-      default: [],
-      index: true,
-    },
-    images: {
-      type: [String],
-      default: [],
-    },
-    materials: {
-      type: MaterialsSchema,
-      required: true,
-    },
-    specifications: {
-      type: [SpecificationSchema],
-      default: [],
-    },
-    variants: {
-      type: [VariantSchema],
-      required: true,
-      validate: {
-        validator: (v: unknown[]) => v.length > 0,
-        message: "At least one variant is required.",
-      },
-    },
-    packaging_logistics: {
-      type: PackagingLogisticsSchema,
-    },
-    description: {
-      type: String,
-    },
-    is_active: {
-      type: Boolean,
-      default: true,
-      index: true,
-    },
-    interaction_count: {
-      type: Number,
-      default: 0,
-      index: -1, // Sort by most clicked by default
-    },
-    last_interacted_at: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-// ============================================================
-// Compound Indexes for Filter Performance
-// ============================================================
-
-ProductSchema.index({ category: 1, is_active: 1 });
-ProductSchema.index({ "specifications.key": 1, "specifications.value": 1 });
-ProductSchema.index({ "variants.color": 1 });
-ProductSchema.index({ name: "text", sku: "text", "tags": "text" });
-
-// ============================================================
-// Export Model
-// ============================================================
-const Product =
-  mongoose.models.Product || mongoose.model("Product", ProductSchema);
+export const Product = models.Product || model<IProduct>("Product", ProductSchema);
 
 export default Product;

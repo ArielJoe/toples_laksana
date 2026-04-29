@@ -1,23 +1,32 @@
-/**
- * GET /api/products
- * Fetches a list of products with support for advanced filtering, text search, and pagination.
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Category from "@/models/Category";
+import { CATEGORY_LABELS, LID_COLOR_LABELS } from "@/types/product";
+
+type MongoFilter = Record<string, unknown>;
+type MongoRange = Record<string, number>;
+
+async function resolveCategoryIds(values: string[]): Promise<string[]> {
+  if (values.length === 0) return [];
+
+  const knownIds = values.filter((value) => CATEGORY_LABELS[value]);
+  const categories = await Category.find({ name: { $in: values } }).select("id").lean();
+  const idsFromNames = categories.map((category) => category.id);
+
+  return [...new Set([...knownIds, ...idsFromNames])];
+}
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
     const { searchParams } = request.nextUrl;
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
-    const limit = Math.min(50, parseInt(searchParams.get("limit") || "10"));
+    const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(50, Number.parseInt(searchParams.get("limit") || "10", 10));
     const sort = searchParams.get("sort") || "popular";
     const search = searchParams.get("search") || "";
     const categories = searchParams.getAll("category");
-    const tags = searchParams.getAll("tags");
     const materialBody = searchParams.getAll("material_body");
     const lidType = searchParams.getAll("lid_type");
     const colors = searchParams.getAll("colors");
@@ -26,77 +35,62 @@ export async function GET(request: NextRequest) {
     const priceMin = searchParams.get("price_min");
     const priceMax = searchParams.get("price_max");
 
-    // Build MongoDB query filter
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter: Record<string, any> = { is_active: true };
+    const filter: MongoFilter = { deletedAt: null };
 
-    // Text search
     if (search) {
-      filter.$text = { $search: search };
+      filter.name = { $regex: search, $options: "i" };
     }
 
-    // Category filter
-    if (categories.length > 0) {
-      filter.category = { $in: categories };
+    const categoryIds = await resolveCategoryIds(categories);
+    if (categoryIds.length > 0) {
+      filter.categoryId = { $in: categoryIds };
     }
 
-    // Use-case tags filter
-    if (tags.length > 0) {
-      filter.tags = { $in: tags };
-    }
-
-    // Material body filter
     if (materialBody.length > 0) {
-      filter["materials.body"] = { $in: materialBody };
+      filter.bodyMaterial = { $in: materialBody };
     }
 
-    // Lid type filter
     if (lidType.length > 0) {
-      filter["materials.lid_type"] = { $in: lidType };
+      filter.lidType = { $in: lidType };
     }
 
-    // Color filter (across variants)
     if (colors.length > 0) {
-      filter["variants.color"] = { $in: colors };
+      const colorIds = colors.map((color) => {
+        const match = Object.entries(LID_COLOR_LABELS).find(([, label]) => label === color);
+        return match?.[0] || color;
+      });
+      filter["prices.lidColorId"] = { $in: colorIds };
     }
 
-    // Volume range filter (via specifications Attribute Pattern)
     if (volumeMin || volumeMax) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const volumeMatch: Record<string, any> = { key: "volume_ml" };
-      if (volumeMin) volumeMatch.value = { ...volumeMatch.value, $gte: parseInt(volumeMin) };
-      if (volumeMax) volumeMatch.value = { ...volumeMatch.value, $lte: parseInt(volumeMax) };
-      filter.specifications = { $elemMatch: volumeMatch };
+      const volumeMatch: MongoRange = {};
+      if (volumeMin) volumeMatch.$gte = Number.parseInt(volumeMin, 10);
+      if (volumeMax) volumeMatch.$lte = Number.parseInt(volumeMax, 10);
+      filter["dimension.volumeMl"] = volumeMatch;
     }
 
-    // Price range filter (retail price of first variant)
     if (priceMin || priceMax) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const priceMatch: Record<string, any> = {};
-      if (priceMin) priceMatch.$gte = parseInt(priceMin);
-      if (priceMax) priceMatch.$lte = parseInt(priceMax);
-      filter["variants.pricing.retail.price"] = priceMatch;
+      const priceMatch: MongoRange = {};
+      if (priceMin) priceMatch.$gte = Number.parseInt(priceMin, 10);
+      if (priceMax) priceMatch.$lte = Number.parseInt(priceMax, 10);
+      filter["prices.price"] = priceMatch;
     }
 
-    // Determine sort order
     let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
     switch (sort) {
       case "price_asc":
-        sortQuery = { "variants.0.pricing.retail.price": 1 };
+        sortQuery = { "prices.price": 1 };
         break;
       case "price_desc":
-        sortQuery = { "variants.0.pricing.retail.price": -1 };
+        sortQuery = { "prices.price": -1 };
         break;
       case "newest":
-        sortQuery = { createdAt: -1 };
-        break;
       case "popular":
       default:
-        sortQuery = { interaction_count: -1, createdAt: -1 };
+        sortQuery = { createdAt: -1 };
         break;
     }
 
-    // ---- Execute Query ----
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
@@ -119,43 +113,33 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("[API] GET /api/products error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
 }
 
-/**
- * POST /api/products
- * Creates a new product entry.
- */
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
     const body = await request.json();
 
-    // Basic validation for required fields
-    if (!body.name || !body.sku || !body.category) {
+    if (!body.id || !body.name || !body.sku || !body.categoryId || !body.unitId) {
       return NextResponse.json(
-        { error: "Missing required fields (name, sku, category)" },
+        { error: "Missing required fields (id, name, sku, categoryId, unitId)" },
         { status: 400 }
       );
     }
 
     const product = await Product.create(body);
     return NextResponse.json({ data: product }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API] POST /api/products error:", error);
-    if (error.code === 11000) {
-      return NextResponse.json(
-        { error: "SKU already exists" },
-        { status: 409 }
-      );
+    const message = error instanceof Error ? error.message : "Failed to create product";
+    const code = typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
+
+    if (code === 11000) {
+      return NextResponse.json({ error: "SKU or ID already exists" }, { status: 409 });
     }
-    return NextResponse.json(
-      { error: error.message || "Failed to create product" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

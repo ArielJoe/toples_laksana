@@ -6,21 +6,12 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
   }, [pathname]);
 
@@ -33,15 +24,11 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-110 transition-all duration-300 ${
-          isScrolled || mobileMenuOpen
-            ? "bg-white/90 backdrop-blur-xl shadow-md py-3"
-            : "bg-transparent py-5"
-        }`}
+        className="fixed top-0 w-full z-110 bg-primary-500 py-5"
       >
         <div className="flex justify-between items-center px-6 lg:px-12 max-w-screen-2xl mx-auto">
           {/* Brand */}
-          <Link href="/" className="text-xl font-extrabold text-primary-500 tracking-tight flex items-center gap-2">
+          <Link href="/" className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
             Toples Laksana
           </Link>
 
@@ -54,8 +41,8 @@ export default function Navbar() {
                   key={link.label}
                   href={link.href}
                   className={`px-4 py-2 rounded-full transition-all ${isActive
-                      ? "bg-primary-50 text-primary-600 font-bold"
-                      : "text-text-secondary hover:text-primary-500 hover:bg-secondary-50"
+                      ? "bg-white/20 text-white font-bold"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
                     }`}
                 >
                   {link.label}
@@ -68,7 +55,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="hidden lg:flex bg-accent-500 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-accent-600 transition-all shadow-sm items-center gap-2"
+              className="hidden lg:flex bg-white text-primary-500 px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-50 transition-all shadow-sm items-center gap-2"
             >
               <span className="material-symbols-outlined text-[1.1rem]">shield_person</span>
               Portal Admin
@@ -77,7 +64,7 @@ export default function Navbar() {
             {/* Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full bg-secondary-50 text-primary-500 hover:bg-primary-50 transition-colors"
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
             >
               <span className="material-symbols-outlined">
                 {mobileMenuOpen ? "close" : "menu"}
@@ -95,7 +82,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed inset-0 z-100 bg-white pt-24 px-6 pb-6 lg:hidden flex flex-col"
+            className="fixed inset-0 z-100 bg-primary-500 pt-24 px-6 pb-6 lg:hidden flex flex-col"
           >
             <div className="flex flex-col gap-2 mb-8">
               {navLinks.map((link) => {
@@ -105,8 +92,8 @@ export default function Navbar() {
                     key={link.label}
                     href={link.href}
                     className={`px-6 py-4 rounded-xl text-lg transition-all ${isActive
-                        ? "bg-primary-50 text-primary-600 font-bold"
-                        : "text-text-secondary font-semibold hover:bg-secondary-50 hover:text-primary-500"
+                        ? "bg-white/20 text-white font-bold"
+                        : "text-white/70 font-semibold hover:bg-white/10 hover:text-white"
                       }`}
                   >
                     {link.label}
@@ -115,10 +102,10 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="mt-auto border-t border-border pt-6">
+            <div className="mt-auto border-t border-white/20 pt-6">
               <Link
                 href="/login"
-                className="w-full bg-accent-500 text-white px-6 py-4 rounded-xl text-base font-bold hover:bg-accent-600 transition-all flex items-center justify-center gap-2"
+                className="w-full bg-white text-primary-500 px-6 py-4 rounded-xl text-base font-bold hover:bg-primary-50 transition-all flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined">shield_person</span>
                 Login Portal Admin

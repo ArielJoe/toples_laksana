@@ -1,11 +1,19 @@
-// ============================================================
-// GET /api/products/[id] — Fetch single product by ID or SKU
-// ============================================================
-
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
-import mongoose from "mongoose";
+
+function productLookup(id: string) {
+  const or: Record<string, string>[] = [{ id }, { sku: id }];
+
+  if (id.match(/^[a-f\d]{24}$/i)) {
+    or.push({ _id: id });
+  }
+
+  return {
+    deletedAt: null,
+    $or: or,
+  };
+}
 
 export async function GET(
   request: NextRequest,
@@ -14,46 +22,19 @@ export async function GET(
   try {
     await connectDB();
     const { id } = await params;
-
-    // Try to find by _id first, then by SKU
-    let product;
-
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      product = await Product.findOne({
-        _id: id,
-        is_active: true,
-      }).lean();
-    }
-
-    // If not found by ID, try SKU
-    if (!product) {
-      product = await Product.findOne({
-        sku: id,
-        is_active: true,
-      }).lean();
-    }
+    const product = await Product.findOne(productLookup(id)).lean();
 
     if (!product) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: product });
   } catch (error) {
     console.error("[API] GET /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch product" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
   }
 }
 
-/**
- * PATCH /api/products/[id]
- * Updates an existing product by ID.
- */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -63,7 +44,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const product = await Product.findByIdAndUpdate(id, body, {
+    const product = await Product.findOneAndUpdate(productLookup(id), body, {
       new: true,
       runValidators: true,
     });
@@ -73,19 +54,13 @@ export async function PATCH(
     }
 
     return NextResponse.json({ data: product });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API] PATCH /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update product" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to update product";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-/**
- * DELETE /api/products/[id]
- * Deletes a product by ID.
- */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -93,19 +68,20 @@ export async function DELETE(
   try {
     await connectDB();
     const { id } = await params;
-
-    const product = await Product.findByIdAndDelete(id);
+    const product = await Product.findOneAndUpdate(
+      productLookup(id),
+      { deletedAt: new Date() },
+      { new: true }
+    );
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json({ message: "Product deleted successfully" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API] DELETE /api/products/[id] error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to delete product" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to delete product";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

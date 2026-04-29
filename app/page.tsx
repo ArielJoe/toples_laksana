@@ -7,29 +7,25 @@ const CATEGORIES = [
     name: "Jar Cylinder",
     icon: "inventory_2",
     desc: "Pilihan utama untuk cookies dan snack premium dengan tampilan modern transparan.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDzxJdzAeDvCiiTEev_KPuhufrOsW-4weP20hY9TdXs8er6TOmLr4AvXn3K8qRC0hIwnPgMxbStj7wyzIDaNpCsFdsdo95aViXcLJAdRCqipUnLC4LegjActcaa15seUDTBk61Oe66f5bP_P3jWz4QNuEsS0FxNdCU6UFhzmuFNvhow5KXfEQCrIUXSy9GpqpAgT-3X6qeoKFsiyT-YtUeac0p6a9AmnKITQYmEOEh2kU2UdOyGpFWCNxDdoDIHxC5uyHymdk-cfN4",
-    tags: ["kue kering", "nastar"],
+    image: "/toples.png",
   },
   {
     name: "Jar Kaca",
     icon: "liquor",
     desc: "Material kaca tebal grade industri, cocok untuk selai, madu, dan produk artisan.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAWD0LOM87TroBp7p7bL0Gmhik6I5j0yZzU4iyEoppXP9FP7XgrCkaoCBa8eVNWA8I_4AB5BbhksOPFpUOZHJMo-LEMQ0JNXsGd_tMTrMw2CpfkXDA09rHXTp_-e79KeLxBr8-SyRSBfe8PjZ3F2HyJVjYigXdSkLe24H1BWPeHaOqnZ_wGq2k8xQKsH9xTQjF4s3Xh78FokPVdL82DmnQrZPyQHIU7cvic4_Prx1yz8C0MwQFwoKY14noYZ35ikgOTxxHYv1U6Tjc",
-    tags: ["selai", "madu"],
+    image: "/toples.png",
   },
   {
     name: "Tin Kaleng",
     icon: "deployed_code",
     desc: "Proteksi maksimal dengan material metalic yang memberikan kesan klasik dan eksklusif.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCFC2Ygg12kybLX9yMU5bRNrzDjx8VvZUey0ur302MkDoHkye25yEINLA2SScmPJfiwrTHAxOA46ONTQRM7EYlWKjZMMUPzxnd5hAauHNAptky5xNzBpZeIe9HUoy34PwbuAj21D28RfdDacmSWjZmCSMZDXGhbkxJ9w6XwRbIeN3bq5sbbMqvjbKw-S_yQOh_COD1W3jkhSc8EcUN-BzMnZTupiuhvNyTz_BqaS5LMMc6LwBQMEkrM9i95ILvicI8q4w1GTX8O8UI",
-    tags: ["nastar", "kue kering"],
+    image: "/toples.png",
   },
   {
     name: "Jar Plastik",
     icon: "layers",
     desc: "Ringan, ekonomis, dan tahan banting. Tersedia dalam berbagai ukuran praktis.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKbnfpr0jzrRcJR179yN8q6F8d3bHp8A8tB31VCdmKcJF7o76mMI5iN_6vsxsh18xv5TqJgUBDsjftWT5X6mTgUVFe9sErpcvP5q5XWnPQl0H0BGeDvnz9H4rOmpbhtBvy0MbODM15gRWaczjbB6P9v2iD93j3-FSaPVx6UfKk_hB5X5SEmvlOYAH8_wmbcVU-s8ZcT2oRxl8Dg4njkVRbRerOxt-M-qQ3atFWa7IYFiojwiDa8f7YoZF-WRHZMWj__EdbCf9ReU8",
-    tags: ["bumbu", "bubuk kopi"],
+    image: "/toples.png",
   },
 ];
 
@@ -74,9 +70,9 @@ export default function HomePage() {
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
             <div className="aspect-4/5 w-full max-w-[450px] max-h-[75vh] rounded-3xl overflow-hidden shadow-2xl relative group">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWD0LOM87TroBp7p7bL0Gmhik6I5j0yZzU4iyEoppXP9FP7XgrCkaoCBa8eVNWA8I_4AB5BbhksOPFpUOZHJMo-LEMQ0JNXsGd_tMTrMw2CpfkXDA09rHXTp_-e79KeLxBr8-SyRSBfe8PjZ3F2HyJVjYigXdSkLe24H1BWPeHaOqnZ_wGq2k8xQKsH9xTQjF4s3Xh78FokPVdL82DmnQrZPyQHIU7cvic4_Prx1yz8C0MwQFwoKY14noYZ35ikgOTxxHYv1U6Tjc"
+                src="/toples.png"
                 alt="Koleksi Jar Premium"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 scale-75"
               />
             </div>
           </div>
@@ -105,7 +101,7 @@ export default function HomePage() {
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-contain scale-75 group-hover:scale-90 transition-transform duration-700"
                 />
               </div>
               <h3 className="text-lg font-bold text-text-primary group-hover:text-primary-50 transition-colors">
@@ -120,7 +116,7 @@ export default function HomePage() {
       {/* ═══════════ TRENDING / POPULAR ═══════════ */}
       <section className="py-24 bg-secondary-50 px-6 lg:px-12">
         <div className="max-w-screen-2xl mx-auto text-center mb-16">
-          <span className="text-accent-500 font-black tracking-widest text-xs uppercase mb-4 block">Paling Banyak Diminati</span>
+          <span className="text-primary-500 font-black tracking-widest text-xs uppercase mb-4 block">Paling Banyak Diminati</span>
           <h2 className="text-4xl font-extrabold text-text-primary tracking-tight">Sedang Tren</h2>
           <p className="text-text-secondary mt-4 max-w-xl mx-auto">
             Produk terpopuler kami berdasarkan interaksi pelanggan dan permintaan grosir bulan ini.
@@ -128,22 +124,22 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-screen-2xl mx-auto">
           {[
-            { name: "Sage Stoneware Mug", price: "Rp 12.500", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDzxJdzAeDvCiiTEev_KPuhufrOsW-4weP20hY9TdXs8er6TOmLr4AvXn3K8qRC0hIwnPgMxbStj7wyzIDaNpCsFdsdo95aViXcLJAdRCqipUnLC4LegjActcaa15seUDTBk61Oe66f5bP_P3jWz4QNuEsS0FxNdCU6UFhzmuFNvhow5KXfEQCrIUXSy9GpqpAgT-3X6qeoKFsiyT-YtUeac0p6a9AmnKITQYmEOEh2kU2UdOyGpFWCNxDdoDIHxC5uyHymdk-cfN4" },
-            { name: "Oatmeal Linen Napkins", price: "Rp 45.000", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCFC2Ygg12kybLX9yMU5bRNrzDjx8VvZUey0ur302MkDoHkye25yEINLA2SScmPJfiwrTHAxOA46ONTQRM7EYlWKjZMMUPzxnd5hAauHNAptky5xNzBpZeIe9HUoy34PwbuAj21D28RfdDacmSWjZmCSMZDXGhbkxJ9w6XwRbIeN3bq5sbbMqvjbKw-S_yQOh_COD1W3jkhSc8EcUN-BzMnZTupiuhvNyTz_BqaS5LMMc6LwBQMEkrM9i95ILvicI8q4w1GTX8O8UI" },
-            { name: "Ribbed Ceramic Canister", price: "Rp 32.000", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKbnfpr0jzrRcJR179yN8q6F8d3bHp8A8tB31VCdmKcJF7o76mMI5iN_6vsxsh18xv5TqJgUBDsjftWT5X6mTgUVFe9sErpcvP5q5XWnPQl0H0BGeDvnz9H4rOmpbhtBvy0MbODM15gRWaczjbB6P9v2iD93j3-FSaPVx6UfKk_hB5X5SEmvlOYAH8_wmbcVU-s8ZcT2oRxl8Dg4njkVRbRerOxt-M-qQ3atFWa7IYFiojwiDa8f7YoZF-WRHZMWj__EdbCf9ReU8" },
-            { name: "Olive Wood Board", price: "Rp 85.000", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAWD0LOM87TroBp7p7bL0Gmhik6I5j0yZzU4iyEoppXP9FP7XgrCkaoCBa8eVNWA8I_4AB5BbhksOPFpUOZHJMo-LEMQ0JNXsGd_tMTrMw2CpfkXDA09rHXTp_-e79KeLxBr8-SyRSBfe8PjZ3F2HyJVjYigXdSkLe24H1BWPeHaOqnZ_wGq2k8xQKsH9xTQjF4s3Xh78FokPVdL82DmnQrZPyQHIU7cvic4_Prx1yz8C0MwQFwoKY14noYZ35ikgOTxxHYv1U6Tjc" },
+            { name: "Sage Stoneware Mug", price: "Rp 12.500", img: "/toples.png" },
+            { name: "Oatmeal Linen Napkins", price: "Rp 45.000", img: "/toples.png" },
+            { name: "Ribbed Ceramic Canister", price: "Rp 32.000", img: "/toples.png" },
+            { name: "Olive Wood Board", price: "Rp 85.000", img: "/toples.png" },
           ].map((item) => (
             <Card key={item.name} className="overflow-hidden border-border hover:shadow-xl transition-all group rounded-2xl bg-white">
               <CardContent className="p-4">
                 <div className="aspect-square rounded-xl bg-secondary-50 overflow-hidden mb-4 flex items-center justify-center">
-                  <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src={item.img} alt={item.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 scale-75" />
                 </div>
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-bold text-text-primary text-sm sm:text-base">{item.name}</h4>
                     <p className="text-primary-500 font-bold mt-1 text-sm">{item.price}</p>
                   </div>
-                  <div className="bg-accent-50 text-accent-500 p-2 rounded-lg shrink-0">
+                  <div className="bg-primary-50 text-primary-500 p-2 rounded-lg shrink-0">
                     <span className="material-symbols-outlined text-sm">trending_up</span>
                   </div>
                 </div>

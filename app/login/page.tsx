@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Portal Admin — Toples Laksana",
+  title: "Portal Admin - Toples Laksana",
 };
 
 export default function LoginPage() {
@@ -10,7 +10,7 @@ export default function LoginPage() {
     <div className="bg-background text-text-primary min-h-screen flex flex-col relative overflow-hidden">
       {/* Ambient BG */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent-500/5 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
       <main className="grow flex items-center justify-center p-6 relative z-10 w-full max-w-screen-2xl mx-auto">
         {/* Back Link */}

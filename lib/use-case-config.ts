@@ -1,149 +1,70 @@
 /**
- * Use-Case Filter Configuration
- * Maps database tags to user-friendly labels and icons.
+ * UI Configuration for catalog filters.
+ * Maps database field values to display labels, icons, and tooltips.
  */
 
-export interface UseCaseConfig {
-  tag: string;          // Must match tags[] values in database
-  label: string;        // Display label in filter UI
-  icon: string;         // Material Symbol icon name
-  description: string;  // Tooltip/Help text
-}
-
 /**
- * Master configuration for the "Cocok Untuk..." (Best for...) filter.
- * To add a new use-case:
- * 1. Add the tag to products in database
- * 2. Add an entry here with the matching tag value
- */
-export const USE_CASE_FILTER_CONFIG: UseCaseConfig[] = [
-  {
-    tag: "nastar",
-    label: "Cookies / Nastar",
-    icon: "cookie",
-    description: "Containers for cookies, pastries, and holiday snacks",
-  },
-  {
-    tag: "kue kering",
-    label: "Other Pastries",
-    icon: "bakery_dining",
-    description: "Packaging for various dry snacks and cakes",
-  },
-  {
-    tag: "bubuk kopi",
-    label: "Coffee / Tea Powder",
-    icon: "coffee",
-    description: "Airtight packaging for ground coffee and tea",
-  },
-  {
-    tag: "biji kopi",
-    label: "Coffee Beans / Granola",
-    icon: "grain",
-    description: "Containers for whole beans and granola",
-  },
-  {
-    tag: "selai",
-    label: "Jam / Honey / Sauce",
-    icon: "humidity_percentage",
-    description: "Jars for semi-liquid products and spreads",
-  },
-  {
-    tag: "bumbu",
-    label: "Spices & Herbs",
-    icon: "spa",
-    description: "Small containers for kitchen spices",
-  },
-  {
-    tag: "manisan",
-    label: "Sweets / Candy",
-    icon: "candy",
-    description: "Jars for candies, sweets, and sweet snacks",
-  },
-  {
-    tag: "sambal",
-    label: "Chili / Pickles",
-    icon: "local_fire_department",
-    description: "Jars for chili sauce, pickles, and fermented products",
-  },
-];
-
-/**
- * Retrieves the UI configuration for a specific tag.
- */
-export function getUseCaseConfig(tag: string): UseCaseConfig | undefined {
-  return USE_CASE_FILTER_CONFIG.find((c) => c.tag === tag);
-}
-
-/**
- * Returns the display label for a tag, falling back to capitalized tag if not configured.
- */
-export function getUseCaseLabel(tag: string): string {
-  const config = getUseCaseConfig(tag);
-  return config?.label ?? tag.charAt(0).toUpperCase() + tag.slice(1);
-}
-
-/**
- * Color mapping and icons for main category filters.
+ * Category display config for catalog filter UI.
  */
 export const CATEGORY_CONFIG: Record<string, { icon: string; label: string }> = {
-  "Tin Kaleng": { icon: "deployed_code", label: "Tin Cans" },
-  "Jar Plastik": { icon: "layers", label: "Plastic Jars" },
-  "Jar Kaca": { icon: "liquor", label: "Glass Jars" },
-  "Jar Cylinder": { icon: "inventory_2", label: "Cylinder Jars" },
-  "Botol": { icon: "water_bottle", label: "Bottles" },
-  "Botol Plastik": { icon: "water_bottle", label: "Plastic Bottles" },
+  cat_tin: { icon: "deployed_code", label: "Tin Kaleng" },
+  cat_jar_plastik: { icon: "layers", label: "Jar Plastik" },
+  cat_jar_kaca: { icon: "liquor", label: "Jar Kaca" },
+  cat_jar_cylinder: { icon: "inventory_2", label: "Jar Cylinder" },
+  cat_botol: { icon: "water_bottle", label: "Botol" },
+  cat_botol_plastik: { icon: "water_bottle", label: "Botol Plastik" },
 };
 
 /**
- * Humanized labels and tooltips for material types.
+ * Labels and tooltips for body material types.
  */
 export const MATERIAL_LABELS: Record<string, { label: string; tooltip: string }> = {
   "Polyethylene Terephthalate (PET) no.1": {
-    label: "Clear Plastic (PET)",
-    tooltip: "Lightweight, clear, food-safe material. Best for cookies.",
+    label: "PET Plastic",
+    tooltip: "Bening, ringan, dan aman untuk makanan.",
   },
   "Polypropylene(PP) no.3": {
-    label: "Strong Plastic (PP)",
-    tooltip: "Durable and heat-resistant up to 100°C. Ideal for reheat-capable products.",
+    label: "PP Plastic",
+    tooltip: "Tahan panas dan lebih lentur.",
   },
   "Tin kaleng": {
     label: "Tin Metal",
-    tooltip: "Premium metallic material. Maximum protection with a classic look.",
+    tooltip: "Material kaleng premium.",
   },
   "Soda lime glass": {
-    label: "Standard Glass",
-    tooltip: "Thick food-grade glass. Heavy, premium, and reusable.",
+    label: "Glass",
+    tooltip: "Kaca tebal berkualitas.",
   },
 };
 
 /**
- * Humanized labels and tooltips for lid/closure types.
+ * Labels and tooltips for lid/closure types.
  */
 export const LID_TYPE_LABELS: Record<string, { label: string; tooltip: string }> = {
   "tutup ulir": {
-    label: "Screw Cap",
-    tooltip: "Traditional screw-on closure. Most common and secure.",
+    label: "Tutup Ulir",
+    tooltip: "Tutup putar standar.",
   },
   "twist off": {
-    label: "Twist-Off Cap",
-    tooltip: "Requires pressure and a short twist. Stronger seal for liquids.",
+    label: "Twist Off",
+    tooltip: "Tutup putar sekali klik.",
   },
   "slide on": {
-    label: "Slide-On Lid",
-    tooltip: "Simple push-on/slide closure for quick access.",
+    label: "Slide On",
+    tooltip: "Tutup geser/tekan.",
   },
 };
 
 /**
- * Color swatch mapping for variant selection.
+ * Color swatch hex values for lid color selection.
+ * Keys must match lowercase labels from LID_COLOR_LABELS.
  */
 export const COLOR_SWATCHES: Record<string, string> = {
-  "Bening": "#FFFFFF",
-  "Gold": "#FFD700",
-  "Silver": "#C0C0C0",
-  "Rose": "#B76E79",
-  "Rose Gold": "#B76E79",
-  "Hitam": "#1A1A1A",
-  "Putih": "#F5F5F5",
-  "Merah": "#DC2626",
+  color_bening: "#FFFFFF",
+  color_putih: "#F5F5F5",
+  color_cling: "#E8E8E0",
+  color_silver: "#C0C0C0",
+  color_emas: "#FFD700",
+  color_rose: "#B76E79",
+  color_hitam: "#1A1A1A",
 };

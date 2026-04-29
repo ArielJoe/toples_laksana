@@ -1,29 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
+import Interaction from "@/models/Interaction";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
     await connectDB();
-
-    const product = await Product.findByIdAndUpdate(
-      id,
-      { 
-        $inc: { interaction_count: 1 },
-        $set: { last_interacted_at: new Date() }
-      },
-      { new: true }
-    );
+    const { id } = await params;
+    const product = await Product.findOne({
+      deletedAt: null,
+      $or: [{ id }, { sku: id }],
+    }).lean();
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, interaction_count: product.interaction_count });
+    await Interaction.create({
+      id: `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      userId: "guest",
+      productId: product.id,
+      interactionType: "detail_click",
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("Interaction Tracking Error:", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";

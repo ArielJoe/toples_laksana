@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { CatalogFilters, FacetCounts } from "@/types/product";
-import { USE_CASE_FILTER_CONFIG, CATEGORY_CONFIG, MATERIAL_LABELS, LID_TYPE_LABELS, COLOR_SWATCHES } from "@/lib/use-case-config";
+import { CATEGORY_CONFIG, MATERIAL_LABELS, LID_TYPE_LABELS, COLOR_SWATCHES } from "@/lib/use-case-config";
+import { CatalogFilters, FacetCounts, getCategoryLabel, getLidColorLabel } from "@/types/product";
 
 interface FilterSidebarProps {
   filters: CatalogFilters;
   facets: FacetCounts | null;
-  onToggleArray: (key: "category" | "tags" | "material_body" | "lid_type" | "colors", value: string) => void;
+  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors", value: string) => void;
   onSetFilters: (f: Partial<CatalogFilters>) => void;
 }
 
@@ -54,7 +54,7 @@ export default function FilterSidebar({
         </h3>
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-2 gap-2">
           {categoryList.map((cat) => {
-            const isActive = filters.category?.includes(cat.value);
+            const isActive = !!filters.category?.includes(cat.value);
             const config = CATEGORY_CONFIG[cat.value];
             return (
               <button
@@ -71,55 +71,8 @@ export default function FilterSidebar({
                     {config.icon}
                   </span>
                 )}
-                <span>{config?.label || cat.value}</span>
+                <span>{getCategoryLabel(cat.value)}</span>
               </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Primary Filter: Use-Case (Best For) */}
-      <section>
-        <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-primary-600 mb-5 flex items-center gap-2">
-          <span className="material-symbols-outlined text-base">local_offer</span>
-          Cocok Untuk
-        </h3>
-        <div className="space-y-1.5">
-          {USE_CASE_FILTER_CONFIG.map((uc) => {
-            const isActive = filters.tags?.includes(uc.tag);
-            const facetCount = facets?.tags.find((t) => t.value === uc.tag)?.count;
-
-            if (facetCount === undefined && !isActive) return null;
-
-            return (
-              <label
-                key={uc.tag}
-                className={`flex items-start gap-2 px-2 py-2.5 rounded-xl cursor-pointer transition-all group ${
-                  isActive
-                    ? "bg-primary-50 border border-primary-200 shadow-sm"
-                    : "hover:bg-secondary-50 border border-transparent"
-                }`}
-              >
-                <div className="pt-0.5 shrink-0">
-                  <input
-                    className="w-4 h-4 rounded-md border-border text-primary-500 focus:ring-primary-500 cursor-pointer accent-primary-500"
-                    type="checkbox"
-                    checked={isActive || false}
-                    onChange={() => onToggleArray("tags", uc.tag)}
-                  />
-                </div>
-                <span className="material-symbols-outlined text-lg text-text-muted group-hover:text-primary-500 transition-colors shrink-0">
-                  {uc.icon}
-                </span>
-                <span className={`text-[0.7rem] font-bold flex-1 min-w-0 leading-tight pt-0.5 ${isActive ? "text-primary-700" : "text-text-secondary group-hover:text-primary-600"} transition-colors`}>
-                  {uc.label}
-                </span>
-                {facetCount !== undefined && (
-                  <span className="text-[0.6rem] font-black text-text-muted bg-white border border-border px-2 py-0.5 rounded-lg shadow-xs shrink-0">
-                    {facetCount}
-                  </span>
-                )}
-              </label>
             );
           })}
         </div>
@@ -197,8 +150,7 @@ export default function FilterSidebar({
           </h3>
           <div className="space-y-1">
             {(facets?.materials || []).map((mat) => {
-              const isActive = filters.material_body?.includes(mat.value);
-              const label = MATERIAL_LABELS[mat.value];
+              const isActive = !!filters.material_body?.includes(mat.value);
               return (
                 <label key={mat.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">
                   <input
@@ -208,7 +160,7 @@ export default function FilterSidebar({
                     onChange={() => onToggleArray("material_body", mat.value)}
                   />
                   <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
-                    {label?.label || mat.value}
+                    {MATERIAL_LABELS[mat.value]?.label || mat.value}
                   </span>
                   <span className="text-[0.6rem] font-black text-text-muted">{mat.count}</span>
                 </label>
@@ -225,7 +177,7 @@ export default function FilterSidebar({
           </h3>
           <div className="space-y-1">
             {(facets?.lid_types || []).map((lid) => {
-              const isActive = filters.lid_type?.includes(lid.value);
+              const isActive = !!filters.lid_type?.includes(lid.value);
               const label = LID_TYPE_LABELS[lid.value];
               return (
                 <label key={lid.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">
@@ -253,7 +205,7 @@ export default function FilterSidebar({
           </h3>
           <div className="flex flex-wrap gap-x-3 gap-y-5 p-1.5">
             {(facets?.colors || []).map((color) => {
-              const isActive = filters.colors?.includes(color.value);
+              const isActive = !!filters.colors?.includes(color.value);
               const hex = COLOR_SWATCHES[color.value] || "#ccc";
               return (
                 <button
@@ -265,10 +217,10 @@ export default function FilterSidebar({
                       : "border-border hover:border-primary-300"
                   }`}
                   style={{ backgroundColor: hex }}
-                  title={`${color.value} (${color.count})`}
+                  title={`${getLidColorLabel(color.value)} (${color.count})`}
                 >
                   {isActive && (
-                    <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-xs font-black" style={{ color: hex === "#FFFFFF" || hex === "#F5F5F5" ? "#096447" : "#fff" }}>
+                    <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-xs font-black" style={{ color: hex === "#FFFFFF" || hex === "#F5F5F5" ? "#16479D" : "#fff" }}>
                       check
                     </span>
                   )}

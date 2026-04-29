@@ -18,7 +18,6 @@ export function useProductFilters() {
     return {
       search: searchParams.get("search") || undefined,
       category: searchParams.getAll("category"),
-      tags: searchParams.getAll("tags"),
       volume_min: searchParams.get("volume_min")
         ? parseInt(searchParams.get("volume_min")!)
         : undefined,
@@ -50,7 +49,6 @@ export function useProductFilters() {
 
       if (merged.search) params.set("search", merged.search);
       merged.category?.forEach((c) => params.append("category", c));
-      merged.tags?.forEach((t) => params.append("tags", t));
       if (merged.volume_min) params.set("volume_min", String(merged.volume_min));
       if (merged.volume_max) params.set("volume_max", String(merged.volume_max));
       if (merged.price_min) params.set("price_min", String(merged.price_min));
@@ -77,7 +75,7 @@ export function useProductFilters() {
 
   // ---- Toggle a value in an array filter ----
   const toggleArrayFilter = useCallback(
-    (key: "category" | "tags" | "material_body" | "lid_type" | "colors", value: string) => {
+    (key: "category" | "material_body" | "lid_type" | "colors", value: string) => {
       const current = filters[key] || [];
       const next = current.includes(value)
         ? current.filter((v) => v !== value)
@@ -119,7 +117,6 @@ export function useProductFilters() {
     let count = 0;
     if (filters.search) count++;
     count += (filters.category?.length || 0);
-    count += (filters.tags?.length || 0);
     if (filters.volume_min || filters.volume_max) count++;
     if (filters.price_min || filters.price_max) count++;
     count += (filters.material_body?.length || 0);

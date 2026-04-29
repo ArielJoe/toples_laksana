@@ -1,7 +1,7 @@
 "use client";
 
-import type { CatalogFilters } from "@/types/product";
-import { getUseCaseLabel, CATEGORY_CONFIG, MATERIAL_LABELS, LID_TYPE_LABELS } from "@/lib/use-case-config";
+import { CATEGORY_CONFIG, MATERIAL_LABELS, LID_TYPE_LABELS } from "@/lib/use-case-config";
+import { CatalogFilters, getCategoryLabel, getLidColorLabel } from "@/types/product";
 
 interface ActiveFilterBarProps {
   filters: CatalogFilters;
@@ -13,15 +13,13 @@ interface ActiveFilterBarProps {
 function getFilterLabel(key: string, value: string): string {
   switch (key) {
     case "category":
-      return CATEGORY_CONFIG[value]?.label || value;
-    case "tags":
-      return getUseCaseLabel(value);
+      return getCategoryLabel(value);
     case "material_body":
       return MATERIAL_LABELS[value]?.label || value;
     case "lid_type":
       return LID_TYPE_LABELS[value]?.label || value;
     case "colors":
-      return value;
+      return getLidColorLabel(value);
     default:
       return value;
   }
@@ -41,9 +39,6 @@ export default function ActiveFilterBar({
   }
   filters.category?.forEach((v) =>
     pills.push({ key: "category", value: v, label: getFilterLabel("category", v) })
-  );
-  filters.tags?.forEach((v) =>
-    pills.push({ key: "tags", value: v, label: getFilterLabel("tags", v) })
   );
   if (filters.volume_min || filters.volume_max) {
     pills.push({

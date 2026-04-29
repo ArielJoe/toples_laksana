@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F9F7F2;
-  --foreground: #2E2E2E;
+  --background: #F7F9FC;
+  --foreground: #1A1A2E;
   --surface: #FFFFFF;
-  --border: #E5E0D8;
-  --divider: #D6D0C6;
+  --border: #D4DCE8;
+  --divider: #C5CFDD;
 
-  /* Primary Palette */
-  --primary-50: #F4F8F3;
-  --primary-100: #E6EFE3;
-  --primary-200: #C7DCC0;
-  --primary-300: #A8C89D;
-  --primary-400: #7FAA70;
-  --primary-500: #5F8D4E;
-  --primary-600: #4E763F;
-  --primary-700: #262626;
-  --primary-800: #1A1A1A;
-  --primary-900: #000000;
+  /* Primary Palette - based on #16479d */
+  --primary-50: #EBF0F9;
+  --primary-100: #D1DEF1;
+  --primary-200: #A3BDE3;
+  --primary-300: #759CD5;
+  --primary-400: #4A6FBE;
+  --primary-500: #16479D;
+  --primary-600: #123B82;
+  --primary-700: #0E2F68;
+  --primary-800: #0A224E;
+  --primary-900: #061534;
 
   /* Secondary Palette */
-  --secondary-50: #F7F3EF;
-  --secondary-500: #9C7B5E;
-  --secondary-900: #2A2018;
+  --secondary-50: #F0F3F8;
+  --secondary-100: #D8E0ED;
+  --secondary-500: #5A7099;
+  --secondary-900: #1A2233;
 
   /* Accent Palette */
   --accent-50: #FFF6E9;
@@ -30,9 +31,26 @@
   --accent-900: #4B3215;
 
   /* Text Colors */
-  --text-primary: #2E2E2E;
-  --text-secondary: #6B6B6B;
-  --text-muted: #9A9A9A;
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A6478;
+  --text-muted: #8D95A3;
+
+  /* M3-style tokens mapped to primary palette */
+  --primary: #16479D;
+  --on-primary: #FFFFFF;
+  --primary-container: #D1DEF1;
+  --on-primary-container: #061534;
+
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F0F3F8;
+  --surface-container: #E8ECF4;
+  --surface-container-high: #DDE3EE;
+  --surface-container-highest: #D4DCE8;
+
+  --on-surface: #1A1A2E;
+  --on-surface-variant: #5A6478;
+  --outline: #8D95A3;
+  --outline-variant: #C5CFDD;
 }
 
 @theme inline {
@@ -43,13 +61,21 @@
   --color-divider: var(--divider);
 
   /* Primary */
+  --color-primary: var(--primary);
   --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
   --color-primary-500: var(--primary-500);
   --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
   --color-primary-900: var(--primary-900);
 
   /* Secondary */
   --color-secondary-50: var(--secondary-50);
+  --color-secondary-100: var(--secondary-100);
   --color-secondary-500: var(--secondary-500);
   --color-secondary-900: var(--secondary-900);
 
@@ -62,6 +88,22 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+
+  /* M3-style tokens */
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -87,7 +129,7 @@
     display: none;
   }
   .skeleton {
-    background: linear-gradient(90deg, #edeeef 25%, #f8f9fa 50%, #edeeef 75%);
+    background: linear-gradient(90deg, #dde3ee 25%, #f0f3f8 50%, #dde3ee 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
   }
@@ -114,14 +156,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-  }
-}
-
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
   }
 }
 

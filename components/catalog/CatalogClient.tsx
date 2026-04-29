@@ -6,7 +6,6 @@ import { useProductFilters } from "@/hooks/useProductFilters";
 import ProductCard from "@/components/catalog/ProductCard";
 import FilterSidebar from "@/components/catalog/FilterSidebar";
 import ActiveFilterBar from "@/components/catalog/ActiveFilterBar";
-import type { Product, FacetCounts, PaginatedResponse } from "@/types/product";
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BadgePercent } from "lucide-react";
+import { CatalogFilters, FacetCounts, PaginatedResponse, Product } from "@/types/product";
 
 const SORT_LABELS: Record<string, string> = {
   popular: "Terpopuler",
@@ -54,6 +53,7 @@ function CatalogContent() {
 
   // Re-fetch product list whenever filters or page change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!loading) setLoading(true);
     fetch(apiUrl)
       .then((r) => r.json())
@@ -75,63 +75,58 @@ function CatalogContent() {
   }, []);
 
   return (
-    <div className="bg-background text-text-primary min-h-screen pt-8">
-      <main className="pb-20 max-w-screen-2xl mx-auto px-6 lg:px-12">
+    <div className="bg-white text-gray-900 min-h-screen">
+      <main className="pb-20 max-w-screen-2xl mx-auto px-4 lg:px-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 mb-8 text-sm text-text-secondary font-medium">
+        <nav className="flex items-center gap-2 py-4 text-sm text-gray-500 font-medium">
           <Link className="hover:text-primary-500 transition-colors" href="/">
             Beranda
           </Link>
           <span className="material-symbols-outlined text-xs">chevron_right</span>
-          <span className="text-text-primary font-bold tracking-tight">Katalog</span>
+          <span className="text-gray-900 font-semibold">Katalog</span>
         </nav>
 
-        {/* Page Title & Controls */}
-        <div className="mb-12">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-text-primary tracking-tight mb-4">
-              Koleksi Kami
-            </h1>
-            <p className="text-text-secondary text-lg leading-relaxed">
-              Temukan berbagai pilihan kemasan industri premium kami, dirancang untuk keindahan estetika dan ketahanan praktis.
-            </p>
-          </div>
-        </div>
+        {/* Controls Bar */}
+        <div className="flex items-center justify-between gap-4 py-3 mb-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            {/* Mobile/Tablet filter button */}
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 text-sm font-medium hover:border-primary-500/30 transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">tune</span>
+              Filter
+              {activeFilterCount > 0 && (
+                <span className="bg-primary-500 text-white text-[0.65rem] font-bold px-1.5 py-0.5 rounded-full">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
 
-        {/* Sticky Controls & Active Filters */}
-        <div className="sticky top-[66px] z-40 bg-white/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 py-5 mb-8 border-b border-border shadow-sm transition-all space-y-5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              {/* Mobile/Tablet filter button */}
-              <button
-                onClick={() => setMobileFilterOpen(true)}
-                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-white rounded-xl border border-border text-sm font-bold shadow-sm hover:border-primary-500/30 transition-all"
-              >
-                <span className="material-symbols-outlined text-lg">tune</span>
-                Filter
-                {activeFilterCount > 0 && (
-                  <span className="bg-primary-500 text-white text-[0.65rem] font-black px-2 py-0.5 rounded-full">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-
-              <div className="hidden lg:flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-500">grid_view</span>
-                <span className="text-[0.65rem] font-black text-text-primary uppercase tracking-[0.2em]">Katalog Produk</span>
-              </div>
+            {/* Sort Tabs */}
+            <div className="hidden sm:flex items-center gap-1">
+              {Object.entries(SORT_LABELS).map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => setFilters({ sort: val as CatalogFilters["sort"] })}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    (filters.sort || "popular") === val
+                      ? "bg-primary-500 text-white"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
-            {/* Sort */}
-            <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl border border-border shadow-sm">
-              <span className="text-[0.65rem] uppercase font-black text-text-muted tracking-widest hidden sm:inline">
-                Urutkan:
-              </span>
+            {/* Mobile Sort */}
+            <div className="sm:hidden">
               <Select
                 value={filters.sort || "popular"}
-                onValueChange={(val) => setFilters({ sort: val as any })}
+                onValueChange={(val) => setFilters({ sort: val as CatalogFilters["sort"] })}
               >
-                <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 font-bold text-sm h-auto p-0 bg-transparent flex items-center justify-between">
+                <SelectTrigger className="w-[130px] border border-gray-200 rounded-lg text-sm h-auto py-2 px-3 bg-white">
                   <SelectValue>{SORT_LABELS[filters.sort || "popular"]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -145,22 +140,26 @@ function CatalogContent() {
             </div>
           </div>
 
-          {activeFilterCount > 0 && (
-            <div className="border-t border-border/50">
-              <ActiveFilterBar
-                filters={filters}
-                totalResults={pagination.total}
-                onRemove={removeFilter}
-                onClearAll={clearAll}
-              />
-            </div>
-          )}
+          <span className="text-sm text-gray-400">
+            {pagination.total} produk
+          </span>
         </div>
 
+        {activeFilterCount > 0 && (
+          <div className="mb-4">
+            <ActiveFilterBar
+              filters={filters}
+              totalResults={pagination.total}
+              onRemove={removeFilter}
+              onClearAll={clearAll}
+            />
+          </div>
+        )}
+
         {/* Main Grid: Sidebar + Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
           {/* Desktop Sidebar */}
-          <div className="hidden lg:block sticky top-28">
+          <div className="hidden lg:block sticky top-20">
             <FilterSidebar
               filters={filters}
               facets={facets}
@@ -210,18 +209,16 @@ function CatalogContent() {
           )}
 
           {/* Product Grid */}
-          <div className="lg:col-span-3 min-h-[600px]">
+          <div className="min-h-[600px]">
             {loading ? (
               /* Skeleton Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white border border-border overflow-hidden rounded-xl animate-pulse">
-                    <div className="aspect-square bg-secondary-50" />
-                    <div className="p-6 space-y-4">
-                      <div className="h-6 bg-secondary-50 w-3/4 rounded-lg" />
-                      <div className="h-4 bg-secondary-50 w-1/2 rounded-lg" />
-                      <div className="h-8 bg-secondary-50 w-2/3 rounded-lg" />
-                      <div className="h-12 bg-secondary-50 w-full mt-2 rounded-xl" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="bg-white border border-gray-100 overflow-hidden rounded-lg animate-pulse">
+                    <div className="aspect-square bg-gray-50" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-gray-50 w-3/4 rounded" />
+                      <div className="h-4 bg-gray-50 w-1/2 rounded" />
                     </div>
                   </div>
                 ))}
@@ -248,13 +245,13 @@ function CatalogContent() {
             ) : (
               <>
                 {/* Product Cards Grid */}
-                <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {products.map((product) => (
                     <ProductCard
-                      key={product._id}
+                      key={product.id}
                       product={product}
                       onCompareToggle={handleCompareToggle}
-                      isComparing={compareIds.includes(product._id)}
+                      isComparing={compareIds.includes(product.id)}
                     />
                   ))}
                 </div>
@@ -285,8 +282,8 @@ function CatalogContent() {
                               <button
                                 onClick={() => setPage(p)}
                                 className={`w-12 h-12 flex items-center justify-center rounded-xl font-bold text-sm transition-all border ${p === pagination.page
-                                    ? "bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20"
-                                    : "bg-white border-border text-text-secondary hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
+                                  ? "bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20"
+                                  : "bg-white border-border text-text-secondary hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
                                   }`}
                               >
                                 {p}
@@ -343,7 +340,7 @@ function CatalogContent() {
               </button>
               <Link
                 href={`/compare?ids=${compareIds.join(",")}`}
-                className="flex-1 sm:flex-none bg-accent-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest hover:bg-accent-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-accent-500/20 active:scale-95"
+                className="flex-1 sm:flex-none bg-primary-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest hover:bg-primary-600 transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary-500/20 active:scale-95"
               >
                 Bandingkan
                 <span className="material-symbols-outlined text-sm">compare_arrows</span>
