@@ -51,6 +51,12 @@ export interface Product {
   lidVariant: string;
   bodyMaterial: string;
   lidType: string;
+  lidMaterialName?: string;
+  lidVariantName?: string;
+  bodyMaterialName?: string;
+  lidTypeName?: string;
+  availabilityStatus?: "available" | "limited" | "preorder" | "unavailable";
+  availabilityNote?: string;
   description?: string;
   dimension?: ProductDimension;
   specifications?: ProductSpecification[];
@@ -166,6 +172,7 @@ export interface CatalogFilters {
   material_body?: string[];
   lid_type?: string[];
   colors?: string[];
+  availability?: string[];
   sort?: "popular" | "price_asc" | "price_desc" | "newest";
   page?: number;
   limit?: number;
@@ -185,9 +192,29 @@ export interface PaginatedResponse<T> {
 
 export interface FacetCounts {
   categories: { value: string; count: number; name?: string }[];
-  materials: { value: string; count: number }[];
-  lid_types: { value: string; count: number }[];
+  materials: { value: string; count: number; name?: string }[];
+  lid_types: { value: string; count: number; name?: string }[];
   colors: { value: string; count: number; name?: string; hex?: string }[];
   volume_range: { min: number; max: number };
   price_range: { min: number; max: number };
+  availability_statuses?: { value: string; count: number; name?: string }[];
+}
+
+export const AVAILABILITY_LABELS: Record<string, string> = {
+  available: "Tersedia",
+  limited: "Terbatas",
+  preorder: "Preorder",
+  unavailable: "Tidak Tersedia",
+};
+
+export function getAvailabilityLabel(status?: string): string {
+  if (!status) return AVAILABILITY_LABELS.available;
+  return AVAILABILITY_LABELS[status] || status;
+}
+
+export function formatAttributeLabel(value?: string): string {
+  if (!value) return "-";
+  return value
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }

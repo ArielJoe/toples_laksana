@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CatalogFilters, FacetCounts, PaginatedResponse, Product, getSpecValue, getLowestRetailPrice, getPrimaryImage } from "@/types/product";
+import { CatalogFilters, FacetCounts, PaginatedResponse, Product, formatAttributeLabel, getSpecValue, getLowestRetailPrice, getPrimaryImage } from "@/types/product";
 import { formatPrice } from "@/lib/price-calculator";
 
 const SORT_LABELS: Record<string, string> = {
@@ -305,7 +305,7 @@ function CatalogContent() {
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-gray-900 group-hover:text-primary-500 transition-colors line-clamp-1">{product.name}</h3>
                             <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                              {product.bodyMaterial}{volume ? ` - ${volume}ml` : ""}
+                              {product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial)}{volume ? ` - ${volume}ml` : ""}
                             </p>
                             <span className="text-sm font-bold text-gray-900 mt-1 block">
                               {retailPrice > 0 ? formatPrice(retailPrice) : "Hubungi Kami"}

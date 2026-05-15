@@ -4,7 +4,7 @@ import connectDB from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
 import ProductDetailClient from "@/components/product/ProductDetailClient";
 import type { Product } from "@/types/product";
-import { getCategoryLabel, getSpecValue } from "@/types/product";
+import { formatAttributeLabel, getCategoryLabel, getSpecValue } from "@/types/product";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,6 +12,9 @@ interface PageProps {
 
 import CategoryModel from "@/models/Category";
 import LidColorModel from "@/models/LidColor";
+import MaterialModel from "@/models/Material";
+import LidTypeModel from "@/models/LidType";
+import LidVariantModel from "@/models/LidVariant";
 
 async function getProduct(id: string): Promise<Product | null> {
   await connectDB();
@@ -23,16 +26,31 @@ async function getProduct(id: string): Promise<Product | null> {
 
   if (!product) return null;
 
-  const category = await CategoryModel.findOne({ id: product.categoryId }).select("name").lean();
-
   const colorIds = [...new Set((product.prices || []).map((p: { lidColorId?: string }) => p.lidColorId).filter(Boolean))];
-  const lidColors = await LidColorModel.find({ id: { $in: colorIds } }).select("id color colorCode").lean();
+  const [
+    category,
+    lidColors,
+    materials,
+    lidType,
+    lidVariant,
+  ] = await Promise.all([
+    CategoryModel.findOne({ id: product.categoryId }).select("name").lean(),
+    LidColorModel.find({ id: { $in: colorIds } }).select("id color colorCode").lean(),
+    MaterialModel.find({ id: { $in: [product.bodyMaterial, product.lidMaterial].filter(Boolean) } }).select("id name").lean(),
+    LidTypeModel.findOne({ id: product.lidType }).select("id name").lean(),
+    LidVariantModel.findOne({ id: product.lidVariant }).select("id name").lean(),
+  ]);
   const colorMap = new Map(lidColors.map((lc) => [lc.id, lc]));
+  const materialMap = new Map(materials.map((material) => [material.id, material.name]));
 
   const parsedProduct = JSON.parse(JSON.stringify(product));
   if (category) {
     parsedProduct.categoryName = category.name;
   }
+  parsedProduct.bodyMaterialName = materialMap.get(product.bodyMaterial) || formatAttributeLabel(product.bodyMaterial);
+  parsedProduct.lidMaterialName = materialMap.get(product.lidMaterial) || formatAttributeLabel(product.lidMaterial);
+  parsedProduct.lidTypeName = lidType?.name || formatAttributeLabel(product.lidType);
+  parsedProduct.lidVariantName = lidVariant?.name || formatAttributeLabel(product.lidVariant);
   if (parsedProduct.prices) {
     parsedProduct.prices = parsedProduct.prices.map((p: NonNullable<Product["prices"]>[number]) => {
       const doc = colorMap.get(p.lidColorId);
@@ -60,7 +78,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${product.name}${volume ? ` ${volume}ml` : ""} - Toples Laksana`,
-    description: `${product.name}, ${category}. Material: ${product.bodyMaterial}. ${volume ? `Volume ${volume}ml. ` : ""}Tersedia untuk pembelian ecer dan grosir.`,
+    description: `${product.name}, ${category}. Material: ${product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial)}. ${volume ? `Volume ${volume}ml. ` : ""}Tersedia untuk pembelian ecer dan grosir.`,
   };
 }
 

@@ -5,10 +5,12 @@ import Link from "next/link";
 import type { Product, ProductPrice } from "@/types/product";
 import {
   getCategoryLabel,
+  getAvailabilityLabel,
   getLidColorLabel,
   getPricesByType,
   getProductTypeLabel,
   getSpecValue,
+  formatAttributeLabel,
   PRICE_TYPE_IDS,
 } from "@/types/product";
 import { calculatePrice, formatPrice, getWholesaleNudge } from "@/lib/price-calculator";
@@ -94,6 +96,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const diameter = getSpecValue(product, "diameter_badan_cm");
   const weight = getSpecValue(product, "berat_total_gr");
   const category = product.categoryName || getCategoryLabel(product.categoryId);
+  const bodyMaterial = product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial);
+  const lidMaterial = product.lidMaterialName || formatAttributeLabel(product.lidMaterial);
+  const lidVariant = product.lidVariantName || formatAttributeLabel(product.lidVariant);
+  const lidType = product.lidTypeName || formatAttributeLabel(product.lidType);
   const selectedColor = activePrice?.lidColorName || getLidColorLabel(activePrice?.lidColorId);
   const selectedColorHex = activePrice?.lidColorHex || COLOR_SWATCHES[activePrice?.lidColorId || ""] || "#ccc";
 
@@ -168,8 +174,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
           <div className="flex items-center gap-3 text-sm text-gray-400 mb-4">
             <span>SKU: {product.sku}</span>
-            <span>Availability: <span className="text-gray-900">In Stock</span></span>
+            <span>Availability: <span className="text-gray-900">{getAvailabilityLabel(product.availabilityStatus)}</span></span>
           </div>
+          {product.availabilityNote && (
+            <p className="text-sm text-gray-500 mb-4">{product.availabilityNote}</p>
+          )}
           <p className="text-sm text-gray-400 mb-4">Product Type: {category}</p>
 
           {/* Price */}
@@ -244,8 +253,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {[
               { label: "Volume", value: volume ? `${volume}ml` : "-" },
               { label: "Berat", value: weight ? `${weight}gr` : "-" },
-              { label: "Bahan", value: product.bodyMaterial || "-" },
-              { label: "Tutup", value: product.lidType || "-" },
+              { label: "Bahan", value: bodyMaterial },
+              { label: "Tutup", value: lidType },
             ].map((item) => (
               <div className="flex justify-between" key={item.label}>
                 <span className="text-gray-400">{item.label}</span>
@@ -338,6 +347,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           category={category}
           selectedColor={selectedColor}
           selectedColorHex={selectedColorHex}
+          bodyMaterial={bodyMaterial}
+          lidMaterial={lidMaterial}
+          lidVariant={lidVariant}
+          lidType={lidType}
         />
       </div>
     </main>
@@ -345,7 +358,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 }
 
 // Separated tab component to keep main component cleaner
-function SpecTabs({ product, volume, height, diameter, weight, category, selectedColor, selectedColorHex }: {
+function SpecTabs({ product, volume, height, diameter, weight, category, selectedColor, selectedColorHex, bodyMaterial, lidMaterial, lidVariant, lidType }: {
   product: Product;
   volume?: number;
   height?: number;
@@ -354,6 +367,10 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
   category: string;
   selectedColor: string;
   selectedColorHex: string;
+  bodyMaterial: string;
+  lidMaterial: string;
+  lidVariant: string;
+  lidType: string;
 }) {
   const [activeTab, setActiveTab] = useState<"dimensions" | "packaging" | "specs">("dimensions");
 
@@ -420,10 +437,11 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
             { label: "SKU", value: product.sku },
             { label: "Kategori", value: category },
             { label: "Tipe Produk", value: getProductTypeLabel(product.productTypeId) },
-            { label: "Material Badan", value: product.bodyMaterial },
-            { label: "Material Tutup", value: product.lidMaterial },
-            { label: "Varian Tutup", value: product.lidVariant },
-            { label: "Tipe Tutup", value: product.lidType },
+            { label: "Status Ketersediaan", value: getAvailabilityLabel(product.availabilityStatus) },
+            { label: "Material Badan", value: bodyMaterial },
+            { label: "Material Tutup", value: lidMaterial },
+            { label: "Varian Tutup", value: lidVariant },
+            { label: "Tipe Tutup", value: lidType },
             {
               label: "Warna Tutup",
               value: (

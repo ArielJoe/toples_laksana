@@ -5,9 +5,6 @@ export interface IWishlist {
   userId: string;
   productId: string;
   lidColorId?: string;
-  quantity: number;
-  note?: string;
-  promoAppliedId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -18,9 +15,6 @@ const WishlistSchema = new Schema<IWishlist>(
     userId: { type: String, required: true },
     productId: { type: String, required: true },
     lidColorId: { type: String, default: null },
-    quantity: { type: Number, required: true, default: 1 },
-    note: { type: String, default: "" },
-    promoAppliedId: { type: String, default: null },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
 );

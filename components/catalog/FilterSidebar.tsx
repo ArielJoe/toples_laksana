@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CATEGORY_CONFIG, MATERIAL_LABELS, LID_TYPE_LABELS, COLOR_SWATCHES } from "@/lib/use-case-config";
-import { CatalogFilters, FacetCounts, getCategoryLabel, getLidColorLabel } from "@/types/product";
+import { CATEGORY_CONFIG, COLOR_SWATCHES } from "@/lib/use-case-config";
+import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, getLidColorLabel } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
 interface FilterSidebarProps {
   filters: CatalogFilters;
   facets: FacetCounts | null;
-  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors", value: string) => void;
+  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors" | "availability", value: string) => void;
   onSetFilters: (f: Partial<CatalogFilters>) => void;
 }
 
@@ -180,7 +180,7 @@ export default function FilterSidebar({
                     onCheckedChange={() => onToggleArray("material_body", mat.value)}
                   />
                   <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
-                    {MATERIAL_LABELS[mat.value]?.label || mat.value}
+                    {mat.name || formatAttributeLabel(mat.value)}
                   </span>
                   <span className="text-[0.6rem] font-black text-text-muted">{mat.count}</span>
                 </label>
@@ -198,7 +198,6 @@ export default function FilterSidebar({
           <div className="space-y-1">
             {(facets?.lid_types || []).map((lid) => {
               const isActive = !!filters.lid_type?.includes(lid.value);
-              const label = LID_TYPE_LABELS[lid.value];
               return (
                 <label key={lid.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">
                   <Checkbox
@@ -206,7 +205,7 @@ export default function FilterSidebar({
                     onCheckedChange={() => onToggleArray("lid_type", lid.value)}
                   />
                   <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
-                    {label?.label || lid.value}
+                    {lid.name || formatAttributeLabel(lid.value)}
                   </span>
                   <span className="text-[0.6rem] font-black text-text-muted">{lid.count}</span>
                 </label>
@@ -248,6 +247,31 @@ export default function FilterSidebar({
                     {colorName} <span className="text-[0.6rem] text-text-muted ml-1 uppercase font-normal">{hex}</span>
                   </span>
                   <span className="text-[0.6rem] font-black text-text-muted">{color.count}</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Availability */}
+        <section>
+          <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted mb-4 flex items-center gap-2">
+            <BadgeCheckIcon className="size-4" />
+            Ketersediaan
+          </h3>
+          <div className="space-y-1">
+            {(facets?.availability_statuses || []).map((status) => {
+              const isActive = !!filters.availability?.includes(status.value);
+              return (
+                <label key={status.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">
+                  <Checkbox
+                    checked={isActive || false}
+                    onCheckedChange={() => onToggleArray("availability", status.value)}
+                  />
+                  <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
+                    {status.name || formatAttributeLabel(status.value)}
+                  </span>
+                  <span className="text-[0.6rem] font-black text-text-muted">{status.count}</span>
                 </label>
               );
             })}

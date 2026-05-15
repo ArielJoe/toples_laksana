@@ -13,9 +13,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   await connectDB();
 
-  const [productCount, interactionCount, waLogsCount] = await Promise.all([
+  const [productCount, interactionCount, pageViews, productViews, waLogsCount] = await Promise.all([
     ProductModel.countDocuments({ deletedAt: null }),
     InteractionModel.countDocuments(),
+    InteractionModel.countDocuments({ interactionType: "page_view" }),
+    InteractionModel.countDocuments({ interactionType: "view" }),
     InteractionModel.countDocuments({ interactionType: "whatsapp_share" }),
   ]);
 
@@ -24,6 +26,8 @@ export default async function AdminDashboard() {
       stats={{
         products: productCount,
         interactions: interactionCount,
+        pageViews,
+        productViews,
         waLogs: waLogsCount,
       }}
     />

@@ -4,7 +4,7 @@ import ProductModel from "@/models/Product";
 import { formatPrice } from "@/lib/price-calculator";
 import { buildInquiryUrl } from "@/lib/whatsapp-builder";
 import type { Metadata } from "next";
-import { getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getSpecValue, Product } from "@/types/product";
+import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getSpecValue, Product } from "@/types/product";
 import { AppIcon } from "@/components/ui/app-icon";
 
 export const metadata: Metadata = {
@@ -20,15 +20,6 @@ function getGridCols(count: number) {
   if (count === 1) return "grid-cols-2";
   if (count === 2) return "grid-cols-3";
   return "grid-cols-4";
-}
-
-function formatLabel(val?: string) {
-  if (!val) return "-";
-  const cleaned = val.replace(/^(mat|type|lid|lid_type)_/i, "");
-  if (cleaned.toUpperCase() === "PET" || cleaned.toUpperCase() === "PP" || cleaned.toUpperCase() === "HDPE") {
-    return cleaned.toUpperCase();
-  }
-  return cleaned.split(/_|-/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 }
 
 export default async function ComparisonPage({ searchParams }: ComparePageProps) {
@@ -123,9 +114,10 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                 { label: "Volume Kapasitas", getter: (p: Product) => `${getSpecValue(p, "volume_ml") || "-"} ml` },
                 { label: "Tinggi Total", getter: (p: Product) => `${getSpecValue(p, "tinggi_cm") || "-"} cm` },
                 { label: "Diameter Badan", getter: (p: Product) => `${getSpecValue(p, "diameter_badan_cm") || "-"} cm` },
-                { label: "Bahan Badan", getter: (p: Product) => formatLabel(p.bodyMaterial) },
-                { label: "Bahan Tutup", getter: (p: Product) => formatLabel(p.lidMaterial) },
-                { label: "Tipe Tutup", getter: (p: Product) => formatLabel(p.lidType) },
+                { label: "Bahan Badan", getter: (p: Product) => p.bodyMaterialName || formatAttributeLabel(p.bodyMaterial) },
+                { label: "Bahan Tutup", getter: (p: Product) => p.lidMaterialName || formatAttributeLabel(p.lidMaterial) },
+                { label: "Tipe Tutup", getter: (p: Product) => p.lidTypeName || formatAttributeLabel(p.lidType) },
+                { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.availabilityStatus) },
                 { label: "Kategori", getter: (p: Product) => getCategoryLabel(p.categoryId) },
               ].map((row, idx) => (
                 <div key={row.label} className={`grid ${gridCols} items-stretch ${idx % 2 === 0 ? "bg-white/50" : "bg-transparent"} hover:bg-primary-50/30 transition-colors`}>

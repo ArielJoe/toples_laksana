@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/types/product";
 import {
+  getAvailabilityLabel,
   getLowestRetailPrice,
   getPrimaryImage,
   getSpecValue,
@@ -75,6 +76,10 @@ export default function ProductCard({
         {volume && (
           <p className="text-xs text-gray-400 mb-2">{volume}ml</p>
         )}
+
+        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-emerald-600">
+          {getAvailabilityLabel(product.availabilityStatus)}
+        </p>
 
         {/* Price */}
         <div className="flex items-baseline gap-1">

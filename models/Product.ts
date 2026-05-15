@@ -41,6 +41,8 @@ export interface IProduct {
   lidVariant: string;
   bodyMaterial: string;
   lidType: string;
+  availabilityStatus: "available" | "limited" | "preorder" | "unavailable";
+  availabilityNote?: string;
   description?: string;
   dimension?: IDimension;
   packaging?: IPackaging[];
@@ -105,6 +107,13 @@ const ProductSchema = new Schema<IProduct>(
     lidVariant: { type: String, required: true, default: "" },
     bodyMaterial: { type: String, required: true, default: "" },
     lidType: { type: String, required: true, default: "" },
+    availabilityStatus: {
+      type: String,
+      enum: ["available", "limited", "preorder", "unavailable"],
+      required: true,
+      default: "available",
+    },
+    availabilityNote: { type: String, default: "" },
     description: { type: String, default: "" },
     dimension: { type: DimensionSchema, default: null },
     packaging: { type: [PackagingSchema], default: [] },
@@ -117,6 +126,11 @@ const ProductSchema = new Schema<IProduct>(
 
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ productTypeId: 1 });
+ProductSchema.index({ availabilityStatus: 1 });
+ProductSchema.index({ bodyMaterial: 1 });
+ProductSchema.index({ lidMaterial: 1 });
+ProductSchema.index({ lidVariant: 1 });
+ProductSchema.index({ lidType: 1 });
 
 export const Product = models.Product || model<IProduct>("Product", ProductSchema);
 

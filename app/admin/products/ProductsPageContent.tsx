@@ -18,16 +18,26 @@ import { AppIcon } from "@/components/ui/app-icon";
 import ProductDialog from "@/components/admin/ProductDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useRouter } from "next/navigation";
-import { getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
+import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
+
+interface MasterDataItem {
+  id: string;
+  name: string;
+  color?: string;
+  colorCode?: string;
+}
 
 interface ProductsPageContentProps {
   initialProducts: Product[];
   masterData: {
-    categories: any[];
-    productTypes: any[];
-    units: any[];
-    lidColors: any[];
-    priceTypes: any[];
+    categories: MasterDataItem[];
+    productTypes: MasterDataItem[];
+    units: MasterDataItem[];
+    lidColors: MasterDataItem[];
+    priceTypes: MasterDataItem[];
+    materials: MasterDataItem[];
+    lidTypes: MasterDataItem[];
+    lidVariants: MasterDataItem[];
   };
 }
 
@@ -87,6 +97,20 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
 
   const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
+  const lidTypeMap = Object.fromEntries(masterData.lidTypes.map(t => [t.id, t.name]));
+  const availabilityClass = (status?: Product["availabilityStatus"]) => {
+    switch (status) {
+      case "limited":
+        return "bg-amber-50 text-amber-700 border-amber-100";
+      case "preorder":
+        return "bg-blue-50 text-blue-700 border-blue-100";
+      case "unavailable":
+        return "bg-slate-100 text-slate-500 border-slate-200";
+      case "available":
+      default:
+        return "bg-emerald-50 text-emerald-600 border-emerald-100";
+    }
+  };
 
   return (
     <>
@@ -183,7 +207,9 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                         </TableCell>
                         <TableCell className="px-8 py-5">
                           <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
-                          <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">{p.lidType}</p>
+                          <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">
+                            {lidTypeMap[p.lidType] || formatAttributeLabel(p.lidType)}
+                          </p>
                         </TableCell>
                         <TableCell className="px-8 py-5">
                           <Badge variant="outline" className="bg-white border-border text-text-secondary text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5">
@@ -197,9 +223,9 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                         </TableCell>
                         <TableCell className="px-8 py-5">
                           {!p.deletedAt ? (
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                              <span className="text-[0.6rem] font-black uppercase tracking-widest">Aktif</span>
+                            <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border", availabilityClass(p.availabilityStatus))}>
+                              <div className="w-1.5 h-1.5 bg-current rounded-full"></div>
+                              <span className="text-[0.6rem] font-black uppercase tracking-widest">{getAvailabilityLabel(p.availabilityStatus)}</span>
                             </div>
                           ) : (
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">

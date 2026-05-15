@@ -4,12 +4,12 @@ import Category from "@/models/Category";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     const body = await request.json();
-    const { id } = params;
+    const { id } = await params;
 
     const category = await Category.findOneAndUpdate({ id }, body, { new: true }).lean();
     if (!category) {
@@ -25,11 +25,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     const category = await Category.findOneAndDelete({ id });
     if (!category) {

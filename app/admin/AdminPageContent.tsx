@@ -22,15 +22,28 @@ import { useRouter } from "next/navigation";
 import { getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
 import type { IInteraction } from "@/models/Interaction";
 
+interface MasterDataItem {
+  id: string;
+  name: string;
+  color?: string;
+  colorCode?: string;
+  hex?: string;
+  symbol?: string;
+  description?: string;
+}
+
 interface AdminPageProps {
   initialProducts: Product[];
   initialInteractions: IInteraction[];
   masterData: {
-    categories: any[];
-    productTypes: any[];
-    units: any[];
-    lidColors: any[];
-    priceTypes: any[];
+    categories: MasterDataItem[];
+    productTypes: MasterDataItem[];
+    units: MasterDataItem[];
+    lidColors: MasterDataItem[];
+    priceTypes: MasterDataItem[];
+    materials: MasterDataItem[];
+    lidTypes: MasterDataItem[];
+    lidVariants: MasterDataItem[];
   };
 }
 

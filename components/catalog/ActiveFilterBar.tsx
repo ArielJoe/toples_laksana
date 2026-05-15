@@ -2,8 +2,8 @@
 
 import { ReactNode } from "react";
 import { AppIcon } from "@/components/ui/app-icon";
-import { MATERIAL_LABELS, LID_TYPE_LABELS, COLOR_SWATCHES } from "@/lib/use-case-config";
-import { CatalogFilters, FacetCounts, getCategoryLabel, getLidColorLabel } from "@/types/product";
+import { COLOR_SWATCHES } from "@/lib/use-case-config";
+import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, getLidColorLabel } from "@/types/product";
 
 interface ActiveFilterBarProps {
   filters: CatalogFilters;
@@ -19,10 +19,18 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
       const facetCat = facets?.categories.find((c) => c.value === value);
       return facetCat?.name || getCategoryLabel(value);
     }
-    case "material_body":
-      return MATERIAL_LABELS[value]?.label || value;
-    case "lid_type":
-      return LID_TYPE_LABELS[value]?.label || value;
+    case "material_body": {
+      const facetMaterial = facets?.materials.find((m) => m.value === value);
+      return facetMaterial?.name || formatAttributeLabel(value);
+    }
+    case "lid_type": {
+      const facetLidType = facets?.lid_types.find((l) => l.value === value);
+      return facetLidType?.name || formatAttributeLabel(value);
+    }
+    case "availability": {
+      const facetStatus = facets?.availability_statuses?.find((s) => s.value === value);
+      return facetStatus?.name || formatAttributeLabel(value);
+    }
     case "colors": {
       const facetColor = facets?.colors?.find((c) => c.value === value);
       const hex = facetColor?.hex || COLOR_SWATCHES[value] || "#ccc";
@@ -70,6 +78,9 @@ export default function ActiveFilterBar({
   );
   filters.colors?.forEach((v) =>
     pills.push({ key: "colors", value: v, label: getFilterLabel("colors", v, facets) })
+  );
+  filters.availability?.forEach((v) =>
+    pills.push({ key: "availability", value: v, label: getFilterLabel("availability", v, facets) })
   );
 
   if (pills.length === 0) return null;

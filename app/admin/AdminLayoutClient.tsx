@@ -24,7 +24,7 @@ export default function AdminLayoutClient({
   const pathname = usePathname();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isProductsOpen, setIsProductsOpen] = useState(pathname.startsWith("/admin/products") || pathname.includes("categories") || pathname.includes("lid-colors") || pathname.includes("product-types") || pathname.includes("units") || pathname.includes("price-types"));
+  const [isProductsOpen, setIsProductsOpen] = useState(pathname.startsWith("/admin/products") || pathname.includes("categories") || pathname.includes("lid-colors") || pathname.includes("product-types") || pathname.includes("units") || pathname.includes("price-types") || pathname.includes("materials") || pathname.includes("lid-types") || pathname.includes("lid-variants"));
 
   const MAIN_NAV = [
     { label: "Dashboard", icon: "dashboard", href: "/admin", active: pathname === "/admin" },
@@ -37,7 +37,10 @@ export default function AdminLayoutClient({
       hasSub: true,
       subItems: [
         { label: "Kategori", icon: "category", href: "/admin/categories", active: pathname === "/admin/categories" },
+        { label: "Material", icon: "inventory_2", href: "/admin/materials", active: pathname === "/admin/materials" },
         { label: "Warna Tutup", icon: "palette", href: "/admin/lid-colors", active: pathname === "/admin/lid-colors" },
+        { label: "Tipe Tutup", icon: "grade", href: "/admin/lid-types", active: pathname === "/admin/lid-types" },
+        { label: "Varian Tutup", icon: "category", href: "/admin/lid-variants", active: pathname === "/admin/lid-variants" },
         { label: "Tipe Produk", icon: "grade", href: "/admin/product-types", active: pathname === "/admin/product-types" },
         { label: "Satuan", icon: "straighten", href: "/admin/units", active: pathname === "/admin/units" },
         { label: "Tipe Harga", icon: "sell", href: "/admin/price-types", active: pathname === "/admin/price-types" },

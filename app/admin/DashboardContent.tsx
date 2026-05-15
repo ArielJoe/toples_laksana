@@ -9,6 +9,8 @@ interface DashboardContentProps {
   stats: {
     products: number;
     interactions: number;
+    pageViews: number;
+    productViews: number;
     waLogs: number;
   };
 }
@@ -24,7 +26,7 @@ export default function DashboardContent({ stats }: DashboardContentProps) {
 
       <div className="p-6 lg:p-10 space-y-8 flex-1 w-full">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-primary-500 rounded-2xl p-8 text-white relative overflow-hidden group border border-primary-600">
             <div className="flex items-center gap-4 mb-6 relative">
               <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
@@ -41,10 +43,21 @@ export default function DashboardContent({ stats }: DashboardContentProps) {
               <div className="w-12 h-12 rounded-2xl bg-secondary-50 flex items-center justify-center">
                 <AppIcon name="touch_app" className="text-2xl text-text-primary" />
               </div>
-              <span className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-text-muted">Interaksi User</span>
+              <span className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-text-muted">Page Views</span>
             </div>
-            <div className="text-5xl font-black text-text-primary tracking-tighter mb-1">{stats.interactions}</div>
-            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">Klik & Dilihat</div>
+            <div className="text-5xl font-black text-text-primary tracking-tighter mb-1">{stats.pageViews}</div>
+            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">Halaman Dilihat</div>
+          </Card>
+
+          <Card className="p-8 border-border relative overflow-hidden group bg-white shadow-none">
+            <div className="flex items-center gap-4 mb-6 relative">
+              <div className="w-12 h-12 rounded-2xl bg-secondary-50 flex items-center justify-center">
+                <AppIcon name="touch_app" className="text-2xl text-text-primary" />
+              </div>
+              <span className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-text-muted">Product Views</span>
+            </div>
+            <div className="text-5xl font-black text-text-primary tracking-tighter mb-1">{stats.productViews}</div>
+            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">{stats.interactions} Total Interaksi</div>
           </Card>
 
           <Card className="p-8 border-border relative overflow-hidden group bg-white shadow-none">

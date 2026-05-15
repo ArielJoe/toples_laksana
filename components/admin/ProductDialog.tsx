@@ -27,17 +27,27 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { Loader2, ImagePlus, X } from "lucide-react";
 import { AppIcon } from "../ui/app-icon";
 
+interface MasterDataItem {
+  id: string;
+  name: string;
+  color?: string;
+  colorCode?: string;
+}
+
 interface ProductDialogProps {
   isOpen: boolean;
   onClose: () => void;
   product?: Product | null;
   onSave: (productData: Partial<Product>) => Promise<void>;
   masterData: {
-    categories: any[];
-    productTypes: any[];
-    units: any[];
-    lidColors: any[];
-    priceTypes: any[];
+    categories: MasterDataItem[];
+    productTypes: MasterDataItem[];
+    units: MasterDataItem[];
+    lidColors: MasterDataItem[];
+    priceTypes: MasterDataItem[];
+    materials: MasterDataItem[];
+    lidTypes: MasterDataItem[];
+    lidVariants: MasterDataItem[];
   };
 }
 
@@ -52,6 +62,8 @@ const emptyProduct: Partial<Product> = {
   lidMaterial: "",
   lidVariant: "",
   lidType: "",
+  availabilityStatus: "available",
+  availabilityNote: "",
   description: "",
   dimension: {
     heightCm: 0,
@@ -199,15 +211,50 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                 onChange={(value) => setFormData({ ...formData, unitId: value })}
                 options={masterData.units.map(u => [u.id, u.name])}
               />
+              <SelectField
+                label="Status Ketersediaan"
+                value={formData.availabilityStatus || "available"}
+                onChange={(value) => setFormData({ ...formData, availabilityStatus: value as Product["availabilityStatus"] })}
+                options={[
+                  ["available", "Tersedia"],
+                  ["limited", "Terbatas"],
+                  ["preorder", "Preorder"],
+                  ["unavailable", "Tidak Tersedia"],
+                ]}
+              />
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border">
               <h4 className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-primary-600">Material</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field label="Material Badan" value={formData.bodyMaterial || ""} onChange={(value) => setFormData({ ...formData, bodyMaterial: value })} required />
-                <Field label="Material Tutup" value={formData.lidMaterial || ""} onChange={(value) => setFormData({ ...formData, lidMaterial: value })} required />
-                <Field label="Varian Tutup" value={formData.lidVariant || ""} onChange={(value) => setFormData({ ...formData, lidVariant: value })} required />
-                <Field label="Tipe Tutup" value={formData.lidType || ""} onChange={(value) => setFormData({ ...formData, lidType: value })} required />
+                <SelectField
+                  label="Material Badan"
+                  value={formData.bodyMaterial || ""}
+                  onChange={(value) => setFormData({ ...formData, bodyMaterial: value })}
+                  options={masterData.materials.map(m => [m.id, m.name])}
+                  fallbackLabel={formData.bodyMaterial}
+                />
+                <SelectField
+                  label="Material Tutup"
+                  value={formData.lidMaterial || ""}
+                  onChange={(value) => setFormData({ ...formData, lidMaterial: value })}
+                  options={masterData.materials.map(m => [m.id, m.name])}
+                  fallbackLabel={formData.lidMaterial}
+                />
+                <SelectField
+                  label="Varian Tutup"
+                  value={formData.lidVariant || ""}
+                  onChange={(value) => setFormData({ ...formData, lidVariant: value })}
+                  options={masterData.lidVariants.map(v => [v.id, v.name])}
+                  fallbackLabel={formData.lidVariant}
+                />
+                <SelectField
+                  label="Tipe Tutup"
+                  value={formData.lidType || ""}
+                  onChange={(value) => setFormData({ ...formData, lidType: value })}
+                  options={masterData.lidTypes.map(t => [t.id, t.name])}
+                  fallbackLabel={formData.lidType}
+                />
               </div>
             </div>
 
@@ -227,6 +274,15 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                 value={formData.description || ""}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="min-h-[100px]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Catatan Ketersediaan</Label>
+              <Textarea
+                value={formData.availabilityNote || ""}
+                onChange={(e) => setFormData({ ...formData, availabilityNote: e.target.value })}
+                className="min-h-[80px]"
               />
             </div>
 
@@ -525,7 +581,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
               <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-12 font-black uppercase tracking-widest text-[0.65rem] rounded-xl">
                 Batal
               </Button>
-              <Button type="submit" disabled={loading} className="flex-[2] h-12 font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 text-[0.65rem] rounded-xl bg-primary-500 hover:bg-primary-600 text-white">
+              <Button type="submit" disabled={loading} className="flex-2 h-12 font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 text-[0.65rem] rounded-xl bg-primary-500 hover:bg-primary-600 text-white">
                 {loading ? "Menyimpan..." : product ? "Simpan Perubahan" : "Tambah Produk"}
               </Button>
             </div>
@@ -585,14 +641,19 @@ function SelectField({
   value,
   onChange,
   options,
+  fallbackLabel,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: [string, ReactNode][];
+  fallbackLabel?: ReactNode;
 }) {
   const selectedOption = options.find(([optValue]) => optValue === value);
-  const selectedLabel = selectedOption ? selectedOption[1] : value;
+  const safeOptions = selectedOption || !value
+    ? options
+    : [[value, fallbackLabel || value] as [string, ReactNode], ...options];
+  const selectedLabel = selectedOption ? selectedOption[1] : (fallbackLabel || value);
 
   return (
     <div className="space-y-2">
@@ -603,7 +664,7 @@ function SelectField({
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {options.map(([optionValue, optionLabel]) => (
+            {safeOptions.map(([optionValue, optionLabel]) => (
               <SelectItem key={optionValue} value={optionValue}>
                 {optionLabel}
               </SelectItem>
