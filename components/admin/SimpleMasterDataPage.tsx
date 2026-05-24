@@ -13,12 +13,13 @@ import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import MasterDataDialog, { MasterDataField } from "@/components/admin/MasterDataDialog";
+import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 export interface SimpleMasterItem {
   id: string;
   name: string;
+  usage?: "body" | "lid" | "both";
   description?: string;
 }
 
@@ -32,6 +33,12 @@ interface SimpleMasterDataPageProps {
   initialItems: SimpleMasterItem[];
   fields: MasterDataField[];
 }
+
+const USAGE_LABELS: Record<NonNullable<SimpleMasterItem["usage"]>, string> = {
+  body: "Badan",
+  lid: "Tutup",
+  both: "Badan & Tutup",
+};
 
 export default function SimpleMasterDataPage({
   title,
@@ -55,10 +62,12 @@ export default function SimpleMasterDataPage({
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.usage ? USAGE_LABELS[item.usage].toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
     (item.description || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const showUsageColumn = fields.some((field) => field.name === "usage");
 
-  const handleSave = async (data: SimpleMasterItem) => {
+  const handleSave = async (data: MasterDataForm) => {
     const isEditing = !!editingItem;
     const url = isEditing ? `${apiPath}/${editingItem.id}` : apiPath;
     const method = isEditing ? "PATCH" : "POST";
@@ -160,6 +169,9 @@ export default function SimpleMasterDataPage({
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama</TableHead>
+                  {showUsageColumn && (
+                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Untuk</TableHead>
+                  )}
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Deskripsi</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                 </TableRow>
@@ -167,7 +179,7 @@ export default function SimpleMasterDataPage({
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="p-20 text-center">
+                    <TableCell colSpan={showUsageColumn ? 5 : 4} className="p-20 text-center">
                       <div className="flex flex-col items-center justify-center text-text-muted">
                         <AppIcon name="inventory_2" className="text-6xl opacity-10 mb-4" />
                         <p className="text-lg font-black text-text-primary">{emptyTitle}</p>
@@ -184,6 +196,13 @@ export default function SimpleMasterDataPage({
                       <TableCell className="px-8 py-5">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{item.name}</p>
                       </TableCell>
+                      {showUsageColumn && (
+                        <TableCell className="px-8 py-5">
+                          <span className="inline-flex rounded-lg bg-secondary-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-text-secondary">
+                            {item.usage ? USAGE_LABELS[item.usage] : "-"}
+                          </span>
+                        </TableCell>
+                      )}
                       <TableCell className="px-8 py-5">
                         <p className="max-w-md text-sm font-medium text-text-secondary truncate">{item.description || "-"}</p>
                       </TableCell>

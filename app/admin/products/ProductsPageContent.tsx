@@ -58,7 +58,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
     const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
     const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
     const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
-    const lidTypeMap = Object.fromEntries(masterData.lidTypes.map(t => [t.id, t.name]));
+    const lidVariantMap = Object.fromEntries(masterData.lidVariants.map(t => [t.id, t.name]));
 
     return products.filter((p) => {
       const skuMatch = p.sku?.toLowerCase().includes(query);
@@ -70,9 +70,9 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
       
       const categoryMatch = (categoryMap[p.categoryId] || "").toLowerCase().includes(query);
       const typeMatch = (typeMap[p.productTypeId || ""] || "").toLowerCase().includes(query);
-      const lidTypeMatch = (lidTypeMap[p.lidType] || "").toLowerCase().includes(query);
+      const lidVariantMatch = (lidVariantMap[p.lidVariant] || p.lidVariant || "").toLowerCase().includes(query);
 
-      return skuMatch || nameMatch || materialMatch || categoryMatch || typeMatch || lidTypeMatch;
+      return skuMatch || nameMatch || materialMatch || categoryMatch || typeMatch || lidVariantMatch;
     });
   }, [products, searchQuery, masterData]);
 
@@ -148,7 +148,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
 
   const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
-  const lidTypeMap = Object.fromEntries(masterData.lidTypes.map(t => [t.id, t.name]));
+  const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
 
 
   return (
@@ -266,7 +266,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                           <TableCell className="px-4 py-3">
                             <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
                             <p className="text-[9px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">
-                              {lidTypeMap[p.lidType] || formatAttributeLabel(p.lidType)}
+                              {materialMap[p.lidMaterial] || formatAttributeLabel(p.lidMaterial)}
                             </p>
                           </TableCell>
                           <TableCell className="px-4 py-3">

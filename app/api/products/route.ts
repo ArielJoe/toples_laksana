@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const categories = searchParams.getAll("category");
     const materialBody = searchParams.getAll("material_body");
+    const lidMaterial = searchParams.getAll("lid_material");
     const lidType = searchParams.getAll("lid_type");
     const colors = searchParams.getAll("colors");
     const availability = searchParams.getAll("availability");
@@ -59,6 +60,10 @@ export async function GET(request: NextRequest) {
 
     if (materialBody.length > 0) {
       filter.bodyMaterial = { $in: materialBody };
+    }
+
+    if (lidMaterial.length > 0) {
+      filter.lidMaterial = { $in: lidMaterial };
     }
 
     if (lidType.length > 0) {

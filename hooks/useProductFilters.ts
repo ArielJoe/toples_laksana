@@ -30,7 +30,7 @@ export function useProductFilters() {
         : undefined,
       price_type: searchParams.getAll("price_type"),
       material_body: searchParams.getAll("material_body"),
-      lid_type: searchParams.getAll("lid_type"),
+      lid_material: searchParams.getAll("lid_material"),
       colors: searchParams.getAll("colors"),
       availability: searchParams.getAll("availability"),
       sort: (searchParams.get("sort") as CatalogFilters["sort"]) || "popular",
@@ -55,7 +55,7 @@ export function useProductFilters() {
       if (merged.price_max) params.set("price_max", String(merged.price_max));
       merged.price_type?.forEach((t) => params.append("price_type", t));
       merged.material_body?.forEach((m) => params.append("material_body", m));
-      merged.lid_type?.forEach((l) => params.append("lid_type", l));
+      merged.lid_material?.forEach((m) => params.append("lid_material", m));
       merged.colors?.forEach((c) => params.append("colors", c));
       merged.availability?.forEach((s) => params.append("availability", s));
       if (merged.sort && merged.sort !== "popular") params.set("sort", merged.sort);
@@ -78,7 +78,7 @@ export function useProductFilters() {
 
   // Toggle a value in an array filter
   const toggleArrayFilter = useCallback(
-    (key: "category" | "material_body" | "lid_type" | "colors" | "availability" | "price_type", value: string) => {
+    (key: "category" | "material_body" | "lid_material" | "colors" | "availability" | "price_type", value: string) => {
       const current = filters[key] || [];
       const next = current.includes(value)
         ? current.filter((v) => v !== value)
@@ -121,7 +121,7 @@ export function useProductFilters() {
     if (filters.volume_min || filters.volume_max) count++;
     if (filters.price_min || filters.price_max) count++;
     count += (filters.material_body?.length || 0);
-    count += (filters.lid_type?.length || 0);
+    count += (filters.lid_material?.length || 0);
     count += (filters.colors?.length || 0);
     count += (filters.availability?.length || 0);
     count += (filters.price_type?.length || 0);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 import { motion } from "framer-motion";
 import { ArrowRightIcon, BadgeCheckIcon, BoxesIcon, ClockIcon, HandshakeIcon, MapPinIcon, MessageCircleIcon, NavigationIcon } from "lucide-react";
@@ -37,14 +38,14 @@ export default function TentangPageClient() {
   return (
     <main className="bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="mx-auto max-w-screen-2xl px-6 pt-12 pb-20 lg:px-12 lg:pt-16 lg:pb-28">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 items-center">
+      <section className="relative w-full lg:h-[calc(100vh-5rem)] flex items-center pt-12 pb-20 lg:py-0">
+        <div className="mx-auto max-w-screen-2xl w-full px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
           {/* Hero Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="lg:col-span-7 space-y-6"
+            className="lg:col-span-1 space-y-6"
           >
             <span className="inline-block text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full">
               Tentang Kami
@@ -73,55 +74,31 @@ export default function TentangPageClient() {
               </a>
             </div>
           </motion.div>
-
-          {/* Hero Right Floating Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="lg:col-span-5 grid grid-cols-2 gap-4 relative"
-          >
-            {/* Stat Card 1 */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="bg-white p-6 rounded-2xl border border-border"
-            >
-              <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-text-muted">Fokus</span>
-              <p className="mt-2 text-xl sm:text-2xl font-extrabold text-text-primary">Kemasan</p>
-            </motion.div>
-
-            {/* Stat Card 2 */}
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.5 }}
-              className="bg-white p-6 rounded-2xl border border-border mt-4 lg:mt-8"
-            >
-              <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-text-muted">Lokasi</span>
-              <p className="mt-2 text-xl sm:text-2xl font-extrabold text-text-primary">Bandung</p>
-            </motion.div>
-
-            {/* Stat Card 3 */}
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 5.5, ease: "easeInOut", delay: 0.2 }}
-              className="bg-white p-6 rounded-2xl border border-border -mt-4 lg:-mt-2"
-            >
-              <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-text-muted">Layanan</span>
-              <p className="mt-2 text-xl sm:text-2xl font-extrabold text-text-primary">Retail</p>
-            </motion.div>
-
-            {/* Stat Card 4 */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 6.5, ease: "easeInOut", delay: 0.7 }}
-              className="bg-white p-6 rounded-2xl border border-border mt-0 lg:mt-6"
-            >
-              <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-text-muted">Skala</span>
-              <p className="mt-2 text-xl sm:text-2xl font-extrabold text-text-primary">Grosir</p>
-            </motion.div>
-          </motion.div>
+ 
+          {/* Desktop spacer to reserve right 50% */}
+          <div className="hidden lg:block lg:col-span-1" />
         </div>
+ 
+        {/* Hero Right Image Showcase with Fade Animation and Natural Left Blend Mask */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="relative lg:absolute lg:right-0 lg:top-0 lg:bottom-0 w-full lg:w-1/2 h-[400px] lg:h-full z-0 overflow-hidden"
+          style={{
+            maskImage: "linear-gradient(to right, transparent 10%, white 70%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 10%, white 70%)",
+          }}
+        >
+          <Image
+            src="/toko-toples_laksana.jpg"
+            alt="Toko Toples Laksana"
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            priority
+          />
+        </motion.div>
       </section>
 
       {/* Scrollytelling Journey Section ("Cara Kami Bekerja") */}

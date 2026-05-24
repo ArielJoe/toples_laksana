@@ -26,6 +26,14 @@ interface ProductDetailClientProps {
   product: Product;
 }
 
+const EMPTY_PRICE: ProductPrice = { price: 0, lidColorId: "", priceTypeId: "" };
+
+function readPositiveInteger(event: React.ChangeEvent<HTMLInputElement>) {
+  const nextValue = Math.max(1, Number.parseInt(event.currentTarget.value, 10) || 1);
+  event.currentTarget.value = String(nextValue);
+  return nextValue;
+}
+
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const { toggleWishlist, isInWishlist } = useApp();
   const wishlisted = isInWishlist(product.id);
@@ -46,8 +54,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     : selectedPrice;
   const quantityPerPack = product.packaging?.[0]?.quantityPerPack || 1;
 
-  const safeActivePrice = activePrice || { price: 0, lidColorId: "", priceTypeId: "" } as ProductPrice;
-  const safeSelectedPrice = selectedPrice || { price: 0, lidColorId: "", priceTypeId: "" } as ProductPrice;
+  const safeActivePrice = activePrice || EMPTY_PRICE;
+  const safeSelectedPrice = selectedPrice || EMPTY_PRICE;
 
   const calcResult = useMemo(
     () => calculatePrice({
@@ -104,7 +112,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const bodyMaterial = product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial);
   const lidMaterial = product.lidMaterialName || formatAttributeLabel(product.lidMaterial);
   const lidVariant = product.lidVariantName || formatAttributeLabel(product.lidVariant);
-  const lidType = product.lidTypeName || formatAttributeLabel(product.lidType);
   const selectedColor = activePrice?.lidColorName || getLidColorLabel(activePrice?.lidColorId);
   const selectedColorHex = activePrice?.lidColorHex || COLOR_SWATCHES[activePrice?.lidColorId || ""] || "#ccc";
 
@@ -184,9 +191,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             <span>SKU: {product.sku}</span>
             <span>Availability: <span className="text-gray-900">{getAvailabilityLabel(product.isAvailable)}</span></span>
           </div>
-          {product.availabilityNote && (
-            <p className="text-sm text-gray-500 mb-4">{product.availabilityNote}</p>
-          )}
           <p className="text-sm text-gray-400 mb-4">Product Type: {category}</p>
 
           {/* Price */}
@@ -261,8 +265,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {[
               { label: "Volume", value: volume ? `${volume}ml` : "-" },
               { label: "Berat", value: weight ? `${weight}gr` : "-" },
-              { label: "Bahan", value: bodyMaterial },
-              { label: "Tutup", value: lidType },
+              { label: "Bahan Badan", value: bodyMaterial },
+              { label: "Bahan Tutup", value: lidMaterial },
             ].map((item) => (
               <div className="flex justify-between" key={item.label}>
                 <span className="text-gray-400">{item.label}</span>
@@ -281,7 +285,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 type="number"
                 min={1}
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number.parseInt(e.target.value, 10) || 1))}
+                onChange={(e) => setQuantity(readPositiveInteger(e))}
                 className="w-24 px-3 py-2.5 text-sm font-semibold bg-white border border-gray-200 rounded-lg outline-none focus:border-primary-500 transition-all"
               />
             </div>
@@ -365,7 +369,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       <div className="mt-16">
         <SpecTabs
           product={product}
-          volume={volume}
           height={height}
           diameter={diameter}
           weight={weight}
@@ -375,7 +378,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           bodyMaterial={bodyMaterial}
           lidMaterial={lidMaterial}
           lidVariant={lidVariant}
-          lidType={lidType}
         />
       </div>
     </main>
@@ -383,9 +385,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 }
 
 // Separated tab component to keep main component cleaner
-function SpecTabs({ product, volume, height, diameter, weight, category, selectedColor, selectedColorHex, bodyMaterial, lidMaterial, lidVariant, lidType }: {
+function SpecTabs({ product, height, diameter, weight, category, selectedColor, selectedColorHex, bodyMaterial, lidMaterial, lidVariant }: {
   product: Product;
-  volume?: number;
   height?: number;
   diameter?: number;
   weight?: number;
@@ -395,7 +396,6 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
   bodyMaterial: string;
   lidMaterial: string;
   lidVariant: string;
-  lidType: string;
 }) {
   const [activeTab, setActiveTab] = useState<"dimensions" | "packaging" | "specs">("dimensions");
 
@@ -472,10 +472,9 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
             { label: "Kategori", value: category },
             { label: "Tipe Produk", value: getProductTypeLabel(product.productTypeId) },
             { label: "Status Ketersediaan", value: getAvailabilityLabel(product.isAvailable) },
-            { label: "Material Badan", value: bodyMaterial },
-            { label: "Material Tutup", value: lidMaterial },
-            { label: "Varian Tutup", value: lidVariant },
-            { label: "Tipe Tutup", value: lidType },
+            { label: "Bahan Badan", value: bodyMaterial },
+            { label: "Bahan Tutup", value: lidMaterial },
+            { label: "Variasi Tutup", value: lidVariant },
             {
               label: "Warna Tutup",
               value: (

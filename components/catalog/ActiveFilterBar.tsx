@@ -23,9 +23,9 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
       const facetMaterial = facets?.materials.find((m) => m.value === value);
       return facetMaterial?.name || formatAttributeLabel(value);
     }
-    case "lid_type": {
-      const facetLidType = facets?.lid_types.find((l) => l.value === value);
-      return facetLidType?.name || formatAttributeLabel(value);
+    case "lid_material": {
+      const facetLidMaterial = facets?.lid_materials.find((l) => l.value === value);
+      return facetLidMaterial?.name || formatAttributeLabel(value);
     }
     case "availability": {
       const facetStatus = facets?.availability_statuses?.find((s) => s.value === value);
@@ -73,8 +73,8 @@ export default function ActiveFilterBar({
   filters.material_body?.forEach((v) =>
     pills.push({ key: "material_body", value: v, label: getFilterLabel("material_body", v, facets) })
   );
-  filters.lid_type?.forEach((v) =>
-    pills.push({ key: "lid_type", value: v, label: getFilterLabel("lid_type", v, facets) })
+  filters.lid_material?.forEach((v) =>
+    pills.push({ key: "lid_material", value: v, label: getFilterLabel("lid_material", v, facets) })
   );
   filters.colors?.forEach((v) =>
     pills.push({ key: "colors", value: v, label: getFilterLabel("colors", v, facets) })

@@ -399,7 +399,6 @@ export default function WishlistPage() {
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-600 shadow-sm transition-all active:scale-[0.97] cursor-pointer"
                 >
-                  <AppIcon name="chat" className="text-sm" />
                   Kirim ke WhatsApp
                 </a>
               </div>

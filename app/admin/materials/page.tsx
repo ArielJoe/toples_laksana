@@ -4,7 +4,7 @@ import SimpleMasterDataPage from "@/components/admin/SimpleMasterDataPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Material Produk - Admin",
+  title: "Bahan Produk - Admin",
 };
 
 export const dynamic = "force-dynamic";
@@ -15,17 +15,28 @@ export default async function MaterialsPage() {
 
   return (
     <SimpleMasterDataPage
-      title="Material Produk"
-      addLabel="Tambah Material"
-      searchPlaceholder="Cari material..."
-      emptyTitle="Material tidak ditemukan"
-      emptyMessage="Tambahkan material untuk dipakai di data produk."
+      title="Bahan Produk"
+      addLabel="Tambah Bahan"
+      searchPlaceholder="Cari bahan..."
+      emptyTitle="Bahan tidak ditemukan"
+      emptyMessage="Tambahkan bahan badan atau bahan tutup untuk dipakai di data produk."
       apiPath="/api/materials"
       initialItems={JSON.parse(JSON.stringify(rawMaterials))}
       fields={[
-        { name: "id", label: "ID Material", type: "text", placeholder: "misal: plastik_pet", required: true },
-        { name: "name", label: "Nama Material", type: "text", placeholder: "misal: Plastik PET", required: true },
-        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat material" },
+        { name: "id", label: "ID Bahan", type: "text", placeholder: "misal: plastik_pet", required: true },
+        { name: "name", label: "Nama Bahan", type: "text", placeholder: "misal: Plastik PET", required: true },
+        {
+          name: "usage",
+          label: "Dipakai Untuk",
+          type: "select",
+          required: true,
+          options: [
+            { value: "both", label: "Badan & Tutup" },
+            { value: "body", label: "Badan Produk" },
+            { value: "lid", label: "Tutup Produk" },
+          ],
+        },
+        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat bahan" },
       ]}
     />
   );

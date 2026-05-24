@@ -4,7 +4,7 @@ import SimpleMasterDataPage from "@/components/admin/SimpleMasterDataPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tipe Tutup - Admin",
+  title: "Jenis Tutup - Admin",
 };
 
 export const dynamic = "force-dynamic";
@@ -15,17 +15,17 @@ export default async function LidTypesPage() {
 
   return (
     <SimpleMasterDataPage
-      title="Tipe Tutup"
-      addLabel="Tambah Tipe Tutup"
-      searchPlaceholder="Cari tipe tutup..."
-      emptyTitle="Tipe tutup tidak ditemukan"
-      emptyMessage="Tambahkan tipe tutup untuk dipakai di data produk."
+      title="Jenis Tutup"
+      addLabel="Tambah Jenis Tutup"
+      searchPlaceholder="Cari jenis tutup..."
+      emptyTitle="Jenis tutup tidak ditemukan"
+      emptyMessage="Tambahkan jenis tutup untuk validasi internal data produk."
       apiPath="/api/lid-types"
       initialItems={JSON.parse(JSON.stringify(rawLidTypes))}
       fields={[
-        { name: "id", label: "ID Tipe Tutup", type: "text", placeholder: "misal: ulir", required: true },
-        { name: "name", label: "Nama Tipe Tutup", type: "text", placeholder: "misal: Ulir", required: true },
-        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat tipe tutup" },
+        { name: "id", label: "ID Jenis Tutup", type: "text", placeholder: "misal: ulir", required: true },
+        { name: "name", label: "Nama Jenis Tutup", type: "text", placeholder: "misal: Ulir", required: true },
+        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat jenis tutup" },
       ]}
     />
   );

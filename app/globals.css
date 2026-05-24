@@ -1,71 +1,72 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1A1A2E;
-  --surface: #FFFFFF;
-  --border: #E2E8F0;
-  --divider: #F1F5F9;
-  --card: #FFFFFF;
-  --card-foreground: #1A1A2E;
-  --popover: #FFFFFF;
-  --popover-foreground: #1A1A2E;
-  --muted: #F8FAFC;
-  --muted-foreground: #5A6478;
-  --input: #D4DCE8;
-  --destructive: #DC2626;
-  --destructive-foreground: #FFFFFF;
+  --background: #ffffff;
+  --foreground: #1a1a2e;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --divider: #f1f5f9;
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a2e;
+  --muted: #f8fafc;
+  --muted-foreground: #5a6478;
+  --input: #d4dce8;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
   /* Primary Palette - based on #16479d */
-  --primary-50: #EBF0F9;
-  --primary-100: #D1DEF1;
-  --primary-200: #A3BDE3;
-  --primary-300: #759CD5;
-  --primary-400: #4A6FBE;
-  --primary-500: #16479D;
-  --primary-600: #123B82;
-  --primary-700: #0E2F68;
-  --primary-800: #0A224E;
+  --primary-50: #ebf0f9;
+  --primary-100: #d1def1;
+  --primary-200: #a3bde3;
+  --primary-300: #759cd5;
+  --primary-400: #4a6fbe;
+  --primary-500: #16479d;
+  --primary-600: #123b82;
+  --primary-700: #0e2f68;
+  --primary-800: #0a224e;
   --primary-900: #061534;
 
   /* Secondary Palette */
-  --secondary-50: #F0F3F8;
-  --secondary-100: #D8E0ED;
-  --secondary-500: #5A7099;
-  --secondary-900: #1A2233;
+  --secondary-50: #f0f3f8;
+  --secondary-100: #d8e0ed;
+  --secondary-500: #5a7099;
+  --secondary-900: #1a2233;
 
   /* Accent Palette */
-  --accent-50: #FFF6E9;
-  --accent-500: #E6A84C;
-  --accent-900: #4B3215;
+  --accent-50: #fff6e9;
+  --accent-500: #e6a84c;
+  --accent-900: #4b3215;
 
   /* Text Colors */
-  --text-primary: #1A1A2E;
-  --text-secondary: #5A6478;
-  --text-muted: #8D95A3;
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a6478;
+  --text-muted: #8d95a3;
 
   /* M3-style tokens mapped to primary palette */
-  --primary: #16479D;
-  --primary-foreground: #FFFFFF;
-  --on-primary: #FFFFFF;
-  --primary-container: #D1DEF1;
+  --primary: #16479d;
+  --primary-foreground: #ffffff;
+  --on-primary: #ffffff;
+  --primary-container: #d1def1;
   --on-primary-container: #061534;
 
-  --secondary: #F0F3F8;
-  --secondary-foreground: #1A2233;
-  --accent: #FFF6E9;
-  --accent-foreground: #4B3215;
+  --secondary: #f0f3f8;
+  --secondary-foreground: #1a2233;
+  --accent: #fff6e9;
+  --accent-foreground: #4b3215;
 
-  --surface-container-lowest: #FFFFFF;
-  --surface-container-low: #F0F3F8;
-  --surface-container: #E8ECF4;
-  --surface-container-high: #DDE3EE;
-  --surface-container-highest: #D4DCE8;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f0f3f8;
+  --surface-container: #e8ecf4;
+  --surface-container-high: #dde3ee;
+  --surface-container-highest: #d4dce8;
 
-  --on-surface: #1A1A2E;
-  --on-surface-variant: #5A6478;
-  --outline: #8D95A3;
-  --outline-variant: #C5CFDD;
+  --on-surface: #1a1a2e;
+  --on-surface-variant: #5a6478;
+  --outline: #8d95a3;
+  --outline-variant: #c5cfdd;
 }
 
 @theme inline {
@@ -177,8 +178,12 @@
     overflow: hidden;
   }
   @keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
   .animate-slide-up {
     animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);

@@ -135,6 +135,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
   // Lookup maps for name resolution
   const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
+  const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
 
   const MOCK_PROMOS = [
     { id: "promo_001", code: "DISKON10", name: "Diskon 10%", type: "percentage" as const, value: 10, isActive: true },
@@ -355,7 +356,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                             </TableCell>
                             <TableCell className="px-8 py-8">
                               <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
-                              <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">{p.lidType}</p>
+                              <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">{materialMap[p.lidMaterial] || p.lidMaterial}</p>
                             </TableCell>
                             <TableCell className="px-8 py-8">
                               <Badge variant="outline" className="bg-white border-border text-text-secondary text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5">

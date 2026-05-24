@@ -25,12 +25,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useUploadThing } from "@/lib/uploadthing";
-import { Loader2, ImagePlus, X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { AppIcon } from "../ui/app-icon";
 
 interface MasterDataItem {
   id: string;
   name: string;
+  usage?: "body" | "lid" | "both";
   color?: string;
   colorCode?: string;
 }
@@ -78,12 +79,63 @@ const emptyProduct: Partial<Product> = {
   deletedAt: null,
 };
 
+function deriveLidTypeIdFromVariant(
+  variantId: string | undefined,
+  lidVariants: MasterDataItem[],
+  lidTypes: MasterDataItem[]
+) {
+  if (!variantId) return "";
+
+  const variant = lidVariants.find((item) => item.id === variantId);
+  const matchingType = lidTypes.find((item) => {
+    if (item.id === variantId.replace(/^lv_/, "lt_")) return true;
+    return variant?.name && item.name.toLowerCase() === variant.name.toLowerCase();
+  });
+
+  return matchingType?.id || "";
+}
+
+function clampNonNegative(value: number) {
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+function readNonNegativeNumber(event: React.ChangeEvent<HTMLInputElement>) {
+  const nextValue = clampNonNegative(Number(event.currentTarget.value));
+  event.currentTarget.value = String(nextValue);
+  return nextValue;
+}
+
+function sanitizeNonNegativeDecimalInput(rawValue: string) {
+  const normalizedValue = rawValue
+    .replace(",", ".")
+    .replace(/[^\d.]/g, "");
+
+  if (!normalizedValue) return "";
+
+  const dotIndex = normalizedValue.indexOf(".");
+  const valueWithSingleDot = dotIndex === -1
+    ? normalizedValue
+    : `${normalizedValue.slice(0, dotIndex + 1)}${normalizedValue.slice(dotIndex + 1).replace(/\./g, "")}`;
+
+  const [rawIntegerPart, decimalPart] = valueWithSingleDot.split(".");
+  const integerPart = (rawIntegerPart || "0").replace(/^0+(?=\d)/, "") || "0";
+
+  return decimalPart === undefined ? integerPart : `${integerPart}.${decimalPart}`;
+}
+
+function parseNonNegativeDecimalInput(value: string) {
+  if (!value || value === ".") return 0;
+  return clampNonNegative(Number(value));
+}
+
 export default function ProductDialog({ isOpen, onClose, product, onSave, masterData }: ProductDialogProps) {
   const [formData, setFormData] = useState<Partial<Product>>(emptyProduct);
   const [loading, setLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<{ id: string; file: File; preview: string; isPrimary: boolean }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startUpload } = useUploadThing("productImage");
+  const bodyMaterialOptions = masterData.materials.filter((material) => material.usage !== "lid");
+  const lidMaterialOptions = masterData.materials.filter((material) => material.usage !== "body");
 
   useEffect(() => {
     if (isOpen) {
@@ -99,7 +151,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
       ...prev,
       dimension: {
         ...(prev.dimension || { heightCm: 0, diameterCm: 0, volumeMl: 0, weightGram: 0 }),
-        [key]: value,
+        [key]: clampNonNegative(value),
       },
     }));
   };
@@ -165,7 +217,13 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
         finalImages = finalImages.map((img, i) => ({ ...img, isPrimary: i === firstPrimaryIndex }));
       }
 
-      await onSave({ ...formData, images: finalImages });
+      const derivedLidType = deriveLidTypeIdFromVariant(
+        formData.lidVariant,
+        masterData.lidVariants,
+        masterData.lidTypes
+      );
+
+      await onSave({ ...formData, lidType: formData.lidType || derivedLidType, images: finalImages });
       
       // Cleanup
       pendingFiles.forEach(f => URL.revokeObjectURL(f.preview));
@@ -224,35 +282,32 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border">
-              <h4 className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-primary-600">Material</h4>
+              <h4 className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-primary-600">Bahan</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SelectField
-                  label="Material Badan"
+                  label="Bahan Badan"
                   value={formData.bodyMaterial || ""}
                   onChange={(value) => setFormData({ ...formData, bodyMaterial: value })}
-                  options={masterData.materials.map(m => [m.id, m.name])}
+                  options={bodyMaterialOptions.map(m => [m.id, m.name])}
                   fallbackLabel={formData.bodyMaterial}
                 />
                 <SelectField
-                  label="Material Tutup"
+                  label="Bahan Tutup"
                   value={formData.lidMaterial || ""}
                   onChange={(value) => setFormData({ ...formData, lidMaterial: value })}
-                  options={masterData.materials.map(m => [m.id, m.name])}
+                  options={lidMaterialOptions.map(m => [m.id, m.name])}
                   fallbackLabel={formData.lidMaterial}
                 />
                 <SelectField
-                  label="Varian Tutup"
+                  label="Variasi Tutup"
                   value={formData.lidVariant || ""}
-                  onChange={(value) => setFormData({ ...formData, lidVariant: value })}
+                  onChange={(value) => setFormData({
+                    ...formData,
+                    lidVariant: value,
+                    lidType: deriveLidTypeIdFromVariant(value, masterData.lidVariants, masterData.lidTypes) || formData.lidType,
+                  })}
                   options={masterData.lidVariants.map(v => [v.id, v.name])}
                   fallbackLabel={formData.lidVariant}
-                />
-                <SelectField
-                  label="Tipe Tutup"
-                  value={formData.lidType || ""}
-                  onChange={(value) => setFormData({ ...formData, lidType: value })}
-                  options={masterData.lidTypes.map(t => [t.id, t.name])}
-                  fallbackLabel={formData.lidType}
                 />
               </div>
             </div>
@@ -272,18 +327,11 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
               <Textarea
                 value={formData.description || ""}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="min-h-[100px]"
+                className="min-h-25"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Catatan Ketersediaan</Label>
-              <Textarea
-                value={formData.availabilityNote || ""}
-                onChange={(e) => setFormData({ ...formData, availabilityNote: e.target.value })}
-                className="min-h-[80px]"
-              />
-            </div>
+
 
               <div className="space-y-4 pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
@@ -296,7 +344,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                   onDragOver={(e) => e.preventDefault()} 
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-secondary-50/30 rounded-2xl border-2 border-dashed border-border p-8 flex flex-col items-center justify-center min-h-[160px] w-full transition-all hover:bg-secondary-50/50 hover:border-primary-300 cursor-pointer group"
+                  className="bg-secondary-50/30 rounded-2xl border-2 border-dashed border-border p-8 flex flex-col items-center justify-center min-h-40 w-full transition-all hover:bg-secondary-50/50 hover:border-primary-300 cursor-pointer group"
                 >
                   <input 
                     type="file" 
@@ -432,7 +480,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
               </div>
               <div className="space-y-3">
                 {(formData.prices || []).map((price, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-secondary-50/50 p-4 rounded-xl border border-border relative">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_0.75fr_auto] gap-3 items-end bg-secondary-50/50 p-4 rounded-xl border border-border relative">
                     <SelectField
                       label="Warna Tutup"
                       value={price.lidColorId}
@@ -463,33 +511,32 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                       }}
                       options={masterData.priceTypes.map(t => [t.id, t.name.replace(/_/g, ' ')])}
                     />
-                    <div className="flex gap-2 items-end">
-                      <div className="flex-1 space-y-2">
-                        <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Harga (Rp)</Label>
-                        <Input
-                          type="number"
-                          value={price.price}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            setFormData(prev => {
-                              const newPrices = [...(prev.prices || [])];
-                              if (newPrices[index]) newPrices[index].price = val;
-                              return { ...prev, prices: newPrices };
-                            });
-                          }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({
-                          ...prev,
-                          prices: (prev.prices || []).filter((_, i) => i !== index)
-                        }))}
-                        className="h-10 w-10 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-red-100"
-                      >
-                        <AppIcon name="delete" />
-                      </button>
+                    <div className="space-y-2">
+                      <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Harga (Rp)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={price.price}
+                        onChange={(e) => {
+                          const val = readNonNegativeNumber(e);
+                          setFormData(prev => {
+                            const newPrices = [...(prev.prices || [])];
+                            if (newPrices[index]) newPrices[index].price = val;
+                            return { ...prev, prices: newPrices };
+                          });
+                        }}
+                      />
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        prices: (prev.prices || []).filter((_, i) => i !== index)
+                      }))}
+                      className="h-10 w-10 justify-self-start md:justify-self-end text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-red-100"
+                    >
+                      <AppIcon name="delete" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -513,13 +560,14 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                 {(formData.packaging || []).map((pack, index) => (
                   <div key={index} className="bg-secondary-50/50 p-4 rounded-xl border border-border relative space-y-4">
                     <div className="flex justify-between items-center">
-                      <div className="flex-1 max-w-[120px]">
+                      <div className="flex-1 max-w-30">
                         <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Isi Per Bal</Label>
                         <Input
                           type="number"
+                          min={0}
                           value={pack.quantityPerPack}
                           onChange={(e) => {
-                            const val = Number(e.target.value);
+                            const val = readNonNegativeNumber(e);
                             setFormData(prev => {
                               const newPack = [...(prev.packaging || [])];
                               if (newPack[index]) newPack[index].quantityPerPack = val;
@@ -623,13 +671,29 @@ function NumberField({
   value: number;
   onChange: (value: number) => void;
 }) {
+  const [displayValue, setDisplayValue] = useState(String(value));
+
+  useEffect(() => {
+    setDisplayValue(String(value));
+  }, [value]);
+
   return (
     <div className="space-y-2">
       <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">{label}</Label>
       <Input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
+        type="text"
+        inputMode="decimal"
+        value={displayValue}
+        onChange={(e) => {
+          const sanitizedValue = sanitizeNonNegativeDecimalInput(e.target.value);
+          setDisplayValue(sanitizedValue);
+          onChange(parseNonNegativeDecimalInput(sanitizedValue));
+        }}
+        onBlur={() => {
+          const parsedValue = parseNonNegativeDecimalInput(displayValue);
+          setDisplayValue(String(parsedValue));
+          onChange(parsedValue);
+        }}
       />
     </div>
   );
@@ -658,7 +722,7 @@ function SelectField({
     <div className="space-y-2">
       <Label>{label}</Label>
       <Select value={value} onValueChange={(val) => onChange(val || "")}>
-        <SelectTrigger className="h-10 w-full bg-background px-3 font-bold text-left">
+        <SelectTrigger className="h-12 w-full bg-background px-3 font-bold text-left">
           <SelectValue>{selectedLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent>

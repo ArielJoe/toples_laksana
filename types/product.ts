@@ -171,7 +171,7 @@ export interface CatalogFilters {
   price_max?: number;
   price_type?: string[];
   material_body?: string[];
-  lid_type?: string[];
+  lid_material?: string[];
   colors?: string[];
   availability?: string[];
   sort?: "popular" | "price_asc" | "price_desc" | "newest";
@@ -194,7 +194,7 @@ export interface PaginatedResponse<T> {
 export interface FacetCounts {
   categories: { value: string; count: number; name?: string }[];
   materials: { value: string; count: number; name?: string }[];
-  lid_types: { value: string; count: number; name?: string }[];
+  lid_materials: { value: string; count: number; name?: string }[];
   colors: { value: string; count: number; name?: string; hex?: string }[];
   volume_range: { min: number; max: number };
   price_range: { min: number; max: number };

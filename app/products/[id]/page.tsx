@@ -13,7 +13,6 @@ interface PageProps {
 import CategoryModel from "@/models/Category";
 import LidColorModel from "@/models/LidColor";
 import MaterialModel from "@/models/Material";
-import LidTypeModel from "@/models/LidType";
 import LidVariantModel from "@/models/LidVariant";
 
 async function getProduct(id: string): Promise<Product | null> {
@@ -31,13 +30,11 @@ async function getProduct(id: string): Promise<Product | null> {
     category,
     lidColors,
     materials,
-    lidType,
     lidVariant,
   ] = await Promise.all([
     CategoryModel.findOne({ id: product.categoryId }).select("name").lean(),
     LidColorModel.find({ id: { $in: colorIds } }).select("id color colorCode").lean(),
     MaterialModel.find({ id: { $in: [product.bodyMaterial, product.lidMaterial].filter(Boolean) } }).select("id name").lean(),
-    LidTypeModel.findOne({ id: product.lidType }).select("id name").lean(),
     LidVariantModel.findOne({ id: product.lidVariant }).select("id name").lean(),
   ]);
   const colorMap = new Map(lidColors.map((lc) => [lc.id, lc]));
@@ -49,7 +46,6 @@ async function getProduct(id: string): Promise<Product | null> {
   }
   parsedProduct.bodyMaterialName = materialMap.get(product.bodyMaterial) || formatAttributeLabel(product.bodyMaterial);
   parsedProduct.lidMaterialName = materialMap.get(product.lidMaterial) || formatAttributeLabel(product.lidMaterial);
-  parsedProduct.lidTypeName = lidType?.name || formatAttributeLabel(product.lidType);
   parsedProduct.lidVariantName = lidVariant?.name || formatAttributeLabel(product.lidVariant);
   if (parsedProduct.prices) {
     parsedProduct.prices = parsedProduct.prices.map((p: NonNullable<Product["prices"]>[number]) => {

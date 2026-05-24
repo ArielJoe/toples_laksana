@@ -22,7 +22,7 @@ import {
 interface FilterSidebarProps {
   filters: CatalogFilters;
   facets: FacetCounts | null;
-  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors" | "availability" | "price_type", value: string) => void;
+  onToggleArray: (key: "category" | "material_body" | "lid_material" | "colors" | "availability" | "price_type", value: string) => void;
   onSetFilters: (f: Partial<CatalogFilters>) => void;
 }
 
@@ -219,20 +219,20 @@ export default function FilterSidebar({
           </div>
         </section>
 
-        {/* Lid Type */}
+        {/* Lid Material */}
         <section>
           <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted mb-4 flex items-center gap-2">
             <SettingsIcon className="size-4" />
-            Tipe Tutup
+            Bahan Tutup
           </h3>
           <div className="space-y-1">
-            {(facets?.lid_types || []).map((lid) => {
-              const isActive = !!filters.lid_type?.includes(lid.value);
+            {(facets?.lid_materials || []).map((lid) => {
+              const isActive = !!filters.lid_material?.includes(lid.value);
               return (
                 <label key={lid.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">
                   <Checkbox
                     checked={isActive || false}
-                    onCheckedChange={() => onToggleArray("lid_type", lid.value)}
+                    onCheckedChange={() => onToggleArray("lid_material", lid.value)}
                   />
                   <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
                     {lid.name || formatAttributeLabel(lid.value)}

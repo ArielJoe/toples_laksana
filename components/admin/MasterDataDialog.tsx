@@ -6,29 +6,38 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+
+type MasterDataValue = string | number | boolean | Date | null | undefined;
+export type MasterDataForm = Record<string, MasterDataValue>;
 
 export interface MasterDataField {
   name: string;
   label: string;
-  type: "text" | "number" | "textarea" | "color";
+  type: "text" | "number" | "textarea" | "color" | "select";
   placeholder?: string;
   required?: boolean;
+  options?: { value: string; label: string }[];
 }
 
 interface MasterDataDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => Promise<void>;
+  onSave: (data: MasterDataForm) => Promise<void>;
   title: string;
   fields: MasterDataField[];
-  initialData?: any;
+  initialData?: object | null;
 }
 
 export default function MasterDataDialog({
@@ -39,17 +48,18 @@ export default function MasterDataDialog({
   fields,
   initialData,
 }: MasterDataDialogProps) {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<MasterDataForm>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setFormData(initialData);
+        setFormData(initialData as MasterDataForm);
       } else {
-        const defaultData: any = {};
+        const defaultData: MasterDataForm = {};
         fields.forEach(f => {
           if (f.type === "number") defaultData[f.name] = 0;
+          else if (f.type === "select") defaultData[f.name] = f.options?.[0]?.value || "";
           else defaultData[f.name] = "";
         });
         setFormData(defaultData);
@@ -63,16 +73,21 @@ export default function MasterDataDialog({
     try {
       await onSave(formData);
       onClose();
-    } catch (error: any) {
-      // Error handling is usually done in the onSave caller, but we can catch it here too
+    } catch (error: unknown) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (name: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+  const handleChange = (name: string, value: MasterDataValue) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement>, name: string) => {
+    const nextValue = Math.max(0, Number(event.currentTarget.value) || 0);
+    event.currentTarget.value = String(nextValue);
+    handleChange(name, nextValue);
   };
 
   return (
@@ -91,19 +106,53 @@ export default function MasterDataDialog({
                 {field.type === "textarea" ? (
                   <Textarea
                     id={field.name}
-                    value={formData[field.name] || ""}
+                    value={String(formData[field.name] ?? "")}
                     onChange={(e) => handleChange(field.name, e.target.value)}
                     placeholder={field.placeholder}
                     required={field.required}
                     className="bg-secondary-50/50 border-border font-bold text-sm min-h-[100px] focus:bg-white transition-all rounded-xl"
                   />
+                ) : field.type === "select" ? (
+                  (() => {
+                    const selectedValue = String(formData[field.name] || field.options?.[0]?.value || "");
+                    const selectedOption = field.options?.find((option) => option.value === selectedValue);
+
+                    return (
+                  <Select
+                    value={selectedValue}
+                    onValueChange={(value) => handleChange(field.name, value ?? "")}
+                  >
+                    <SelectTrigger className="h-12 w-full bg-secondary-50/50 border-border font-bold text-sm rounded-xl px-4">
+                      <span className="flex flex-1 text-left">
+                        {selectedOption?.label || field.placeholder}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {(field.options || []).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                    );
+                  })()
                 ) : (
                   <div className="relative">
                     <Input
                       id={field.name}
-                      type="text"
-                      value={formData[field.name] || ""}
-                      onChange={(e) => handleChange(field.name, e.target.value)}
+                      type={field.type === "number" ? "number" : "text"}
+                      min={field.type === "number" ? 0 : undefined}
+                      value={field.type === "number" ? Number(formData[field.name] || 0) : String(formData[field.name] ?? "")}
+                      onChange={(e) => {
+                        if (field.type === "number") {
+                          handleNumberChange(e, field.name);
+                        } else {
+                          handleChange(field.name, e.target.value);
+                        }
+                      }}
                       placeholder={field.placeholder}
                       required={field.required}
                       disabled={field.name === "id" && !!initialData}
@@ -113,13 +162,13 @@ export default function MasterDataDialog({
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
                         <input
                           type="color"
-                          value={formData[field.name] || "#000000"}
+                          value={String(formData[field.name] || "#000000")}
                           onChange={(e) => handleChange(field.name, e.target.value.toUpperCase())}
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                         />
                         <div
                           className="w-7 h-7 rounded-lg border border-border shadow-inner"
-                          style={{ backgroundColor: formData[field.name] || "#000000" }}
+                          style={{ backgroundColor: String(formData[field.name] || "#000000") }}
                         />
                       </div>
                     )}

@@ -132,7 +132,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                 { label: "Diameter Badan", getter: (p: Product) => `${getSpecValue(p, "diameter_badan_cm") || "-"} cm` },
                 { label: "Bahan Badan", getter: (p: Product) => p.bodyMaterialName || formatAttributeLabel(p.bodyMaterial) },
                 { label: "Bahan Tutup", getter: (p: Product) => p.lidMaterialName || formatAttributeLabel(p.lidMaterial) },
-                { label: "Tipe Tutup", getter: (p: Product) => p.lidTypeName || formatAttributeLabel(p.lidType) },
+                { label: "Variasi Tutup", getter: (p: Product) => p.lidVariantName || formatAttributeLabel(p.lidVariant) },
                 { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.isAvailable) },
                 { label: "Kategori", getter: (p: Product) => getCategoryLabel(p.categoryId) },
               ].map((row, idx) => (

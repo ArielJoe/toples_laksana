@@ -4,7 +4,7 @@ import SimpleMasterDataPage from "@/components/admin/SimpleMasterDataPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Varian Tutup - Admin",
+  title: "Variasi Tutup - Admin",
 };
 
 export const dynamic = "force-dynamic";
@@ -15,17 +15,17 @@ export default async function LidVariantsPage() {
 
   return (
     <SimpleMasterDataPage
-      title="Varian Tutup"
-      addLabel="Tambah Varian Tutup"
-      searchPlaceholder="Cari varian tutup..."
-      emptyTitle="Varian tutup tidak ditemukan"
-      emptyMessage="Tambahkan varian tutup untuk dipakai di data produk."
+      title="Variasi Tutup"
+      addLabel="Tambah Variasi Tutup"
+      searchPlaceholder="Cari variasi tutup..."
+      emptyTitle="Variasi tutup tidak ditemukan"
+      emptyMessage="Tambahkan variasi tutup untuk dipakai di data produk."
       apiPath="/api/lid-variants"
       initialItems={JSON.parse(JSON.stringify(rawLidVariants))}
       fields={[
-        { name: "id", label: "ID Varian Tutup", type: "text", placeholder: "misal: polos", required: true },
-        { name: "name", label: "Nama Varian Tutup", type: "text", placeholder: "misal: Polos", required: true },
-        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat varian tutup" },
+        { name: "id", label: "ID Variasi Tutup", type: "text", placeholder: "misal: twist_off", required: true },
+        { name: "name", label: "Nama Variasi Tutup", type: "text", placeholder: "misal: Twist Off", required: true },
+        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat variasi tutup" },
       ]}
     />
   );
