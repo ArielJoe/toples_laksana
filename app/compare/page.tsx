@@ -44,7 +44,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
   return (
     <div className="bg-[#F8FAFC] text-text-primary font-sans min-h-screen pt-8 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-primary-50/50 to-transparent -z-10" />
+      <div className="absolute top-0 left-0 w-full h-125 bg-linear-to-b from-primary-50/50 to-transparent -z-10" />
 
       <main className="max-w-7xl mx-auto px-6 pb-20 lg:px-12 relative">
         {/* Header */}
@@ -80,12 +80,21 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
         ) : (
           <div className="overflow-x-auto no-scrollbar pb-8">
             {/* Product Cards Header */}
-            <div className={`grid ${gridCols} items-stretch gap-6 mb-8 min-w-[700px]`}>
+            <div className={`grid ${gridCols} items-stretch gap-6 mb-8 min-w-175`}>
+              {/* Empty placeholder to align with table labels */}
+              <div className="flex flex-col justify-end p-6 bg-white/30 backdrop-blur-md rounded-xl border border-white/50">
+                <span className="text-[0.65rem] font-black uppercase tracking-[0.25em] text-text-muted">
+                  Spesifikasi
+                </span>
+                <span className="text-xs font-bold text-text-secondary mt-1 block">
+                  Kemasan terpilih
+                </span>
+              </div>
               {products.map((product) => {
                 const image = getPrimaryImage(product);
                 return (
                   <div key={product.id} className="bg-white/70 backdrop-blur-md p-6 flex flex-col items-center text-center border border-white rounded-xl relative group transition-all duration-500">
-                    <Link href={`/compare?ids=${ids?.split(",").filter((id) => id !== product.id).join(",")}`} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-secondary-50 hover:bg-red-50 text-text-muted hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100">
+                    <Link href={`/compare?ids=${ids?.split(",").filter((id) => id !== product.id).join(",")}`} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-secondary-50 hover:bg-red-50 text-text-muted hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 z-20">
                       <AppIcon name="close" className="text-base" />
                     </Link>
                     <div className="relative w-full aspect-square mb-6">
@@ -116,7 +125,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             </div>
 
             {/* Spec Comparison Table */}
-            <div className="flex flex-col rounded-xl overflow-hidden bg-white/40 backdrop-blur-xl min-w-[700px]">
+            <div className="flex flex-col rounded-xl overflow-hidden bg-white/40 backdrop-blur-xl min-w-175">
               {[
                 { label: "Volume Kapasitas", getter: (p: Product) => `${getSpecValue(p, "volume_ml") || "-"} ml` },
                 { label: "Tinggi Total", getter: (p: Product) => `${getSpecValue(p, "tinggi_cm") || "-"} cm` },
@@ -127,7 +136,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                 { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.isAvailable) },
                 { label: "Kategori", getter: (p: Product) => getCategoryLabel(p.categoryId) },
               ].map((row, idx) => (
-                <div key={row.label} className={`grid ${gridCols} items-stretch ${idx % 2 === 0 ? "bg-white/50" : "bg-transparent"} hover:bg-primary-50/30 transition-colors`}>
+                <div key={row.label} className={`grid ${gridCols} items-stretch gap-6 ${idx % 2 === 0 ? "bg-white/50" : "bg-transparent"} hover:bg-primary-50/30 transition-colors`}>
                   <div className="px-8 py-5 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] flex items-center">{row.label}</div>
                   {products.map((p) => (
                     <div key={`${p.id}-${row.label}`} className="px-8 py-5 text-sm text-center text-text-primary font-black flex items-center justify-center tracking-tight">
@@ -138,7 +147,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
               ))}
 
               {/* Price Row */}
-              <div className={`grid ${gridCols} items-stretch bg-primary-50/50 backdrop-blur-md`}>
+              <div className={`grid ${gridCols} items-stretch gap-6 bg-primary-50/50 backdrop-blur-md`}>
                 <div className="px-8 py-8 text-[0.65rem] font-black text-primary-600 uppercase tracking-[0.25em] flex items-center">
                   Harga Ecer Terendah
                 </div>
@@ -157,7 +166,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             </div>
 
             {/* CTA Buttons */}
-            <div className={`grid ${gridCols} items-center mt-8 gap-6 min-w-[700px]`}>
+            <div className={`grid ${gridCols} items-center mt-8 gap-6 min-w-175`}>
               <div />
               {products.map((p) => (
                 <a key={`${p.id}-cta`} href={buildInquiryUrl(p)} target="_blank" rel="noopener noreferrer" className="w-full bg-white border-2 border-primary-500/10 text-primary-600 py-3 px-6 rounded-xl font-black text-[0.7rem] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary-500 hover:text-white hover:border-primary-500 transition-all active:scale-95 group">

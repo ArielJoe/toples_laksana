@@ -6,6 +6,7 @@ import type { Product } from "@/types/product";
 import {
   getAvailabilityLabel,
   getLowestRetailPrice,
+  getLowestWholesalePrice,
   getPrimaryImage,
   getSpecValue,
 } from "@/types/product";
@@ -20,16 +21,21 @@ interface ProductCardProps {
   product: Product;
   onCompareToggle?: (productId: string) => void;
   isComparing?: boolean;
+  onInquiryToggle?: (productId: string) => void;
+  isInquirySelected?: boolean;
+  priceType?: string[];
 }
 
 export default function ProductCard({
   product,
   onCompareToggle,
   isComparing = false,
+  onInquiryToggle,
+  isInquirySelected = false,
+  priceType,
 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useApp();
   const volume = getSpecValue(product, "volume_ml");
-  const retailPrice = getLowestRetailPrice(product);
   const heroImage = getPrimaryImage(product);
   const productHref = `/products/${product.id}`;
   const wishlisted = isInWishlist(product.id);
@@ -44,6 +50,19 @@ export default function ProductCard({
 
   return (
     <Card className="group relative overflow-hidden rounded-lg border border-border bg-card py-0 transition-all duration-300">
+      {/* WhatsApp Selection Checkbox */}
+      {onInquiryToggle && (
+        <div
+          className="absolute top-3 left-3 z-10 flex items-center justify-center p-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            className="size-5 rounded border border-border bg-white data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 hover:border-blue-500 hover:bg-blue-50/50 transition-all cursor-pointer shadow-sm"
+            checked={isInquirySelected}
+            onCheckedChange={() => onInquiryToggle?.(product.id)}
+          />
+        </div>
+      )}
       {/* Wishlist Button */}
       <button
         onClick={(e) => {
@@ -105,11 +124,60 @@ export default function ProductCard({
           {getAvailabilityLabel(product.isAvailable)}
         </p>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-1">
-          <span className="text-base font-bold text-gray-900">
-            {retailPrice > 0 ? formatPrice(retailPrice) : "Hubungi Kami"}
-          </span>
+        {/* Price Section */}
+        <div className="space-y-1 mt-2 mb-2">
+          {(() => {
+            const priceTypes = priceType || [];
+            const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
+            const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
+            const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
+
+            const retailPrice = getLowestRetailPrice(product);
+            const wholesalePrice = getLowestWholesalePrice(product);
+
+            if (onlyWholesale && wholesalePrice > 0) {
+              return (
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base font-bold text-gray-900">
+                    {formatPrice(wholesalePrice)}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-medium">/ bal</span>
+                </div>
+              );
+            }
+            if (onlyRetail && retailPrice > 0) {
+              return (
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base font-bold text-gray-900">
+                    {formatPrice(retailPrice)}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
+                </div>
+              );
+            }
+            if (showBoth) {
+              return (
+                <div className="space-y-0.5">
+                  {retailPrice > 0 ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-bold text-gray-900">
+                        {formatPrice(retailPrice)}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
+                    </div>
+                  ) : (
+                    <div className="text-sm font-bold text-gray-900">Hubungi Kami</div>
+                  )}
+                  {wholesalePrice > 0 && (
+                    <div className="text-[10px] text-primary-600 font-black tracking-wide">
+                      Grosir: {formatPrice(wholesalePrice)} <span className="text-text-muted font-medium">/ bal</span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return <div className="text-sm font-bold text-gray-900">Hubungi Kami</div>;
+          })()}
         </div>
 
         {/* Compare */}
@@ -119,7 +187,7 @@ export default function ProductCard({
             onClick={(e) => e.stopPropagation()}
           >
             <Checkbox
-              className="size-3.5"
+              className="size-3.5 hover:border-blue-500 hover:bg-blue-50/50 transition-all cursor-pointer"
               checked={isComparing}
               onCheckedChange={() => onCompareToggle?.(product.id)}
             />

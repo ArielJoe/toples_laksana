@@ -22,7 +22,7 @@ import {
 interface FilterSidebarProps {
   filters: CatalogFilters;
   facets: FacetCounts | null;
-  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors" | "availability", value: string) => void;
+  onToggleArray: (key: "category" | "material_body" | "lid_type" | "colors" | "availability" | "price_type", value: string) => void;
   onSetFilters: (f: Partial<CatalogFilters>) => void;
 }
 
@@ -56,6 +56,36 @@ export default function FilterSidebar({
               }
             }}
           />
+        </div>
+      </section>
+
+      {/* Pilihan Satuan Harga */}
+      <section>
+        <h3 className="text-[0.65rem] font-black uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
+          <SlidersHorizontalIcon className="size-4" />
+          Satuan Harga
+        </h3>
+        <div className="space-y-1">
+          {[
+            { value: "ptype_001", name: "Ecer (pcs)" },
+            { value: "ptype_004", name: "Grosir (bal)" },
+          ].map((type) => {
+            const isActive = !!filters.price_type?.includes(type.value);
+            return (
+              <label
+                key={type.value}
+                className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors"
+              >
+                <Checkbox
+                  checked={isActive}
+                  onCheckedChange={() => onToggleArray("price_type", type.value)}
+                />
+                <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
+                  {type.name}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </section>
 

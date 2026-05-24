@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     const volumeMax = searchParams.get("volume_max");
     const priceMin = searchParams.get("price_min");
     const priceMax = searchParams.get("price_max");
+    const priceTypes = searchParams.getAll("price_type");
     const ids = searchParams.getAll("id");
 
     const filter: MongoFilter = { deletedAt: null };
@@ -93,11 +94,18 @@ export async function GET(request: NextRequest) {
       filter["dimension.volumeMl"] = volumeMatch;
     }
 
-    if (priceMin || priceMax) {
-      const priceMatch: MongoRange = {};
-      if (priceMin) priceMatch.$gte = Number.parseInt(priceMin, 10);
-      if (priceMax) priceMatch.$lte = Number.parseInt(priceMax, 10);
-      filter["prices.price"] = priceMatch;
+    if (priceMin || priceMax || priceTypes.length > 0) {
+      const elemMatch: MongoFilter = {};
+      if (priceTypes.length > 0) {
+        elemMatch.priceTypeId = { $in: priceTypes };
+      }
+      if (priceMin || priceMax) {
+        const priceMatch: MongoRange = {};
+        if (priceMin) priceMatch.$gte = Number.parseInt(priceMin, 10);
+        if (priceMax) priceMatch.$lte = Number.parseInt(priceMax, 10);
+        elemMatch.price = priceMatch;
+      }
+      filter.prices = { $elemMatch: elemMatch };
     }
 
     let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };

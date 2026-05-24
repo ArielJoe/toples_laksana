@@ -210,7 +210,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                 <p className="text-sm mt-2 max-w-xs text-text-secondary font-medium">Mulai kembangkan bisnis Anda dengan menambahkan produk pertama.</p>
               </div>
             ) : (
-              <Table className="min-w-[800px]">
+              <Table className="min-w-200">
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>

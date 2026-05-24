@@ -169,6 +169,7 @@ export interface CatalogFilters {
   volume_max?: number;
   price_min?: number;
   price_max?: number;
+  price_type?: string[];
   material_body?: string[];
   lid_type?: string[];
   colors?: string[];

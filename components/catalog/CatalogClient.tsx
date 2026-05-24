@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CatalogFilters, FacetCounts, PaginatedResponse, Product, formatAttributeLabel, getSpecValue, getLowestRetailPrice, getPrimaryImage } from "@/types/product";
+import { CatalogFilters, FacetCounts, PaginatedResponse, Product, formatAttributeLabel, getSpecValue, getLowestRetailPrice, getLowestWholesalePrice, getPrimaryImage } from "@/types/product";
 import { formatPrice } from "@/lib/price-calculator";
 
 const SORT_LABELS: Record<string, string> = {
@@ -67,7 +67,7 @@ function CatalogContent() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [apiUrl]);
+  }, [apiUrl, loading]);
 
   // Toggle product comparison (max 3)
   const handleCompareToggle = useCallback((id: string) => {
@@ -81,7 +81,7 @@ function CatalogContent() {
       <main className="w-full">
 
         {/* Sticky Header: Controls Bar + Active Filters */}
-        <div className="sticky top-[75px] z-30 bg-background/95 backdrop-blur-md px-6 lg:px-10 border-b border-border">
+        <div className="sticky top-18.75 z-30 bg-background/95 backdrop-blur-md px-6 lg:px-10 border-b border-border">
           <div className="flex items-center justify-between gap-4 h-20">
             <div className="flex items-center gap-3">
               {/* Mobile/Tablet filter button */}
@@ -121,7 +121,7 @@ function CatalogContent() {
                   value={filters.sort || "popular"}
                   onValueChange={(val) => setFilters({ sort: val as CatalogFilters["sort"] })}
                 >
-                  <SelectTrigger className="w-[130px] border border-gray-200 rounded-lg text-sm h-auto py-2 px-3 bg-white cursor-pointer">
+                  <SelectTrigger className="w-32.5 border border-gray-200 rounded-lg text-sm h-auto py-2 px-3 bg-white cursor-pointer">
                     <SelectValue>{SORT_LABELS[filters.sort || "popular"]}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -162,10 +162,10 @@ function CatalogContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] relative">
           {/* Vertical Border Line (Non-breaking) */}
-          <div className="hidden lg:block absolute left-[300px] top-0 bottom-0 border-r border-border z-10" />
+          <div className="hidden lg:block absolute left-75 top-0 bottom-0 border-r border-border z-10" />
 
           {/* Desktop Sidebar (Sticky & Fit Height) */}
-          <div className="hidden lg:block sticky top-[140px] h-fit px-6 py-10 bg-white z-20">
+          <div className="hidden lg:block sticky top-35 h-fit px-6 py-10 bg-white z-20">
             <FilterSidebar
               filters={filters}
               facets={facets}
@@ -175,7 +175,7 @@ function CatalogContent() {
           </div>
 
           {/* Product Grid Area */}
-          <div className="min-h-[600px] px-6 lg:px-10 py-10 flex flex-col gap-6">
+          <div className="min-h-150 px-6 lg:px-10 py-10 flex flex-col gap-6">
             {activeFilterCount > 0 && (
               <ActiveFilterBar
                 filters={filters}
@@ -280,6 +280,7 @@ function CatalogContent() {
                         product={product}
                         onCompareToggle={handleCompareToggle}
                         isComparing={compareIds.includes(product.id)}
+                        priceType={filters.price_type}
                       />
                     ))}
                   </div>
@@ -288,8 +289,16 @@ function CatalogContent() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {products.map((product) => {
                       const volume = getSpecValue(product, "volume_ml");
-                      const retailPrice = getLowestRetailPrice(product);
                       const heroImage = getPrimaryImage(product);
+
+                      const priceTypes = filters.price_type || [];
+                      const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
+                      const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
+                      const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
+
+                      const retailPrice = getLowestRetailPrice(product);
+                      const wholesalePrice = getLowestWholesalePrice(product);
+
                       return (
                         <Link
                           key={product.id}
@@ -314,9 +323,34 @@ function CatalogContent() {
                             <p className="text-xs text-gray-400 mt-1 line-clamp-1">
                               {product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial)}{volume ? ` - ${volume}ml` : ""}
                             </p>
-                            <span className="text-sm font-bold text-gray-900 mt-1 block">
-                              {retailPrice > 0 ? formatPrice(retailPrice) : "Hubungi Kami"}
-                            </span>
+                            <div className="space-y-0.5 mt-1">
+                              {onlyWholesale && wholesalePrice > 0 ? (
+                                <span className="text-sm font-bold text-gray-900 block">
+                                  {formatPrice(wholesalePrice)} <span className="text-[10px] text-gray-400 font-medium">/ bal</span>
+                                </span>
+                              ) : onlyRetail && retailPrice > 0 ? (
+                                <span className="text-sm font-bold text-gray-900 block">
+                                  {formatPrice(retailPrice)} <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
+                                </span>
+                              ) : showBoth ? (
+                                <>
+                                  {retailPrice > 0 ? (
+                                    <span className="text-sm font-bold text-gray-900 block">
+                                      {formatPrice(retailPrice)} <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-sm font-bold text-gray-900 block">Hubungi Kami</span>
+                                  )}
+                                  {wholesalePrice > 0 && (
+                                    <span className="text-[10px] text-primary-600 font-black tracking-wide block">
+                                      Grosir: {formatPrice(wholesalePrice)} <span className="text-text-muted font-medium">/ bal</span>
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-sm font-bold text-gray-900 block">Hubungi Kami</span>
+                              )}
+                            </div>
                           </div>
                           <AppIcon name="chevron_right" className="shrink-0 text-gray-300 transition-colors group-hover:text-primary-500" />
                         </Link>

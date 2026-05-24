@@ -28,6 +28,7 @@ export function useProductFilters() {
       price_max: searchParams.get("price_max")
         ? Number.parseInt(searchParams.get("price_max")!)
         : undefined,
+      price_type: searchParams.getAll("price_type"),
       material_body: searchParams.getAll("material_body"),
       lid_type: searchParams.getAll("lid_type"),
       colors: searchParams.getAll("colors"),
@@ -52,6 +53,7 @@ export function useProductFilters() {
       if (merged.volume_max) params.set("volume_max", String(merged.volume_max));
       if (merged.price_min) params.set("price_min", String(merged.price_min));
       if (merged.price_max) params.set("price_max", String(merged.price_max));
+      merged.price_type?.forEach((t) => params.append("price_type", t));
       merged.material_body?.forEach((m) => params.append("material_body", m));
       merged.lid_type?.forEach((l) => params.append("lid_type", l));
       merged.colors?.forEach((c) => params.append("colors", c));
@@ -76,7 +78,7 @@ export function useProductFilters() {
 
   // Toggle a value in an array filter
   const toggleArrayFilter = useCallback(
-    (key: "category" | "material_body" | "lid_type" | "colors" | "availability", value: string) => {
+    (key: "category" | "material_body" | "lid_type" | "colors" | "availability" | "price_type", value: string) => {
       const current = filters[key] || [];
       const next = current.includes(value)
         ? current.filter((v) => v !== value)
@@ -122,6 +124,7 @@ export function useProductFilters() {
     count += (filters.lid_type?.length || 0);
     count += (filters.colors?.length || 0);
     count += (filters.availability?.length || 0);
+    count += (filters.price_type?.length || 0);
     return count;
   }, [filters]);
 

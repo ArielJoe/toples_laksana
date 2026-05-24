@@ -36,7 +36,7 @@ export default function RootLayout({
             {children}
           </LayoutShell>
         </AppProvider>
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="bottom-left" />
       </body>
     </html>
   );

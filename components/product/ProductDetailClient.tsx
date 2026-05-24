@@ -109,7 +109,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const selectedColorHex = activePrice?.lidColorHex || COLOR_SWATCHES[activePrice?.lidColorId || ""] || "#ccc";
 
   return (
-    <main className="pb-12 pt-12 max-w-full mx-auto px-4 sm:px-8 lg:px-16 xl:px-24">
+    <main className="pb-12 pt-12 max-w-7xl mx-auto px-6 lg:px-12 w-full">
       {/* Breadcrumbs */}
       <nav className="mb-6 flex items-center flex-wrap gap-1 text-sm text-gray-400 font-medium">
         <Link className="hover:text-primary-500 transition-colors" href="/catalog">Katalog</Link>
@@ -419,7 +419,7 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
       </div>
 
       {activeTab === "dimensions" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-full">
           {[
             { label: "Tinggi Total", value: height, unit: "cm" },
             { label: "Diameter", value: diameter, unit: "cm" },
@@ -435,7 +435,7 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
       )}
 
       {activeTab === "packaging" && (
-        <div className="max-w-3xl bg-white p-6 rounded-xl border border-gray-100">
+        <div className="max-w-full bg-white p-6 rounded-xl border border-gray-100">
           <h4 className="font-semibold text-gray-900 mb-3">Pengemasan</h4>
           {(product.packaging || []).length > 0 ? (
             <div className="space-y-4">
@@ -466,7 +466,7 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
       )}
 
       {activeTab === "specs" && (
-        <div className="max-w-3xl overflow-hidden rounded-xl border border-gray-100">
+        <div className="max-w-full overflow-hidden rounded-xl border border-gray-100">
           {[
             { label: "SKU", value: product.sku },
             { label: "Kategori", value: category },
