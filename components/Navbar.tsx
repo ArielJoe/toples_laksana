@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MenuIcon, ShieldUserIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,7 +20,6 @@ export default function Navbar() {
   const navLinks = [
     { label: "Beranda", href: "/" },
     { label: "Katalog", href: "/catalog" },
-    { label: "Lokasi", href: "/lokasi" },
     { label: "Tentang Kami", href: "/tentang" },
   ];
 
@@ -58,6 +55,12 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 text-white text-sm font-semibold transition-all hover:bg-white/20 hover:text-white cursor-pointer"
+            >
+              <ShieldUserIcon className="size-4" />
+            </Link>
 
             {/* Hamburger */}
             <Button
@@ -102,6 +105,13 @@ export default function Navbar() {
             </div>
 
             <div className="mt-auto border-t border-white/20 pt-6">
+              <Link
+                href="/login"
+                className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all cursor-pointer"
+              >
+                <ShieldUserIcon className="size-5" />
+                <span>Login Admin</span>
+              </Link>
             </div>
           </motion.div>
         )}

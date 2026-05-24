@@ -28,6 +28,7 @@ export default function AdminLayoutClient({
 
   const MAIN_NAV = [
     { label: "Dashboard", icon: "dashboard", href: "/admin", active: pathname === "/admin" },
+    { label: "Invoice", icon: "request_quote", href: "/admin/invoice", active: pathname === "/admin/invoice" },
     { 
       label: "Produk", 
       icon: "inventory_2", 
