@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "@/components/ui/sonner";
+import { AppProvider } from "@/context/AppContext";
 
 export default function RootLayout({
   children,
@@ -30,9 +31,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <LayoutShell>
-          {children}
-        </LayoutShell>
+        <AppProvider>
+          <LayoutShell>
+            {children}
+          </LayoutShell>
+        </AppProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

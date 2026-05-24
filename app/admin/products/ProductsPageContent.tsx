@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Image from "next/image";
 import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -43,11 +44,37 @@ interface ProductsPageContentProps {
 
 export default function ProductsPageContent({ initialProducts, masterData }: ProductsPageContentProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const router = useRouter();
+
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return products;
+    const query = searchQuery.toLowerCase();
+    const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
+    const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
+    const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
+    const lidTypeMap = Object.fromEntries(masterData.lidTypes.map(t => [t.id, t.name]));
+
+    return products.filter((p) => {
+      const skuMatch = p.sku?.toLowerCase().includes(query);
+      const nameMatch = p.name?.toLowerCase().includes(query);
+      
+      const bodyMat = (materialMap[p.bodyMaterial] || p.bodyMaterial || "").toLowerCase();
+      const lidMat = (materialMap[p.lidMaterial] || p.lidMaterial || "").toLowerCase();
+      const materialMatch = bodyMat.includes(query) || lidMat.includes(query);
+      
+      const categoryMatch = (categoryMap[p.categoryId] || "").toLowerCase().includes(query);
+      const typeMatch = (typeMap[p.productTypeId || ""] || "").toLowerCase().includes(query);
+      const lidTypeMatch = (lidTypeMap[p.lidType] || "").toLowerCase().includes(query);
+
+      return skuMatch || nameMatch || materialMatch || categoryMatch || typeMatch || lidTypeMatch;
+    });
+  }, [products, searchQuery, masterData]);
 
   // Create or update a product via the API
   const handleSave = async (productData: Partial<Product>) => {
@@ -90,6 +117,30 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
     setProductToDelete(null);
   };
 
+  // Toggle availability status of a product
+  const toggleAvailability = async (product: Product) => {
+    const isCurrentlyAvailable = product.isAvailable !== false;
+    const newIsAvailable = !isCurrentlyAvailable;
+
+    try {
+      const response = await fetch(`/api/products/${product.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isAvailable: newIsAvailable }),
+      });
+
+      if (!response.ok) throw new Error("Gagal memperbarui status ketersediaan");
+
+      toast.success(`Status ${product.name} berhasil diubah menjadi ${newIsAvailable ? "Tersedia" : "Tidak Tersedia"}`);
+
+      // Update local state
+      setProducts(products.map(p => p.id === product.id ? { ...p, isAvailable: newIsAvailable } : p));
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal memperbarui status ketersediaan");
+    }
+  };
+
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsDialogOpen(true);
@@ -98,19 +149,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
   const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
   const lidTypeMap = Object.fromEntries(masterData.lidTypes.map(t => [t.id, t.name]));
-  const availabilityClass = (status?: Product["availabilityStatus"]) => {
-    switch (status) {
-      case "limited":
-        return "bg-amber-50 text-amber-700 border-amber-100";
-      case "preorder":
-        return "bg-blue-50 text-blue-700 border-blue-100";
-      case "unavailable":
-        return "bg-slate-100 text-slate-500 border-slate-200";
-      case "available":
-      default:
-        return "bg-emerald-50 text-emerald-600 border-emerald-100";
-    }
-  };
+
 
   return (
     <>
@@ -145,6 +184,8 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
               <input
                 type="text"
                 placeholder="Cari SKU, nama, atau material..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -169,73 +210,108 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                 <p className="text-sm mt-2 max-w-xs text-text-secondary font-medium">Mulai kembangkan bisnis Anda dengan menambahkan produk pertama.</p>
               </div>
             ) : (
-              <Table className="min-w-[900px]">
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">SKU & Material</TableHead>
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Kategori</TableHead>
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga Dasar</TableHead>
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Status</TableHead>
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">SKU & Material</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Kategori</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga Dasar</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Status</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map(p => {
-                    const image = getPrimaryImage(p);
+                  {filteredProducts.length === 0 ? (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={6} className="p-20 text-center">
+                        <div className="flex flex-col items-center justify-center text-text-muted">
+                          <AppIcon name="inventory_2" className="text-6xl opacity-10 mb-4" />
+                          <p className="text-lg font-black text-text-primary">Produk tidak ditemukan</p>
+                          <p className="text-sm font-medium">Coba gunakan kata kunci pencarian lain.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredProducts.map(p => {
+                      const image = getPrimaryImage(p);
 
-                    return (
-                      <TableRow key={p.id} className="transition-all duration-200 group border-border">
-                        <TableCell className="px-8 py-5">
-                          <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-lg bg-[#F9FAFB] flex items-center justify-center p-1.5 border border-border shrink-0 overflow-hidden transition-all">
-                              {image ? (
-                                <img className="w-full h-full object-cover rounded-lg" alt={p.name} src={image} />
-                              ) : (
-                                <AppIcon name="inventory_2" className="text-2xl opacity-30" />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors line-clamp-1 tracking-tight">{p.name}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="secondary" className="bg-secondary-50 text-secondary-600 border-none text-[0.55rem] font-black uppercase px-1.5 h-4">
-                                  {typeMap[p.productTypeId || ""] || getProductTypeLabel(p.productTypeId)}
-                                </Badge>
+                      return (
+                        <TableRow key={p.id} className="transition-all duration-200 group border-border">
+                          <TableCell className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-[#F9FAFB] flex items-center justify-center p-1 border border-border shrink-0 overflow-hidden transition-all">
+                                {image ? (
+                                  <Image
+                                    className="object-cover rounded-lg"
+                                    alt={p.name}
+                                    src={image}
+                                    width={40}
+                                    height={40}
+                                  />
+                                ) : (
+                                  <AppIcon name="inventory_2" className="text-xl opacity-30" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-black text-text-primary group-hover:text-primary-600 transition-colors line-clamp-1 tracking-tight">{p.name}</p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <Badge variant="secondary" className="bg-secondary-50 text-secondary-600 border-none text-[0.5rem] font-black uppercase px-1 h-3.5">
+                                    {typeMap[p.productTypeId || ""] || getProductTypeLabel(p.productTypeId)}
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-8 py-5">
-                          <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
-                          <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">
-                            {lidTypeMap[p.lidType] || formatAttributeLabel(p.lidType)}
-                          </p>
-                        </TableCell>
-                        <TableCell className="px-8 py-5">
-                          <Badge variant="outline" className="bg-white border-border text-text-secondary text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5">
-                            {categoryMap[p.categoryId] || getCategoryLabel(p.categoryId)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-8 py-5">
-                          <p className="text-sm font-black text-text-primary tracking-tight">
-                            {formatPrice(getLowestRetailPrice(p))}
-                          </p>
-                        </TableCell>
-                        <TableCell className="px-8 py-5">
-                          {!p.deletedAt ? (
-                            <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border", availabilityClass(p.availabilityStatus))}>
-                              <div className="w-1.5 h-1.5 bg-current rounded-full"></div>
-                              <span className="text-[0.6rem] font-black uppercase tracking-widest">{getAvailabilityLabel(p.availabilityStatus)}</span>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
-                              <span className="text-[0.6rem] font-black uppercase tracking-widest">Draft</span>
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="px-8 py-5 text-right">
-                          <div className="flex items-center justify-end gap-1">
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
+                            <p className="text-[9px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">
+                              {lidTypeMap[p.lidType] || formatAttributeLabel(p.lidType)}
+                            </p>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Badge variant="outline" className="bg-white border-border text-text-secondary text-[0.55rem] font-black uppercase tracking-widest px-1.5 py-0.5">
+                              {categoryMap[p.categoryId] || getCategoryLabel(p.categoryId)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <p className="text-xs font-black text-text-primary tracking-tight">
+                              {formatPrice(getLowestRetailPrice(p))}
+                            </p>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            {!p.deletedAt ? (
+                              <div className="flex items-center gap-2.5">
+                                <button
+                                  onClick={() => toggleAvailability(p)}
+                                  className={cn(
+                                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none p-0.5 border-none outline-none shadow-none",
+                                    p.isAvailable !== false ? "bg-emerald-500" : "bg-red-500"
+                                  )}
+                                >
+                                  <span
+                                    className={cn(
+                                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out",
+                                      p.isAvailable !== false ? "translate-x-4" : "translate-x-0"
+                                    )}
+                                  />
+                                </button>
+                                <span className={cn(
+                                  "text-[0.6rem] font-black uppercase tracking-widest",
+                                  p.isAvailable !== false ? "text-emerald-600" : "text-red-500"
+                                )}>
+                                  {getAvailabilityLabel(p.isAvailable)}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+                                <span className="text-[0.6rem] font-black uppercase tracking-widest">Draft</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-right">
+                          <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleEdit(p)}
                               className="w-9 h-9 rounded-xl text-text-muted hover:bg-primary-50 hover:text-primary-600 flex items-center justify-center transition-all cursor-pointer border-none shadow-none"
@@ -255,17 +331,18 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                         </TableCell>
                       </TableRow>
                     )
-                  })}
+                  })
+                )}
                 </TableBody>
               </Table>
             )}
           </div>
 
           {/* Pagination */}
-          {products.length > 0 && (
+          {filteredProducts.length > 0 && (
             <div className="px-8 py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
               <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
-                Showing <span className="text-text-primary font-black">1-{products.length}</span> of <span className="text-text-primary font-black">{products.length}</span> items
+                Showing <span className="text-text-primary font-black">1-{filteredProducts.length}</span> of <span className="text-text-primary font-black">{filteredProducts.length}</span> items
               </span>
               <div className="flex items-center gap-1.5">
                 <button className="w-9 h-9 rounded-xl bg-white border border-border flex items-center justify-center text-text-muted opacity-50 cursor-not-allowed transition-all">

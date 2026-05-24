@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
@@ -130,14 +131,10 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
   }));
 
   const COLORS = masterData.lidColors;
-  const TYPES = masterData.productTypes;
-  const UNITS = masterData.units;
-  const PRICE_TYPES = masterData.priceTypes;
 
   // Lookup maps for name resolution
   const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
-  const unitMap = Object.fromEntries(masterData.units.map(u => [u.id, u.name]));
 
   const MOCK_PROMOS = [
     { id: "promo_001", code: "DISKON10", name: "Diskon 10%", type: "percentage" as const, value: 10, isActive: true },
@@ -314,7 +311,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                     <p className="text-sm mt-2 max-w-xs text-text-secondary font-medium">Mulai kembangkan bisnis Anda dengan menambahkan produk pertama.</p>
                   </div>
                 ) : (
-                  <Table className="min-w-[900px]">
+                  <Table className="min-w-225">
                     <TableHeader>
                       <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>
@@ -335,7 +332,13 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                               <div className="flex items-center gap-5">
                                 <div className="w-14 h-14 rounded-lg bg-[#F9FAFB] flex items-center justify-center p-1.5 border border-border shrink-0 overflow-hidden group-hover:scale-105 group-hover:border-primary-200 transition-all">
                                   {image ? (
-                                    <img className="w-full h-full object-cover rounded-lg" alt={p.name} src={image} />
+                                    <Image
+                                      className="object-cover rounded-lg"
+                                      alt={p.name}
+                                      src={image}
+                                      width={56}
+                                      height={56}
+                                    />
                                   ) : (
                                     <AppIcon name="inventory_2" className="text-2xl opacity-30" />
                                   )}

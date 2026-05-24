@@ -172,7 +172,7 @@ export default function AdminLayoutClient({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-72 flex flex-col min-h-screen w-full relative">
+      <div className="flex-1 lg:ml-72 flex flex-col min-h-screen min-w-0 relative">
         {/* Mobile Navbar Header */}
         <header className="lg:hidden h-20 bg-white border-b border-border flex items-center justify-between px-6 sticky top-0 z-40">
           <div className="flex items-center gap-4">

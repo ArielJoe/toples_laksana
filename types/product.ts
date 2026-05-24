@@ -55,7 +55,7 @@ export interface Product {
   lidVariantName?: string;
   bodyMaterialName?: string;
   lidTypeName?: string;
-  availabilityStatus?: "available" | "limited" | "preorder" | "unavailable";
+  isAvailable?: boolean;
   availabilityNote?: string;
   description?: string;
   dimension?: ProductDimension;
@@ -200,16 +200,11 @@ export interface FacetCounts {
   availability_statuses?: { value: string; count: number; name?: string }[];
 }
 
-export const AVAILABILITY_LABELS: Record<string, string> = {
-  available: "Tersedia",
-  limited: "Terbatas",
-  preorder: "Preorder",
-  unavailable: "Tidak Tersedia",
-};
-
-export function getAvailabilityLabel(status?: string): string {
-  if (!status) return AVAILABILITY_LABELS.available;
-  return AVAILABILITY_LABELS[status] || status;
+export function getAvailabilityLabel(isAvailable?: boolean | string): string {
+  if (typeof isAvailable === "string") {
+    return isAvailable === "false" || isAvailable === "unavailable" ? "Tidak Tersedia" : "Tersedia";
+  }
+  return isAvailable === false ? "Tidak Tersedia" : "Tersedia";
 }
 
 export function formatAttributeLabel(value?: string): string {

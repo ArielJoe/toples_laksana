@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { AppIcon } from "@/components/ui/app-icon";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,23 +58,17 @@ export default function HomePage() {
                 Jelajahi Katalog
                 <AppIcon name="arrow_forward" />
               </Link>
-              <Link
-                href="/catalog?category=Jar+Cylinder"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "bg-white text-text-primary border-border rounded-xl font-bold transition-all hover:bg-secondary-50 gap-2 h-12 px-7 cursor-pointer"
-                )}
-              >
-                Lihat Koleksi
-              </Link>
             </div>
           </div>
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="aspect-4/5 w-full max-w-[450px] max-h-[75vh] rounded-2xl overflow-hidden relative group">
-              <img
+            <div className="aspect-4/5 w-full max-w-112.5 max-h-[75vh] rounded-2xl overflow-hidden relative group">
+              <Image
                 src="/toples.png"
                 alt="Koleksi Jar Premium"
-                className="w-full h-full object-contain group-hover:scale-[0.82] transition-transform duration-700 scale-75"
+                fill
+                className="object-contain group-hover:scale-[0.82] transition-transform duration-700 scale-75"
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                priority
               />
             </div>
           </div>
@@ -99,10 +94,12 @@ export default function HomePage() {
               className="group flex flex-col cursor-pointer"
             >
               <div className="aspect-square rounded-xl bg-white border border-border overflow-hidden mb-4 relative transition-all">
-                <img
+                <Image
                   src={cat.image}
                   alt={cat.name}
-                  className="w-full h-full object-contain scale-75 group-hover:scale-[0.82] transition-transform duration-700"
+                  fill
+                  className="object-contain scale-75 group-hover:scale-[0.82] transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
               </div>
               <h3 className="text-lg font-bold text-text-primary transition-colors">
@@ -132,8 +129,14 @@ export default function HomePage() {
           ].map((item) => (
             <Card key={item.name} className="overflow-hidden border border-border transition-all group rounded-xl bg-white p-0">
               <CardContent className="p-4">
-                <div className="aspect-square rounded-lg bg-secondary-50 overflow-hidden mb-4 flex items-center justify-center">
-                  <img src={item.img} alt={item.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 scale-75" />
+                <div className="aspect-square rounded-lg bg-secondary-50 overflow-hidden mb-4 relative">
+                  <Image
+                    src={item.img}
+                    alt={item.name}
+                    fill
+                    className="object-contain group-hover:scale-110 transition-transform duration-700 scale-75"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  />
                 </div>
                 <div className="flex justify-between items-start">
                   <div>

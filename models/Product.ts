@@ -41,7 +41,7 @@ export interface IProduct {
   lidVariant: string;
   bodyMaterial: string;
   lidType: string;
-  availabilityStatus: "available" | "limited" | "preorder" | "unavailable";
+  isAvailable: boolean;
   availabilityNote?: string;
   description?: string;
   dimension?: IDimension;
@@ -107,11 +107,10 @@ const ProductSchema = new Schema<IProduct>(
     lidVariant: { type: String, required: true, default: "" },
     bodyMaterial: { type: String, required: true, default: "" },
     lidType: { type: String, required: true, default: "" },
-    availabilityStatus: {
-      type: String,
-      enum: ["available", "limited", "preorder", "unavailable"],
+    isAvailable: {
+      type: Boolean,
       required: true,
-      default: "available",
+      default: true,
     },
     availabilityNote: { type: String, default: "" },
     description: { type: String, default: "" },
@@ -126,7 +125,7 @@ const ProductSchema = new Schema<IProduct>(
 
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ productTypeId: 1 });
-ProductSchema.index({ availabilityStatus: 1 });
+ProductSchema.index({ isAvailable: 1 });
 ProductSchema.index({ bodyMaterial: 1 });
 ProductSchema.index({ lidMaterial: 1 });
 ProductSchema.index({ lidVariant: 1 });

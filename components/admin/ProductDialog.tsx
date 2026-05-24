@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -62,7 +63,7 @@ const emptyProduct: Partial<Product> = {
   lidMaterial: "",
   lidVariant: "",
   lidType: "",
-  availabilityStatus: "available",
+  isAvailable: true,
   availabilityNote: "",
   description: "",
   dimension: {
@@ -213,13 +214,11 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
               />
               <SelectField
                 label="Status Ketersediaan"
-                value={formData.availabilityStatus || "available"}
-                onChange={(value) => setFormData({ ...formData, availabilityStatus: value as Product["availabilityStatus"] })}
+                value={formData.isAvailable === false ? "false" : "true"}
+                onChange={(value) => setFormData({ ...formData, isAvailable: value === "true" })}
                 options={[
-                  ["available", "Tersedia"],
-                  ["limited", "Terbatas"],
-                  ["preorder", "Preorder"],
-                  ["unavailable", "Tidak Tersedia"],
+                  ["true", "Tersedia"],
+                  ["false", "Tidak Tersedia"],
                 ]}
               />
             </div>
@@ -322,7 +321,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                       "relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group",
                       img.isPrimary ? "border-primary-500 shadow-lg shadow-primary-500/10" : "border-border hover:border-primary-200"
                     )}>
-                      <img src={img.imageUrl} alt="Product" className="w-full h-full object-cover" />
+                      <Image src={img.imageUrl} alt="Product" fill className="object-cover" sizes="(max-width: 640px) 50vw, 15vw" />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
                         <button
                           type="button"
@@ -370,7 +369,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                       "relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group",
                       pf.isPrimary ? "border-primary-500 shadow-lg shadow-primary-500/10" : "border-border border-dashed hover:border-primary-200"
                     )}>
-                      <img src={pf.preview} alt="Pending" className="w-full h-full object-cover opacity-70" />
+                      <Image src={pf.preview} alt="Pending" fill className="object-cover opacity-70" sizes="(max-width: 640px) 50vw, 15vw" />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
                         <button
                           type="button"

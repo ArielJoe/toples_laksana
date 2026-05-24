@@ -1,5 +1,4 @@
 import connectDB from "@/lib/mongodb";
-import InteractionModel from "@/models/Interaction";
 import ProductModel from "@/models/Product";
 import { Metadata } from "next";
 import { getInteractions } from "@/lib/actions/interaction.actions";
@@ -14,8 +13,8 @@ export const dynamic = "force-dynamic";
 export default async function InteractionsPage() {
   await connectDB();
   
-  const [{ data: interactions, total }, rawProducts] = await Promise.all([
-    getInteractions({ limit: 100 }),
+  const [{ data: interactions }, rawProducts] = await Promise.all([
+    getInteractions({ limit: 1000 }),
     ProductModel.find({ deletedAt: null }).select("id name").lean(),
   ]);
 

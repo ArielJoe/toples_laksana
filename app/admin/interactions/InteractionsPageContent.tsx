@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -10,29 +12,76 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 
+type InteractionType = "page_view" | "view" | "detail_click" | "whatsapp_share" | "promo_click";
+
+interface InteractionItem {
+  id: string;
+  userId: string;
+  productId?: string;
+  pagePath?: string;
+  interactionType: InteractionType;
+  createdAt?: string;
+}
+
+interface ProductOption {
+  id: string;
+  name: string;
+}
+
 interface InteractionsPageContentProps {
-  initialInteractions: any[];
-  products: any[];
+  initialInteractions: InteractionItem[];
+  products: ProductOption[];
+}
+
+function getDateValue(date?: string) {
+  return date ? new Date(date).getTime() : 0;
+}
+
+function getInteractionLabel(type: InteractionType) {
+  switch (type) {
+    case "view":
+      return "Dilihat";
+    case "detail_click":
+      return "Klik Detail";
+    case "whatsapp_share":
+      return "Klik WhatsApp";
+    case "promo_click":
+      return "Klik Promo";
+    case "page_view":
+    default:
+      return "Page View";
+  }
 }
 
 export default function InteractionsPageContent({ initialInteractions, products }: InteractionsPageContentProps) {
-  const [interactions] = useState(initialInteractions);
   const [searchQuery, setSearchQuery] = useState("");
-  const productMap = Object.fromEntries(products.map(p => [p.id, p.name]));
 
-  const filteredInteractions = interactions.filter(interaction => {
-    const productName = productMap[interaction.productId] || interaction.productId;
-    return productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interaction.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interaction.interactionType.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const productMap = useMemo(
+    () => Object.fromEntries(products.map((product) => [product.id, product.name])),
+    [products],
+  );
+
+  const filteredInteractions = useMemo(() => {
+    return initialInteractions
+      .filter((interaction) => {
+        const productName = productMap[interaction.productId || ""] || interaction.productId || "";
+        const query = searchQuery.toLowerCase();
+
+        return (
+          productName.toLowerCase().includes(query) ||
+          interaction.userId.toLowerCase().includes(query) ||
+          interaction.interactionType.toLowerCase().includes(query)
+        );
+      })
+      .sort((a, b) => {
+        return getDateValue(b.createdAt) - getDateValue(a.createdAt); // Descending (newest first)
+      });
+  }, [initialInteractions, productMap, searchQuery]);
 
   return (
     <>
-      {/* Topbar */}
       <header className="hidden lg:flex h-24 bg-white border-b border-border items-center justify-between px-10 sticky top-0 z-40">
         <div>
           <h2 className="text-[1.6rem] font-black text-text-primary tracking-tight">Interaksi</h2>
@@ -40,27 +89,22 @@ export default function InteractionsPageContent({ initialInteractions, products 
       </header>
 
       <div className="p-6 lg:p-10 space-y-6 flex-1 w-full max-w-full">
+        {/* Table Card */}
         <Card className="shadow-none overflow-hidden bg-white border border-border">
-          {/* Toolbar */}
-          <div className="px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white gap-4">
+          <div className="px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white gap-4 border-b border-border">
             <div className="relative flex-1 sm:max-w-md group">
               <AppIcon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-text-muted transition-colors group-focus-within:text-primary-500" />
-              <input
+              <Input
                 type="text"
                 placeholder="Cari interaksi..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
-            <div className="flex gap-2 lg:gap-3">
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="tune" className="text-sm" /> Filter
-              </button>
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="download" className="text-sm" /> Ekspor
-              </button>
-            </div>
+            <Badge variant="secondary" className="bg-primary-50 text-primary-600 border-none px-3 py-1 text-xs font-black self-start sm:self-auto">
+              {filteredInteractions.length} data
+            </Badge>
           </div>
 
           <div className="overflow-x-auto">
@@ -80,7 +124,7 @@ export default function InteractionsPageContent({ initialInteractions, products 
                       <div className="flex flex-col items-center justify-center text-text-muted">
                         <AppIcon name="touch_app" className="text-6xl opacity-10 mb-4" />
                         <p className="text-lg font-black text-text-primary">Interaksi tidak ditemukan</p>
-                        <p className="text-sm font-medium">Coba gunakan kata kunci pencarian lain.</p>
+                        <p className="text-sm font-medium">Coba gunakan kata kunci lain.</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -89,26 +133,23 @@ export default function InteractionsPageContent({ initialInteractions, products 
                     <TableRow key={interaction.id} className="transition-all duration-200 group border-border">
                       <TableCell className="px-8 py-5">
                         <p className="text-sm font-black text-text-primary tracking-tight">
-                          {new Date(interaction.createdAt).toLocaleString("id-ID", {
+                          {new Date(interaction.createdAt || "").toLocaleString("id-ID", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                             hour: "2-digit",
-                            minute: "2-digit"
+                            minute: "2-digit",
                           })}
                         </p>
                       </TableCell>
                       <TableCell className="px-8 py-5">
                         <Badge variant="outline" className="font-black text-[0.6rem] uppercase tracking-widest px-2 py-1 border-border bg-secondary-50/50">
-                          {interaction.interactionType === "view" && "Dilihat"}
-                          {interaction.interactionType === "detail_click" && "Klik Detail"}
-                          {interaction.interactionType === "whatsapp_share" && "Klik WhatsApp"}
-                          {interaction.interactionType === "promo_click" && "Klik Promo"}
+                          {getInteractionLabel(interaction.interactionType)}
                         </Badge>
                       </TableCell>
                       <TableCell className="px-8 py-5">
                         <p className="text-sm font-bold text-text-primary group-hover:text-primary-600 transition-colors line-clamp-1">
-                          {productMap[interaction.productId] || interaction.productId}
+                          {productMap[interaction.productId || ""] || interaction.productId || "-"}
                         </p>
                       </TableCell>
                       <TableCell className="px-8 py-5 font-mono text-[10px] text-text-muted tracking-tighter">

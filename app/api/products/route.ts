@@ -39,8 +39,13 @@ export async function GET(request: NextRequest) {
     const volumeMax = searchParams.get("volume_max");
     const priceMin = searchParams.get("price_min");
     const priceMax = searchParams.get("price_max");
+    const ids = searchParams.getAll("id");
 
     const filter: MongoFilter = { deletedAt: null };
+
+    if (ids.length > 0) {
+      filter.id = { $in: ids };
+    }
 
     if (search) {
       filter.name = { $regex: search, $options: "i" };
@@ -68,7 +73,17 @@ export async function GET(request: NextRequest) {
     }
 
     if (availability.length > 0) {
-      filter.availabilityStatus = { $in: availability };
+      const booleanAvailability = availability
+        .map((val) => {
+          if (val === "true" || val === "available") return true;
+          if (val === "false" || val === "unavailable") return false;
+          return null;
+        })
+        .filter((val) => val !== null);
+
+      if (booleanAvailability.length > 0) {
+        filter.isAvailable = { $in: booleanAvailability };
+      }
     }
 
     if (volumeMin || volumeMax) {

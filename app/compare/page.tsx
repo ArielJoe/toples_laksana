@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import connectDB from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
 import { formatPrice } from "@/lib/price-calculator";
@@ -90,7 +91,13 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                     <div className="relative w-full aspect-square mb-6">
                       <div className="absolute inset-0 bg-secondary-50/50 rounded-2xl -z-10" />
                       {image ? (
-                        <img alt={product.name} className="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-700 p-4" src={image} />
+                        <Image
+                          alt={product.name}
+                          fill
+                          className="object-contain transform group-hover:scale-110 transition-transform duration-700 p-4"
+                          src={image}
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-200">
                           <AppIcon name="inventory_2" className="text-6xl" />
@@ -117,7 +124,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                 { label: "Bahan Badan", getter: (p: Product) => p.bodyMaterialName || formatAttributeLabel(p.bodyMaterial) },
                 { label: "Bahan Tutup", getter: (p: Product) => p.lidMaterialName || formatAttributeLabel(p.lidMaterial) },
                 { label: "Tipe Tutup", getter: (p: Product) => p.lidTypeName || formatAttributeLabel(p.lidType) },
-                { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.availabilityStatus) },
+                { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.isAvailable) },
                 { label: "Kategori", getter: (p: Product) => getCategoryLabel(p.categoryId) },
               ].map((row, idx) => (
                 <div key={row.label} className={`grid ${gridCols} items-stretch ${idx % 2 === 0 ? "bg-white/50" : "bg-transparent"} hover:bg-primary-50/30 transition-colors`}>

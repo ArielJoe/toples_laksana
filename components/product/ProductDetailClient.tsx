@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Product, ProductPrice } from "@/types/product";
 import {
   getCategoryLabel,
@@ -16,14 +17,18 @@ import {
 import { calculatePrice, formatPrice, getWholesaleNudge } from "@/lib/price-calculator";
 import { buildBulkInquiryUrl, buildWhatsAppUrl } from "@/lib/whatsapp-builder";
 import { COLOR_SWATCHES } from "@/lib/use-case-config";
-import { Tag } from "lucide-react";
+import { Heart, Tag } from "lucide-react";
 import { AppIcon } from "@/components/ui/app-icon";
+import { useApp } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 
 interface ProductDetailClientProps {
   product: Product;
 }
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+  const { toggleWishlist, isInWishlist } = useApp();
+  const wishlisted = isInWishlist(product.id);
   const retailPrices = getPricesByType(product, PRICE_TYPE_IDS.withLid);
   const fallbackPrices = product.prices || [];
   const priceOptions = retailPrices.length > 0 ? retailPrices : fallbackPrices;
@@ -124,10 +129,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {/* Main Image */}
           <div className="relative bg-white border border-gray-100 rounded-xl overflow-hidden aspect-square flex items-center justify-center p-8">
             {heroImage ? (
-              <img
+              <Image
                 alt={product.name}
-                className="max-w-full max-h-full object-contain scale-75"
+                fill
+                className="object-contain scale-75 p-8"
                 src={heroImage}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
               />
             ) : (
               <AppIcon name="inventory_2" className="text-8xl text-gray-200" />
@@ -159,9 +167,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <button
                   key={`${image.imageUrl}-${i}`}
                   onClick={() => setMainImage(i)}
-                  className={`w-16 h-16 bg-white border rounded-lg p-1 overflow-hidden transition-all cursor-pointer ${i === mainImage ? "border-primary-500 border-2" : "border-gray-200 hover:border-gray-300"}`}
+                  className={`w-16 h-16 bg-white border rounded-lg p-1 overflow-hidden transition-all cursor-pointer relative ${i === mainImage ? "border-primary-500 border-2" : "border-gray-200 hover:border-gray-300"}`}
                 >
-                  <img alt={`${product.name} ${i + 1}`} className="w-full h-full object-contain scale-75" src={image.imageUrl} />
+                  <Image alt={`${product.name} ${i + 1}`} fill className="object-contain scale-75 p-1" src={image.imageUrl} sizes="64px" />
                 </button>
               ))}
             </div>
@@ -174,7 +182,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
           <div className="flex items-center gap-3 text-sm text-gray-400 mb-4">
             <span>SKU: {product.sku}</span>
-            <span>Availability: <span className="text-gray-900">{getAvailabilityLabel(product.availabilityStatus)}</span></span>
+            <span>Availability: <span className="text-gray-900">{getAvailabilityLabel(product.isAvailable)}</span></span>
           </div>
           {product.availabilityNote && (
             <p className="text-sm text-gray-500 mb-4">{product.availabilityNote}</p>
@@ -294,16 +302,33 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
           {/* CTA Buttons */}
           <div className="space-y-3">
-            <a
-              href={buildWhatsAppUrl(product, safeActivePrice, calcResult)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleWhatsAppClick}
-              className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary-600 transition-all text-sm"
-            >
-              <AppIcon name="chat" className="text-xl" />
-              Pesan via WhatsApp
-            </a>
+            <div className="flex gap-3">
+              <a
+                href={buildWhatsAppUrl(product, safeActivePrice, calcResult)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleWhatsAppClick}
+                className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary-600 transition-all text-sm"
+              >
+                <AppIcon name="chat" className="text-xl" />
+                Pesan via WhatsApp
+              </a>
+              <button
+                onClick={() => toggleWishlist(product.id)}
+                className={cn(
+                  "size-12 shrink-0 flex items-center justify-center rounded-xl border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
+                  wishlisted && "text-red-500 border-red-100 bg-red-50"
+                )}
+                title={wishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
+              >
+                <Heart
+                  className={cn(
+                    "size-5 transition-transform",
+                    wishlisted ? "fill-red-500 text-red-500 scale-110" : ""
+                  )}
+                />
+              </button>
+            </div>
             {quantity >= 5 && pricingMode === "wholesale" && (
               <a
                 href={buildBulkInquiryUrl(product, safeActivePrice, quantity)}
@@ -413,9 +438,13 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
         <div className="max-w-3xl bg-white p-6 rounded-xl border border-gray-100">
           <h4 className="font-semibold text-gray-900 mb-3">Pengemasan</h4>
           {(product.packaging || []).length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {(product.packaging || []).map((pack, index) => (
                 <div key={index} className="grid grid-cols-2 gap-3 text-sm">
+                  <span className="text-gray-400">Tipe Pengemasan</span>
+                  <span className="font-semibold text-primary-600">
+                    {pack.quantityPerPack > 1 ? "Bal (Grosir/Box)" : "Ecer (Eceran/Satuan)"}
+                  </span>
                   <span className="text-gray-400">Isi per pack</span>
                   <span className="font-medium">{pack.quantityPerPack} pcs</span>
                   <span className="text-gray-400">Dimensi</span>
@@ -424,6 +453,11 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
                   <span className="font-medium">{pack.weightKg || "-"} kg</span>
                 </div>
               ))}
+              <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 leading-relaxed space-y-1">
+                <span className="font-bold text-gray-700 block mb-1">Catatan Pembelian:</span>
+                <p>• Pembelian <strong>Eceran</strong> dikemas per satuan (pcs) dengan pengemasan ecer standar pabrik.</p>
+                <p>• Pembelian <strong>Grosir/Bal</strong> dikemas langsung per pack/dus (1 bal = {product.packaging?.[0]?.quantityPerPack || 1} pcs) dari pabrik untuk perlindungan ekstra selama pengiriman.</p>
+              </div>
             </div>
           ) : (
             <p className="text-sm text-gray-400">Informasi pengemasan belum tersedia.</p>
@@ -437,7 +471,7 @@ function SpecTabs({ product, volume, height, diameter, weight, category, selecte
             { label: "SKU", value: product.sku },
             { label: "Kategori", value: category },
             { label: "Tipe Produk", value: getProductTypeLabel(product.productTypeId) },
-            { label: "Status Ketersediaan", value: getAvailabilityLabel(product.availabilityStatus) },
+            { label: "Status Ketersediaan", value: getAvailabilityLabel(product.isAvailable) },
             { label: "Material Badan", value: bodyMaterial },
             { label: "Material Tutup", value: lidMaterial },
             { label: "Varian Tutup", value: lidVariant },

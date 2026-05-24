@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useProductFilters } from "@/hooks/useProductFilters";
 import ProductCard from "@/components/catalog/ProductCard";
 import FilterSidebar from "@/components/catalog/FilterSidebar";
@@ -295,9 +296,15 @@ function CatalogContent() {
                           href={`/products/${product.id}`}
                           className="group flex items-center gap-4 bg-white border border-gray-100 rounded-xl p-4 transition-all"
                         >
-                          <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
+                          <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-lg overflow-hidden relative flex items-center justify-center">
                             {heroImage ? (
-                              <img src={heroImage} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              <Image
+                                src={heroImage}
+                                alt={product.name}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                sizes="96px"
+                              />
                             ) : (
                               <AppIcon name="inventory_2" className="text-3xl text-gray-200" />
                             )}

@@ -12,7 +12,9 @@ import {
 import { formatPrice } from "@/lib/price-calculator";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PackageIcon } from "lucide-react";
+import { Heart, PackageIcon } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
@@ -25,10 +27,12 @@ export default function ProductCard({
   onCompareToggle,
   isComparing = false,
 }: ProductCardProps) {
+  const { toggleWishlist, isInWishlist } = useApp();
   const volume = getSpecValue(product, "volume_ml");
   const retailPrice = getLowestRetailPrice(product);
   const heroImage = getPrimaryImage(product);
   const productHref = `/products/${product.id}`;
+  const wishlisted = isInWishlist(product.id);
 
   const handleInteraction = async () => {
     try {
@@ -40,6 +44,26 @@ export default function ProductCard({
 
   return (
     <Card className="group relative overflow-hidden rounded-lg border border-border bg-card py-0 transition-all duration-300">
+      {/* Wishlist Button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWishlist(product.id);
+        }}
+        className={cn(
+          "absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
+          wishlisted && "text-red-500 border-red-100 bg-red-50"
+        )}
+        title={wishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
+      >
+        <Heart
+          className={cn(
+            "size-4 transition-transform",
+            wishlisted ? "fill-red-500 text-red-500 scale-110" : ""
+          )}
+        />
+      </button>
       {/* Image Section */}
       <Link
         href={productHref}
@@ -77,8 +101,8 @@ export default function ProductCard({
           <p className="text-xs text-gray-400 mb-2">{volume}ml</p>
         )}
 
-        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-emerald-600">
-          {getAvailabilityLabel(product.availabilityStatus)}
+        <p className={`mb-2 text-[0.65rem] font-bold uppercase tracking-widest ${product.isAvailable !== false ? "text-emerald-600" : "text-red-500"}`}>
+          {getAvailabilityLabel(product.isAvailable)}
         </p>
 
         {/* Price */}

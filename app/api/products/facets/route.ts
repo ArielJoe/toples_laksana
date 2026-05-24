@@ -52,7 +52,7 @@ export async function GET() {
       ]),
       Product.aggregate([
         { $match: activeFilter },
-        { $group: { _id: "$availabilityStatus", count: { $sum: 1 } } },
+        { $group: { _id: "$isAvailable", count: { $sum: 1 } } },
         { $project: { value: "$_id", count: 1, _id: 0 } },
         { $sort: { count: -1 } },
       ]),
@@ -111,9 +111,10 @@ export async function GET() {
         };
       }),
       availability_statuses: availabilityStatuses
-        .filter((item) => item.value)
+        .filter((item) => item.value !== undefined && item.value !== null)
         .map((item) => ({
-          ...item,
+          value: String(item.value),
+          count: item.count,
           name: getAvailabilityLabel(item.value),
         })),
       volume_range: volumeRange[0] || { min: 0, max: 1500 },
