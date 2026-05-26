@@ -57,17 +57,26 @@ function CatalogContent() {
 
   // Re-fetch products on filter/page change
   useEffect(() => {
+    let ignore = false;
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!loading) setLoading(true);
+    setLoading(true);
     fetch(apiUrl)
       .then((r) => r.json())
       .then((data: PaginatedResponse<Product>) => {
+        if (ignore) return;
         setProducts(data.data || []);
         setPagination(data.pagination);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [apiUrl, loading]);
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [apiUrl]);
 
   // Toggle product comparison (max 3)
   const handleCompareToggle = useCallback((id: string) => {

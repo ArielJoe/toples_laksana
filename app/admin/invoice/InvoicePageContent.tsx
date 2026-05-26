@@ -88,11 +88,13 @@ function getDefaultInvoiceNumber() {
 
 function createLineItem(
   description = "",
-  quantity = 1,
+  quantity = 0,
   rate = 0,
+  stableId?: string,
 ): InvoiceLineItem {
-  const id =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
+  const id = stableId
+    ? stableId
+    : typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -108,25 +110,22 @@ function getDefaultInvoiceForm(): InvoiceForm {
   return {
     documentTitle: "INVOICE",
     invoiceNumber: getDefaultInvoiceNumber(),
-    companyName: "Laksana",
-    companyDetails: "Toples Laksana\nBandung, Indonesia",
-    billTo: "Ariel",
-    shipTo: "Ariel",
+    companyName: "",
+    companyDetails: "",
+    billTo: "",
+    shipTo: "",
     invoiceDate: getDateInputValue(new Date()),
-    paymentTerms: "Termin max H+7",
-    poNumber: "002",
-    notes: "Pembayaran termin max H+7",
-    terms: "Jika telat dikenakan denda 10% per hari",
-    taxRate: 5,
-    discountRate: 15,
-    shipping: 55000,
+    paymentTerms: "",
+    poNumber: "",
+    notes: "",
+    terms: "",
+    taxRate: 0,
+    discountRate: 0,
+    shipping: 0,
     currency: "IDR",
     logoDataUrl: null,
     logoName: "",
-    items: [
-      { id: "item-1", description: "toples 500ml bulat tutup pink", quantity: 1000, rate: 5000 },
-      { id: "item-2", description: "kaleng tin 750ml silver", quantity: 500, rate: 12000 },
-    ],
+    items: [createLineItem("", 0, 0, "item-1")],
   };
 }
 
@@ -213,7 +212,7 @@ export default function InvoicePageContent() {
   const addItem = () => {
     setForm((current) => ({
       ...current,
-      items: [...current.items, createLineItem("Item baru", 1, 0)],
+      items: [...current.items, createLineItem()],
     }));
   };
 
