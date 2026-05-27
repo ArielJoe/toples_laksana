@@ -7,7 +7,6 @@ import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, ge
 
 interface ActiveFilterBarProps {
   filters: CatalogFilters;
-  totalResults: number;
   onRemove: (key: keyof CatalogFilters, value?: string) => void;
   onClearAll: () => void;
   facets: FacetCounts | null;
@@ -50,7 +49,6 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
 
 export default function ActiveFilterBar({
   filters,
-  totalResults,
   onRemove,
   onClearAll,
   facets,
@@ -116,9 +114,6 @@ export default function ActiveFilterBar({
         Hapus Semua
       </button>
 
-      <span className="ml-auto rounded-lg border border-border bg-secondary-50 px-3 py-1.5 text-xs font-bold text-text-secondary">
-        Ditemukan <span className="font-black text-text-primary">{totalResults}</span> produk
-      </span>
     </div>
   );
 }

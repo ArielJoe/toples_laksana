@@ -115,9 +115,15 @@ export default function ProductCard({
     <Card
       className={cn(
         "group relative h-full overflow-hidden rounded-xl border border-border bg-white p-0 transition-colors hover:border-primary-300 hover:bg-secondary-50/40",
-        isList ? "flex" : "flex flex-col"
+        isList ? "flex min-h-36" : "flex flex-col"
       )}
     >
+      <Link
+        href={productHref}
+        onClick={handleInteraction}
+        aria-label={`Lihat detail ${product.name}`}
+        className="absolute inset-0 z-0 cursor-pointer"
+      />
       {/* WhatsApp Selection Checkbox */}
       {onInquiryToggle && (
         <div
@@ -152,13 +158,11 @@ export default function ProductCard({
         />
       </button>
       {/* Image Section */}
-      <div className={cn("flex h-full w-full", isList ? "flex-col sm:flex-row" : "flex-col")}>
-        <Link
-          href={productHref}
-          onClick={handleInteraction}
+      <div className={cn("pointer-events-none relative z-10 flex h-full w-full", isList ? "flex-row" : "flex-col")}>
+        <div
           className={cn(
-            "relative block shrink-0 cursor-pointer overflow-hidden bg-secondary-50",
-            isList ? "aspect-square w-full p-5 sm:size-40 sm:aspect-auto lg:size-44" : "aspect-square w-full p-5"
+            "relative block shrink-0 overflow-hidden bg-secondary-50",
+            isList ? "h-auto w-30 p-3 sm:size-40 lg:size-44" : "aspect-square w-full p-5"
           )}
         >
           {heroImage ? (
@@ -176,19 +180,19 @@ export default function ProductCard({
               <PackageIcon className="size-14 text-muted-foreground/30" />
             </div>
           )}
-        </Link>
+        </div>
 
         {/* Info Section */}
         <div className={cn(
           "flex min-w-0 flex-1 flex-col border-t border-border/60 px-4 pb-4 pt-3",
-          isList && "sm:border-l sm:border-t-0 sm:px-5 sm:py-4 sm:pr-12"
+          isList && "border-l border-t-0 px-3 py-3 pr-11 sm:px-5 sm:py-4 sm:pr-12"
         )}>
           {/* Product Name */}
-          <Link href={productHref} onClick={handleInteraction} className="block cursor-pointer">
+          <div>
             <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-primary-500">
               {product.name}
             </h3>
-          </Link>
+          </div>
 
           {meta && (
             <p className="mt-2 line-clamp-1 text-xs font-medium text-text-muted">{meta}</p>
@@ -209,7 +213,7 @@ export default function ProductCard({
           {/* Compare */}
           <div className="mt-3 flex items-center">
             <label
-              className="flex cursor-pointer items-center gap-2"
+              className="pointer-events-auto flex cursor-pointer items-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
               <Checkbox

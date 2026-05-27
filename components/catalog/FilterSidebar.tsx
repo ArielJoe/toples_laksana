@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CATEGORY_CONFIG, COLOR_SWATCHES } from "@/lib/use-case-config";
+import { useRef, useState } from "react";
+import { COLOR_SWATCHES } from "@/lib/use-case-config";
 import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, getLidColorLabel } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,27 +35,44 @@ export default function FilterSidebar({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [volumeMin, setVolumeMin] = useState(filters.volume_min || 0);
   const [volumeMax, setVolumeMax] = useState(filters.volume_max || 1500);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const vRange = facets?.volume_range || { min: 0, max: 1500 };
   const categoryList = facets?.categories || [];
 
+  const submitSearch = () => {
+    const nextSearch = searchInputRef.current?.value.trim() || "";
+    onSetFilters({ search: nextSearch || undefined });
+  };
+
   return (
-    <aside className="space-y-10">
+    <aside className="space-y-8">
       {/* Search Input */}
       <section>
-        <div className="relative">
-          <SearchIcon className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
-          <Input
-            type="text"
-            placeholder="Cari produk..."
-            className="h-12 bg-secondary-50/50 border-border font-bold text-sm pl-11 pr-6 focus:bg-white transition-all rounded-xl"
-            defaultValue={filters.search || ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                onSetFilters({ search: (e.target as HTMLInputElement).value || undefined });
-              }
-            }}
-          />
+        <div className="flex gap-2">
+          <div className="relative min-w-0 flex-1">
+            <SearchIcon className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+            <Input
+              key={filters.search || "empty-search"}
+              ref={searchInputRef}
+              type="text"
+              placeholder="Cari produk..."
+              className="h-12 bg-secondary-50/50 border-border font-bold text-sm pl-11 pr-4 focus:bg-white transition-all rounded-xl"
+              defaultValue={filters.search || ""}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  submitSearch();
+                }
+              }}
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={submitSearch}
+            className="h-12 shrink-0 rounded-xl bg-primary-500 px-4 text-sm font-black text-white hover:bg-primary-600"
+          >
+            Cari
+          </Button>
         </div>
       </section>
 
@@ -95,20 +112,21 @@ export default function FilterSidebar({
           <PackageIcon className="size-4" />
           Jenis Kemasan
         </h3>
-        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
           {categoryList.map((cat) => {
             const isActive = !!filters.category?.includes(cat.value);
-            const config = CATEGORY_CONFIG[cat.value];
+            const categoryName = cat.name && cat.name !== cat.value
+              ? cat.name
+              : getCategoryLabel(cat.value);
             return (
               <Button
                 type="button"
                 variant={isActive ? "default" : "outline"}
                 key={cat.value}
                 onClick={() => onToggleArray("category", cat.value)}
-                className="h-auto min-h-20 flex-col gap-2 p-3 text-center text-[0.65rem] font-black"
+                className="h-auto min-h-16 p-2.5 text-center text-xs font-black leading-snug sm:text-sm lg:min-h-18"
               >
-                {config && <PackageIcon className="size-4" />}
-                <span>{cat.name || getCategoryLabel(cat.value)}</span>
+                <span className="wrap-break-word">{categoryName}</span>
               </Button>
             );
           })}
@@ -191,7 +209,7 @@ export default function FilterSidebar({
 
       {/* Advanced Filters Panel */}
       <div
-        className={`space-y-8 overflow-hidden transition-all duration-500 ease-in-out ${showAdvanced ? "max-h-[1000px] opacity-100 mt-6 pb-6" : "max-h-0 opacity-0"
+        className={`space-y-7 overflow-hidden transition-all duration-500 ease-in-out ${showAdvanced ? "max-h-250 opacity-100 mt-5 pb-2" : "max-h-0 opacity-0"
           }`}
       >
         {/* Material Body */}
