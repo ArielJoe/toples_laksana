@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import MasterDataDialog, { MasterDataField } from "@/components/admin/MasterDataDialog";
+import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { ILidColor } from "@/models/LidColor";
 
@@ -28,9 +28,12 @@ const LID_COLOR_FIELDS: MasterDataField[] = [
   { name: "colorCode", label: "Kode Warna (HEX)", type: "color", placeholder: "misal: #FF0000", required: true },
 ];
 
+const ADMIN_TABLE_PAGE_SIZE = 10;
+
 export default function LidColorsPageContent({ initialColors }: LidColorsPageContentProps) {
   const [colors, setColors] = useState(initialColors);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -43,8 +46,15 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
     color.color.toLowerCase().includes(searchQuery.toLowerCase()) ||
     color.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const totalPages = Math.max(1, Math.ceil(filteredColors.length / ADMIN_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = filteredColors.length === 0
+    ? 0
+    : (safePage - 1) * ADMIN_TABLE_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * ADMIN_TABLE_PAGE_SIZE, filteredColors.length);
+  const paginatedColors = filteredColors.slice(startIndex - 1, endIndex);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: MasterDataForm) => {
     const isEditing = !!editingColor;
     const url = isEditing ? `/api/lid-colors/${editingColor.id}` : "/api/lid-colors";
     const method = isEditing ? "PATCH" : "POST";
@@ -68,11 +78,12 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
         setColors(colors.map(c => c.id === editingColor.id ? saved.data : c));
       } else {
         setColors([saved.data, ...colors]);
+        setPage(1);
       }
       
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menyimpan warna");
       throw error;
     }
   };
@@ -90,8 +101,8 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
       setColors(colors.filter(c => c.id !== colorToDelete));
       toast.success("Warna berhasil dihapus");
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus warna");
     } finally {
       setIsConfirmOpen(false);
       setColorToDelete(null);
@@ -147,7 +158,10 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
                 type="text"
                 placeholder="Cari warna..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -183,7 +197,7 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredColors.map((color) => (
+                  paginatedColors.map((color) => (
                     <TableRow key={color.id} className="transition-all duration-200 group border-border">
                       <TableCell className="px-8 py-5">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{color.id}</span>
@@ -220,6 +234,23 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
               </TableBody>
             </Table>
           </div>
+
+          {filteredColors.length > 0 && (
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+                Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredColors.length}</span> data
+              </span>
+              <PaginationControls
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
+            </div>
+          )}
         </Card>
       </div>
 

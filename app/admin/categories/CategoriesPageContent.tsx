@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -17,7 +17,7 @@ import { Product } from "@/types/product";
 import { ICategory } from "@/models/Category";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import MasterDataDialog, { MasterDataField } from "@/components/admin/MasterDataDialog";
+import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface CategoriesPageContentProps {
@@ -31,8 +31,11 @@ const CATEGORY_FIELDS: MasterDataField[] = [
   { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi kategori (opsional)" },
 ];
 
+const ADMIN_TABLE_PAGE_SIZE = 10;
+
 export default function CategoriesPageContent({ initialProducts, initialCategories }: CategoriesPageContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [categories, setCategories] = useState(initialCategories.map(c => ({
     ...c,
     count: initialProducts.filter(p => p.categoryId === c.id).length
@@ -49,8 +52,15 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / ADMIN_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = filteredCategories.length === 0
+    ? 0
+    : (safePage - 1) * ADMIN_TABLE_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * ADMIN_TABLE_PAGE_SIZE, filteredCategories.length);
+  const paginatedCategories = filteredCategories.slice(startIndex - 1, endIndex);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: MasterDataForm) => {
     const isEditing = !!editingCategory;
     const url = isEditing ? `/api/categories/${editingCategory.id}` : "/api/categories";
     const method = isEditing ? "PATCH" : "POST";
@@ -79,11 +89,12 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
         setCategories(categories.map(c => c.id === editingCategory.id ? savedItem : c));
       } else {
         setCategories([savedItem, ...categories]);
+        setPage(1);
       }
       
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menyimpan kategori");
       throw error;
     }
   };
@@ -101,8 +112,8 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
       setCategories(categories.filter(c => c.id !== categoryToDelete));
       toast.success("Kategori berhasil dihapus");
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus kategori");
     } finally {
       setIsConfirmOpen(false);
       setCategoryToDelete(null);
@@ -158,7 +169,10 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
                 type="text"
                 placeholder="Cari kategori..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -194,7 +208,7 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredCategories.map((cat) => (
+                  paginatedCategories.map((cat) => (
                     <TableRow key={cat.id} className="transition-all duration-200 group border-border">
                       <TableCell className="px-8 py-5">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{cat.id}</span>
@@ -229,6 +243,23 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
               </TableBody>
             </Table>
           </div>
+
+          {filteredCategories.length > 0 && (
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+                Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredCategories.length}</span> data
+              </span>
+              <PaginationControls
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
+            </div>
+          )}
         </Card>
       </div>
 

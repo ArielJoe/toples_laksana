@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -68,6 +69,8 @@ const inputClass =
 
 const compactInputClass =
   "h-9 rounded-lg border-neutral-300 bg-white text-sm font-bold text-black shadow-none focus-visible:border-black";
+
+const INVOICE_ITEMS_PAGE_SIZE = 8;
 
 const labelClass =
   "text-[0.68rem] font-black uppercase tracking-[0.16em] text-neutral-600";
@@ -305,6 +308,7 @@ export default function InvoicePageContent() {
   const [form, setForm] = useState<InvoiceForm>(() => getDefaultInvoiceForm());
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [lineItemPage, setLineItemPage] = useState(1);
   const resetBaselineRef = useRef<InvoiceForm | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -313,6 +317,19 @@ export default function InvoicePageContent() {
   }
 
   const totals = useMemo(() => calculateTotals(form), [form]);
+  const lineItemTotalPages = Math.max(
+    1,
+    Math.ceil(form.items.length / INVOICE_ITEMS_PAGE_SIZE),
+  );
+  const safeLineItemPage = Math.min(lineItemPage, lineItemTotalPages);
+  const lineItemStartIndex = form.items.length === 0
+    ? 0
+    : (safeLineItemPage - 1) * INVOICE_ITEMS_PAGE_SIZE + 1;
+  const lineItemEndIndex = Math.min(
+    safeLineItemPage * INVOICE_ITEMS_PAGE_SIZE,
+    form.items.length,
+  );
+  const paginatedLineItems = form.items.slice(lineItemStartIndex - 1, lineItemEndIndex);
   const hasFormChanged = useMemo(
     () =>
       resetBaselineRef.current
@@ -346,6 +363,7 @@ export default function InvoicePageContent() {
       ...current,
       items: [...current.items, createLineItem()],
     }));
+    setLineItemPage(Math.ceil((form.items.length + 1) / INVOICE_ITEMS_PAGE_SIZE));
   };
 
   const removeItem = (id: string) => {
@@ -681,7 +699,7 @@ export default function InvoicePageContent() {
                 </div>
 
                 <div className="divide-y divide-neutral-300">
-                  {form.items.map((item) => (
+                  {paginatedLineItems.map((item) => (
                     <div
                       key={item.id}
                       className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center gap-3 py-2"
@@ -735,6 +753,23 @@ export default function InvoicePageContent() {
                     </div>
                   ))}
                 </div>
+
+                {form.items.length > INVOICE_ITEMS_PAGE_SIZE && (
+                  <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-neutral-300 pt-4 sm:flex-row">
+                    <span className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-neutral-600">
+                      Menampilkan <span className="text-black">{lineItemStartIndex}-{lineItemEndIndex}</span> dari <span className="text-black">{form.items.length}</span> item
+                    </span>
+                    <PaginationControls
+                      page={safeLineItemPage}
+                      totalPages={lineItemTotalPages}
+                      onPageChange={setLineItemPage}
+                      className="mx-0 w-auto"
+                      contentClassName="gap-1"
+                      linkClassName="size-9 border-neutral-300 text-[0.65rem] font-black text-black hover:bg-neutral-100 hover:text-black data-[active=true]:border-black data-[active=true]:bg-black data-[active=true]:text-white data-[active=true]:hover:bg-neutral-900"
+                      previousNextClassName="h-9 border-neutral-300 text-black hover:bg-neutral-100 hover:text-black"
+                    />
+                  </div>
+                )}
 
                 <Button
                   type="button"

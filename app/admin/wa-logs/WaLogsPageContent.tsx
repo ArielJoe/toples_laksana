@@ -8,6 +8,7 @@ import AdminDatePickerField, {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -102,10 +103,13 @@ function getProductSummary(
     .join(", ");
 }
 
+const WA_LOGS_PAGE_SIZE = 10;
+
 export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
 
   const productMap = useMemo(
     () => Object.fromEntries(products.map((product) => [product.id, product])),
@@ -136,6 +140,14 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
       .sort((a, b) => getDateValue(b.createdAt) - getDateValue(a.createdAt));
   }, [endDate, initialLogs, productMap, searchQuery, startDate]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / WA_LOGS_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = filteredLogs.length === 0
+    ? 0
+    : (safePage - 1) * WA_LOGS_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * WA_LOGS_PAGE_SIZE, filteredLogs.length);
+  const paginatedLogs = filteredLogs.slice(startIndex - 1, endIndex);
+
   return (
     <>
       <header className="hidden lg:flex h-24 bg-white border-b border-border items-center justify-between px-10 sticky top-0 z-40">
@@ -154,7 +166,10 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                   type="text"
                   placeholder="Cari produk atau email..."
                   value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onChange={(event) => {
+                    setSearchQuery(event.target.value);
+                    setPage(1);
+                  }}
                   className="h-12 w-full rounded-lg border-border bg-secondary-50/30 pl-12 pr-6 text-sm font-bold text-text-primary shadow-none transition-all focus:bg-white focus:border-primary-500"
                 />
               </div>
@@ -164,6 +179,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                 value={startDate}
                 onChange={(value) => {
                   setStartDate(value);
+                  setPage(1);
                   if (endDate && value && getStartOfDateInput(value) > getEndOfDateInput(endDate)) {
                     setEndDate("");
                   }
@@ -174,7 +190,10 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
               <AdminDatePickerField
                 label="Sampai"
                 value={endDate}
-                onChange={setEndDate}
+                onChange={(value) => {
+                  setEndDate(value);
+                  setPage(1);
+                }}
                 minDate={parseDateInputValue(startDate)}
               />
 
@@ -184,6 +203,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                   setSearchQuery("");
                   setStartDate("");
                   setEndDate("");
+                  setPage(1);
                 }}
                 className="h-12 rounded-lg border border-border bg-white px-4 text-[0.65rem] font-black uppercase tracking-[0.12em] text-text-secondary transition-all hover:bg-secondary-50 hover:text-text-primary"
               >
@@ -218,7 +238,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredLogs.map((log) => {
+                  paginatedLogs.map((log) => {
                     const details = log.details || [];
                     const itemCount = details.reduce((sum, detail) => sum + (detail.quantity || 0), 0);
 
@@ -300,6 +320,23 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
               </TableBody>
             </Table>
           </div>
+
+          {filteredLogs.length > 0 && (
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+                Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredLogs.length}</span> log
+              </span>
+              <PaginationControls
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
+            </div>
+          )}
         </Card>
       </div>
     </>

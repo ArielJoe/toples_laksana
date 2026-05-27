@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -42,9 +43,12 @@ interface ProductsPageContentProps {
   };
 }
 
+const PRODUCTS_PAGE_SIZE = 10;
+
 export default function ProductsPageContent({ initialProducts, masterData }: ProductsPageContentProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState("");
+  const [productPage, setProductPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -75,6 +79,14 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
       return skuMatch || nameMatch || materialMatch || categoryMatch || typeMatch || lidVariantMatch;
     });
   }, [products, searchQuery, masterData]);
+
+  const productTotalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PAGE_SIZE));
+  const safeProductPage = Math.min(productPage, productTotalPages);
+  const productStartIndex = filteredProducts.length === 0
+    ? 0
+    : (safeProductPage - 1) * PRODUCTS_PAGE_SIZE + 1;
+  const productEndIndex = Math.min(safeProductPage * PRODUCTS_PAGE_SIZE, filteredProducts.length);
+  const paginatedProducts = filteredProducts.slice(productStartIndex - 1, productEndIndex);
 
   // Create or update a product via the API
   const handleSave = async (productData: Partial<Product>) => {
@@ -185,7 +197,10 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                 type="text"
                 placeholder="Cari SKU, nama, atau material..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setProductPage(1);
+                }}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -233,7 +248,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredProducts.map(p => {
+                    paginatedProducts.map(p => {
                       const image = getPrimaryImage(p);
 
                       return (
@@ -342,17 +357,17 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
           {filteredProducts.length > 0 && (
             <div className="px-8 py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
               <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
-                Showing <span className="text-text-primary font-black">1-{filteredProducts.length}</span> of <span className="text-text-primary font-black">{filteredProducts.length}</span> items
+                Showing <span className="text-text-primary font-black">{productStartIndex}-{productEndIndex}</span> of <span className="text-text-primary font-black">{filteredProducts.length}</span> items
               </span>
-              <div className="flex items-center gap-1.5">
-                <button className="w-9 h-9 rounded-xl bg-white border border-border flex items-center justify-center text-text-muted opacity-50 cursor-not-allowed transition-all">
-                  <AppIcon name="chevron_left" className="text-lg" />
-                </button>
-                <button className="w-9 h-9 rounded-xl bg-primary-500 text-white font-black text-[0.65rem] cursor-pointer">1</button>
-                <button className="w-9 h-9 rounded-xl bg-white border border-border hover:bg-secondary-50 flex items-center justify-center text-text-primary transition-all cursor-pointer">
-                  <AppIcon name="chevron_right" className="text-lg" />
-                </button>
-              </div>
+              <PaginationControls
+                page={safeProductPage}
+                totalPages={productTotalPages}
+                onPageChange={setProductPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
             </div>
           )}
         </Card>

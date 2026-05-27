@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangleIcon, HelpCircleIcon } from "lucide-react";
 
 interface ConfirmModalProps {
   isOpen: boolean;

@@ -27,9 +27,15 @@ export async function POST(request: NextRequest) {
 
     const item = await LidColor.create(body);
     return NextResponse.json({ data: item }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API] POST /api/lid-colors error:", error);
-    if (error.code === 11000) {
+    const isDuplicateKeyError =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000;
+
+    if (isDuplicateKeyError) {
       return NextResponse.json({ error: "ID or color already exists" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to create lid color" }, { status: 500 });

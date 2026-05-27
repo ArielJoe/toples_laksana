@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
+import { PaginationControls } from "@/components/ui/pagination";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
@@ -40,6 +41,8 @@ const USAGE_LABELS: Record<NonNullable<SimpleMasterItem["usage"]>, string> = {
   both: "Badan & Tutup",
 };
 
+const MASTER_DATA_PAGE_SIZE = 10;
+
 export default function SimpleMasterDataPage({
   title,
   addLabel,
@@ -56,6 +59,7 @@ export default function SimpleMasterDataPage({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SimpleMasterItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const router = useRouter();
 
@@ -66,6 +70,13 @@ export default function SimpleMasterDataPage({
     (item.description || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
   const showUsageColumn = fields.some((field) => field.name === "usage");
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / MASTER_DATA_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = filteredItems.length === 0
+    ? 0
+    : (safePage - 1) * MASTER_DATA_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * MASTER_DATA_PAGE_SIZE, filteredItems.length);
+  const paginatedItems = filteredItems.slice(startIndex - 1, endIndex);
 
   const handleSave = async (data: MasterDataForm) => {
     const isEditing = !!editingItem;
@@ -89,6 +100,7 @@ export default function SimpleMasterDataPage({
         setItems(items.map((item) => item.id === editingItem.id ? saved.data : item));
       } else {
         setItems([saved.data, ...items]);
+        setPage(1);
       }
 
       toast.success(isEditing ? `${title} berhasil diperbarui` : `${title} berhasil ditambahkan`);
@@ -157,7 +169,10 @@ export default function SimpleMasterDataPage({
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -188,7 +203,7 @@ export default function SimpleMasterDataPage({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredItems.map((item) => (
+                  paginatedItems.map((item) => (
                     <TableRow key={item.id} className="transition-all duration-200 group border-border">
                       <TableCell className="px-8 py-5">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{item.id}</span>
@@ -234,6 +249,23 @@ export default function SimpleMasterDataPage({
               </TableBody>
             </Table>
           </div>
+
+          {filteredItems.length > 0 && (
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+                Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredItems.length}</span> data
+              </span>
+              <PaginationControls
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
+            </div>
+          )}
         </Card>
       </div>
 

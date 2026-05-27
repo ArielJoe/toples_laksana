@@ -27,9 +27,15 @@ export async function POST(request: NextRequest) {
 
     const category = await Category.create(body);
     return NextResponse.json({ data: category }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API] POST /api/categories error:", error);
-    if (error.code === 11000) {
+    const isDuplicateKeyError =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000;
+
+    if (isDuplicateKeyError) {
       return NextResponse.json({ error: "Category ID or name already exists" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to create category" }, { status: 500 });

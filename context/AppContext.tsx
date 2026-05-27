@@ -54,9 +54,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, googleProvider);
       toast.success(`Selamat datang, ${result.user.displayName}!`);
       return result.user;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Google login failed", error);
-      if (error.code !== "auth/popup-closed-by-user") {
+      const errorCode =
+        typeof error === "object" && error !== null && "code" in error
+          ? (error as { code?: string }).code
+          : undefined;
+
+      if (errorCode !== "auth/popup-closed-by-user") {
         toast.error("Gagal masuk dengan Google");
       }
       return null;

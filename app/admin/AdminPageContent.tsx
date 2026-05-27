@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -48,9 +49,48 @@ interface AdminPageProps {
   };
 }
 
+const ADMIN_PRODUCTS_PAGE_SIZE = 10;
+const ADMIN_TABLE_PAGE_SIZE = 10;
+
+interface TablePagination<T> {
+  items: T[];
+  totalItems: number;
+  totalPages: number;
+  safePage: number;
+  startIndex: number;
+  endIndex: number;
+}
+
+function getTablePagination<T>(items: T[], page: number): TablePagination<T> {
+  const totalPages = Math.max(1, Math.ceil(items.length / ADMIN_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = items.length === 0
+    ? 0
+    : (safePage - 1) * ADMIN_TABLE_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * ADMIN_TABLE_PAGE_SIZE, items.length);
+
+  return {
+    items: items.slice(startIndex - 1, endIndex),
+    totalItems: items.length,
+    totalPages,
+    safePage,
+    startIndex,
+    endIndex,
+  };
+}
+
 export default function AdminPageContent({ initialProducts, initialInteractions, masterData }: AdminPageProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [productPage, setProductPage] = useState(1);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [colorPage, setColorPage] = useState(1);
+  const [productTypePage, setProductTypePage] = useState(1);
+  const [unitPage, setUnitPage] = useState(1);
+  const [priceTypePage, setPriceTypePage] = useState(1);
+  const [promoPage, setPromoPage] = useState(1);
+  const [interactionPage, setInteractionPage] = useState(1);
+  const [waLogPage, setWaLogPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -60,6 +100,13 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
 
   const waLogs = initialInteractions.filter(i => i.interactionType === "whatsapp_share");
   const allInteractions = initialInteractions;
+  const productTotalPages = Math.max(1, Math.ceil(products.length / ADMIN_PRODUCTS_PAGE_SIZE));
+  const safeProductPage = Math.min(productPage, productTotalPages);
+  const productStartIndex = products.length === 0
+    ? 0
+    : (safeProductPage - 1) * ADMIN_PRODUCTS_PAGE_SIZE + 1;
+  const productEndIndex = Math.min(safeProductPage * ADMIN_PRODUCTS_PAGE_SIZE, products.length);
+  const paginatedProducts = products.slice(productStartIndex - 1, productEndIndex);
 
   // Create or update a product via the API
   const handleSave = async (productData: Partial<Product>) => {
@@ -142,6 +189,42 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
     { id: "promo_002", code: "HEMAT5K", name: "Potongan Rp5.000", type: "nominal" as const, value: 5000, isActive: true },
     { id: "promo_003", code: "NEWYEAR", name: "Promo Tahun Baru", type: "percentage" as const, value: 15, isActive: false },
   ];
+
+  const categoryPagination = getTablePagination(CATEGORIES, categoryPage);
+  const colorPagination = getTablePagination(COLORS, colorPage);
+  const productTypePagination = getTablePagination(masterData.productTypes, productTypePage);
+  const unitPagination = getTablePagination(masterData.units, unitPage);
+  const priceTypePagination = getTablePagination(masterData.priceTypes, priceTypePage);
+  const promoPagination = getTablePagination(MOCK_PROMOS, promoPage);
+  const interactionPagination = getTablePagination(allInteractions, interactionPage);
+  const waLogPagination = getTablePagination(waLogs, waLogPage);
+
+  const renderTablePagination = (
+    pagination: TablePagination<unknown>,
+    onPageChange: (page: number) => void,
+    label = "data",
+  ) => {
+    if (pagination.totalItems === 0) {
+      return null;
+    }
+
+    return (
+      <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+          Menampilkan <span className="text-text-primary font-black">{pagination.startIndex}-{pagination.endIndex}</span> dari <span className="text-text-primary font-black">{pagination.totalItems}</span> {label}
+        </span>
+        <PaginationControls
+          page={pagination.safePage}
+          totalPages={pagination.totalPages}
+          onPageChange={onPageChange}
+          className="mx-0 w-auto"
+          contentClassName="gap-1"
+          linkClassName="size-9 text-[0.65rem] font-black"
+          previousNextClassName="h-9"
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="bg-background text-text-primary flex min-h-screen font-sans relative selection:bg-primary-500/10">
@@ -324,7 +407,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {products.map(p => {
+                      {paginatedProducts.map(p => {
                         const image = getPrimaryImage(p);
 
                         return (
@@ -412,17 +495,17 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               {products.length > 0 && (
                 <div className="px-8 py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
                   <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
-                    Showing <span className="text-text-primary font-black">1-{products.length}</span> of <span className="text-text-primary font-black">{products.length}</span> items
+                    Showing <span className="text-text-primary font-black">{productStartIndex}-{productEndIndex}</span> of <span className="text-text-primary font-black">{products.length}</span> items
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    <button className="w-9 h-9 rounded-xl bg-white border border-border flex items-center justify-center text-text-muted opacity-50 cursor-not-allowed shadow-sm transition-all">
-                      <AppIcon name="chevron_left" className="text-lg" />
-                    </button>
-                    <button className="w-9 h-9 rounded-xl bg-primary-500 text-white font-black text-[0.65rem] shadow-lg shadow-primary-500/20 cursor-pointer">1</button>
-                    <button className="w-9 h-9 rounded-xl bg-white border border-border hover:bg-secondary-50 flex items-center justify-center text-text-primary transition-all shadow-sm cursor-pointer">
-                      <AppIcon name="chevron_right" className="text-lg" />
-                    </button>
-                  </div>
+                  <PaginationControls
+                    page={safeProductPage}
+                    totalPages={productTotalPages}
+                    onPageChange={setProductPage}
+                    className="mx-0 w-auto"
+                    contentClassName="gap-1"
+                    linkClassName="size-9 text-[0.65rem] font-black"
+                    previousNextClassName="h-9"
+                  />
                 </div>
               )}
             </Card>
@@ -449,7 +532,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {CATEGORIES.map(cat => (
+                  {categoryPagination.items.map(cat => (
                     <TableRow key={cat.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{cat.id}</TableCell>
                       <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{cat.name}</TableCell>
@@ -465,6 +548,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(categoryPagination, setCategoryPage)}
             </Card>
           )}
 
@@ -489,7 +573,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {COLORS.map(color => (
+                  {colorPagination.items.map(color => (
                     <TableRow key={color.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{color.id}</TableCell>
                       <TableCell className="px-8 py-8">
@@ -507,6 +591,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(colorPagination, setColorPage)}
             </Card>
           )}
 
@@ -530,7 +615,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {masterData.productTypes.map(type => (
+                  {productTypePagination.items.map(type => (
                     <TableRow key={type.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{type.id}</TableCell>
                       <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{type.name}</TableCell>
@@ -543,6 +628,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(productTypePagination, setProductTypePage)}
             </Card>
           )}
 
@@ -567,7 +653,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {masterData.units.map(unit => (
+                  {unitPagination.items.map(unit => (
                     <TableRow key={unit.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{unit.id}</TableCell>
                       <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{unit.name}</TableCell>
@@ -583,6 +669,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(unitPagination, setUnitPage)}
             </Card>
           )}
 
@@ -607,7 +694,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {masterData.priceTypes.map(pt => (
+                  {priceTypePagination.items.map(pt => (
                     <TableRow key={pt.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{pt.id}</TableCell>
                       <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{pt.name}</TableCell>
@@ -621,6 +708,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(priceTypePagination, setPriceTypePage)}
             </Card>
           )}
 
@@ -647,7 +735,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {MOCK_PROMOS.map(promo => (
+                  {promoPagination.items.map(promo => (
                     <TableRow key={promo.id} className="transition-all border-border">
                       <TableCell className="px-8 py-8 font-mono text-xs font-black text-primary-600">{promo.code}</TableCell>
                       <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{promo.name}</TableCell>
@@ -681,6 +769,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ))}
                 </TableBody>
               </Table>
+              {renderTablePagination(promoPagination, setPromoPage)}
             </Card>
           )}
 
@@ -715,7 +804,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : allInteractions.map(interaction => {
+                  ) : interactionPagination.items.map(interaction => {
                     const product = products.find(p => p.id === interaction.productId);
                     return (
                       <TableRow key={interaction.id} className="transition-all border-border">
@@ -740,6 +829,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   })}
                 </TableBody>
               </Table>
+              {renderTablePagination(interactionPagination, setInteractionPage)}
             </Card>
           )}
 
@@ -773,7 +863,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : waLogs.map(log => {
+                  ) : waLogPagination.items.map(log => {
                     const product = products.find(p => p.id === log.productId);
                     return (
                       <TableRow key={log.id} className="transition-all border-border">
@@ -790,6 +880,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   })}
                 </TableBody>
               </Table>
+              {renderTablePagination(waLogPagination, setWaLogPage, "log")}
             </Card>
           )}
         </div>

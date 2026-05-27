@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -13,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import MasterDataDialog, { MasterDataField } from "@/components/admin/MasterDataDialog";
+import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { IPriceType } from "@/models/PriceType";
 
@@ -27,9 +28,12 @@ const PRICE_TYPE_FIELDS: MasterDataField[] = [
   { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi tipe harga (opsional)" },
 ];
 
+const ADMIN_TABLE_PAGE_SIZE = 10;
+
 export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesPageContentProps) {
   const [priceTypes, setPriceTypes] = useState(initialPriceTypes);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -43,8 +47,15 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
     pt.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
     pt.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const totalPages = Math.max(1, Math.ceil(filteredPriceTypes.length / ADMIN_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIndex = filteredPriceTypes.length === 0
+    ? 0
+    : (safePage - 1) * ADMIN_TABLE_PAGE_SIZE + 1;
+  const endIndex = Math.min(safePage * ADMIN_TABLE_PAGE_SIZE, filteredPriceTypes.length);
+  const paginatedPriceTypes = filteredPriceTypes.slice(startIndex - 1, endIndex);
 
-  const handleSave = async (data: any) => {
+  const handleSave = async (data: MasterDataForm) => {
     const isEditing = !!editingPriceType;
     const url = isEditing ? `/api/price-types/${editingPriceType.id}` : "/api/price-types";
     const method = isEditing ? "PATCH" : "POST";
@@ -68,11 +79,12 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
         setPriceTypes(priceTypes.map(p => p.id === editingPriceType.id ? saved.data : p));
       } else {
         setPriceTypes([saved.data, ...priceTypes]);
+        setPage(1);
       }
       
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menyimpan tipe harga");
       throw error;
     }
   };
@@ -90,8 +102,8 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
       setPriceTypes(priceTypes.filter(p => p.id !== priceTypeToDelete));
       toast.success("Tipe harga berhasil dihapus");
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus tipe harga");
     } finally {
       setIsConfirmOpen(false);
       setPriceTypeToDelete(null);
@@ -147,7 +159,10 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                 type="text"
                 placeholder="Cari tipe harga..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
@@ -183,7 +198,7 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredPriceTypes.map((pt) => (
+                  paginatedPriceTypes.map((pt) => (
                     <TableRow key={pt.id} className="transition-all duration-200 group border-border">
                       <TableCell className="px-8 py-5">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{pt.id}</span>
@@ -216,6 +231,23 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
               </TableBody>
             </Table>
           </div>
+
+          {filteredPriceTypes.length > 0 && (
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
+                Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredPriceTypes.length}</span> data
+              </span>
+              <PaginationControls
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mx-0 w-auto"
+                contentClassName="gap-1"
+                linkClassName="size-9 text-[0.65rem] font-black"
+                previousNextClassName="h-9"
+              />
+            </div>
+          )}
         </Card>
       </div>
 

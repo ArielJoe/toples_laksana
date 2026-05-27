@@ -7,6 +7,7 @@ import ProductCard from "@/components/catalog/ProductCard";
 import FilterSidebar from "@/components/catalog/FilterSidebar";
 import ActiveFilterBar from "@/components/catalog/ActiveFilterBar";
 import { AppIcon } from "@/components/ui/app-icon";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -153,7 +154,7 @@ function CatalogContent() {
                   <SelectContent
                     align="start"
                     sideOffset={8}
-                    className="min-w-[var(--anchor-width)]"
+                    className="min-w-(--anchor-width)"
                   >
                     {Object.entries(SORT_LABELS).map(([val, label]) => (
                       <SelectItem key={val} value={val}>
@@ -356,59 +357,14 @@ function CatalogContent() {
 
                   {/* Pagination */}
                   {pagination.totalPages > 1 && (
-                    <div className="mt-16 flex justify-center items-center gap-3">
-                      <button
-                        disabled={!pagination.hasPrev}
-                        onClick={() => setPage(pagination.page - 1)}
-                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-text-secondary hover:bg-primary-500 hover:text-white transition-all border border-border disabled:opacity-30 disabled:pointer-events-none active:scale-90"
-                      >
-                        <AppIcon name="chevron_left" />
-                      </button>
-                      <div className="flex items-center gap-2">
-                        {Array.from(
-                          { length: pagination.totalPages },
-                          (_, i) => i + 1,
-                        )
-                          .filter((p) => {
-                            const current = pagination.page;
-                            return (
-                              p === 1 ||
-                              p === pagination.totalPages ||
-                              Math.abs(p - current) <= 1
-                            );
-                          })
-                          .map((p, idx, arr) => {
-                            const showEllipsis =
-                              idx > 0 && p - arr[idx - 1] > 1;
-                            return (
-                              <span key={p} className="flex items-center gap-2">
-                                {showEllipsis && (
-                                  <span className="w-8 text-center text-text-muted font-bold">
-                                    ...
-                                  </span>
-                                )}
-                                <button
-                                  onClick={() => setPage(p)}
-                                  className={`w-12 h-12 flex items-center justify-center rounded-xl font-bold text-sm transition-all border ${
-                                    p === pagination.page
-                                      ? "bg-primary-500 text-white border-primary-500"
-                                      : "bg-white border-border text-text-secondary hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
-                                  }`}
-                                >
-                                  {p}
-                                </button>
-                              </span>
-                            );
-                          })}
-                      </div>
-                      <button
-                        disabled={!pagination.hasNext}
-                        onClick={() => setPage(pagination.page + 1)}
-                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-text-secondary hover:bg-primary-500 hover:text-white transition-all border border-border disabled:opacity-30 disabled:pointer-events-none active:scale-90"
-                      >
-                        <AppIcon name="chevron_right" />
-                      </button>
-                    </div>
+                    <PaginationControls
+                      page={pagination.page}
+                      totalPages={pagination.totalPages}
+                      onPageChange={setPage}
+                      className="mt-16"
+                      linkClassName="size-10 font-bold"
+                      previousNextClassName="h-10"
+                    />
                   )}
                 </>
               )}
