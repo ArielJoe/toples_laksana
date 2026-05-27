@@ -25,9 +25,15 @@ export default function WishlistPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [fetching, setFetching] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [inquiryIds, setInquiryIds] = useState<string[]>([]);
+  const [inquirySelections, setInquirySelections] = useState<{ id: string; unit: "pcs" | "bal" }[]>([]);
+  const inquiryIds = inquirySelections.map((item) => item.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<ModalItem[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user || wishlist.length === 0) {
@@ -53,10 +59,10 @@ export default function WishlistPage() {
     fetchWishlistProducts();
   }, [user, wishlist]);
 
-  // Filter out compareIds and inquiryIds that are no longer in the wishlist
+  // Filter out compareIds and inquirySelections that are no longer in the wishlist
   useEffect(() => {
     setCompareIds((prev) => prev.filter((id) => wishlist.includes(id)));
-    setInquiryIds((prev) => prev.filter((id) => wishlist.includes(id)));
+    setInquirySelections((prev) => prev.filter((item) => wishlist.includes(item.id)));
   }, [wishlist]);
 
   // Toggle product comparison (max 3)
@@ -66,21 +72,35 @@ export default function WishlistPage() {
     );
   };
 
-  // Toggle product inquiry selection
-  const handleInquiryToggle = (id: string) => {
-    setInquiryIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+  // Handle inquiry selection with unit
+  const handleInquirySelect = (productId: string, unit: "pcs" | "bal" | "") => {
+    setInquirySelections((prev) => {
+      if (!unit) {
+        return prev.filter((item) => item.id !== productId);
+      }
+      const exists = prev.some((item) => item.id === productId);
+      if (exists) {
+        return prev.map((item) =>
+          item.id === productId ? { ...item, unit } : item
+        );
+      }
+      return [...prev, { id: productId, unit }];
+    });
   };
 
-  // Open modal and pre-fill items with default quantity of 1 and unit 'pcs'
+  // Open modal and pre-fill items with their chosen unit and default quantity of 1
   const handleOpenModal = () => {
-    const selectedProducts = products.filter((p) => inquiryIds.includes(p.id));
-    const items = selectedProducts.map((p) => ({
-      product: p,
-      quantity: 1,
-      unit: "pcs" as const,
-    }));
+    const items = inquirySelections
+      .map((sel) => {
+        const product = products.find((p) => p.id === sel.id);
+        if (!product) return null;
+        return {
+          product,
+          quantity: 1,
+          unit: sel.unit,
+        };
+      })
+      .filter(Boolean) as ModalItem[];
     setModalItems(items);
     setIsModalOpen(true);
   };
@@ -151,12 +171,9 @@ export default function WishlistPage() {
   };
 
   return (
-    <main className="bg-white min-h-[70vh] px-6 py-12 lg:px-12 lg:py-16 relative">
+    <main className="bg-white min-h-[70vh] px-6 py-4 lg:px-12 lg:py-8 relative">
       <div className="mx-auto max-w-screen-2xl">
-        <div className="mb-10">
-          <span className="text-xs font-black uppercase tracking-[0.2em] text-primary-500">
-            Aktivitas Saya
-          </span>
+        <div className="mb-6">
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">
             Wishlist Saya
           </h1>
@@ -165,8 +182,8 @@ export default function WishlistPage() {
           </p>
         </div>
 
-        {loading || (fetching && products.length === 0) ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center">
+        {!mounted || loading || (fetching && products.length === 0) ? (
+          <div className="min-h-[50vh] flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 border-4 border-primary-100 border-t-primary-500 rounded-full animate-spin" />
             <p className="text-primary-600 font-bold tracking-widest text-xs uppercase mt-4">Memuat Wishlist...</p>
           </div>
@@ -207,7 +224,7 @@ export default function WishlistPage() {
         ) : (
           <>
             {/* WhatsApp Inquiry Selection Toolbar */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 rounded-2xl border border-border">
+            <div className="sticky top-25 z-30 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-border">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-text-secondary uppercase tracking-wider">
                   Pilih produk untuk ditanyakan
@@ -220,7 +237,7 @@ export default function WishlistPage() {
                 {inquiryIds.length > 0 && (
                   <>
                     <button
-                      onClick={() => setInquiryIds([])}
+                      onClick={() => setInquirySelections([])}
                       className="px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-100 cursor-pointer transition-all active:scale-[0.97]"
                     >
                       Reset Pilihan
@@ -238,17 +255,20 @@ export default function WishlistPage() {
             </div>
 
             {/* Wishlist Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-20">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onCompareToggle={handleCompareToggle}
-                  isComparing={compareIds.includes(product.id)}
-                  onInquiryToggle={handleInquiryToggle}
-                  isInquirySelected={inquiryIds.includes(product.id)}
-                />
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4">
+              {products.map((product) => {
+                const selection = inquirySelections.find((item) => item.id === product.id);
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onCompareToggle={handleCompareToggle}
+                    isComparing={compareIds.includes(product.id)}
+                    onInquirySelect={handleInquirySelect}
+                    selectedUnit={selection?.unit || ""}
+                  />
+                );
+              })}
             </div>
           </>
         )}
@@ -257,23 +277,33 @@ export default function WishlistPage() {
       {/* Floating Comparison Bar */}
       {compareIds.length > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-full max-w-2xl px-4 sm:px-6">
-          <div className="bg-primary-900 text-white rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-primary-800/50 backdrop-blur-xl shadow-lg">
+          <div className="bg-white/95 text-text-primary rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border shadow-2xl backdrop-blur-xl">
             <div className="flex items-center gap-3 sm:gap-4 pl-1 sm:pl-2">
               <div className="flex -space-x-3">
-                {compareIds.slice(0, 3).map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-primary-900 bg-primary-700 flex items-center justify-center text-white"
-                  >
-                    <AppIcon name="inventory_2" className="text-xs sm:text-base" />
-                  </div>
-                ))}
+                {compareIds.slice(0, 3).map((id) => {
+                  const product = products.find((p) => p.id === id);
+                  const imageUrl = product?.images?.[0]?.imageUrl || "/toples.png";
+                  return (
+                    <div
+                      key={id}
+                      className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gray-50 overflow-hidden flex items-center justify-center shadow-xs"
+                    >
+                      <Image
+                        src={imageUrl}
+                        alt={product?.name || "Product"}
+                        fill
+                        className="object-contain p-0.5"
+                        sizes="40px"
+                      />
+                    </div>
+                  );
+                })}
               </div>
               <div className="min-w-0">
-                <p className="text-[0.6rem] sm:text-xs font-black uppercase tracking-widest text-primary-200 whitespace-nowrap">
+                <p className="text-[0.6rem] sm:text-xs font-black uppercase tracking-widest text-text-primary whitespace-nowrap">
                   {compareIds.length} Produk Terpilih
                 </p>
-                <p className="text-[0.6rem] sm:text-[0.65rem] text-primary-400 font-medium truncate">
+                <p className="text-[0.6rem] sm:text-[0.65rem] text-text-secondary font-medium truncate">
                   Bandingkan maks. 3 produk
                 </p>
               </div>
@@ -281,13 +311,13 @@ export default function WishlistPage() {
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <button
                 onClick={() => setCompareIds([])}
-                className="text-[0.65rem] sm:text-xs font-bold text-primary-300 hover:text-white transition-colors px-2 tracking-widest whitespace-nowrap cursor-pointer border-none bg-transparent"
+                className="text-[0.65rem] sm:text-xs font-bold text-text-secondary hover:text-text-primary transition-colors px-2 tracking-widest whitespace-nowrap cursor-pointer border-none bg-transparent"
               >
                 BATAL
               </button>
               <Link
                 href={`/compare?ids=${compareIds.join(",")}`}
-                className="flex-1 sm:flex-none bg-primary-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest hover:bg-primary-600 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                className="flex-1 sm:flex-none bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer border-none shadow-md"
               >
                 Bandingkan
                 <AppIcon name="compare_arrows" className="text-sm" />
@@ -310,8 +340,8 @@ export default function WishlistPage() {
             {/* Header */}
             <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-gray-50">
               <div>
-                <h3 className="text-lg font-black text-text-primary tracking-tight">Ringkasan Diskusi WhatsApp</h3>
-                <p className="text-xs text-text-secondary mt-0.5">Tentukan jumlah masing-masing produk sebelum memulai obrolan.</p>
+                <h3 className="text-2xl font-black text-text-primary tracking-tight">Ringkasan Diskusi WhatsApp</h3>
+                <p className="text-sm text-text-secondary mt-0.5">Tentukan jumlah masing-masing produk sebelum memulai obrolan.</p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}

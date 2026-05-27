@@ -38,7 +38,7 @@ export default function TentangPageClient() {
   return (
     <main className="bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative flex min-h-[100svh] w-full flex-col justify-center overflow-hidden pb-8 pt-24 lg:block lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-0">
+      <section className="relative flex min-h-svh w-full flex-col justify-center overflow-hidden pb-8 pt-8 lg:block lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-0">
         <div className="z-10 mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 px-6 lg:h-full lg:grid-cols-2 lg:gap-12 lg:px-12">
           {/* Hero Left Content */}
           <motion.div
@@ -80,7 +80,7 @@ export default function TentangPageClient() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="relative z-0 mt-8 h-[240px] w-full overflow-hidden lg:absolute lg:bottom-0 lg:right-0 lg:top-0 lg:mt-0 lg:h-full lg:w-1/2"
+          className="relative z-0 mt-8 h-60 w-full overflow-hidden lg:absolute lg:bottom-0 lg:right-0 lg:top-0 lg:mt-0 lg:h-full lg:w-1/2"
           style={{
             maskImage: "linear-gradient(to right, transparent 10%, white 70%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 10%, white 70%)",

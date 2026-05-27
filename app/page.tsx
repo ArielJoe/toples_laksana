@@ -47,7 +47,7 @@ export default function HomePage() {
   return (
     <main className="overflow-hidden bg-white">
       {/* Hero Section */}
-      <section className="relative flex min-h-[100svh] items-center px-6 pb-10 pt-32 lg:h-screen lg:min-h-0 lg:px-12 lg:pb-12 lg:pt-36">
+      <section className="relative flex min-h-svh items-center px-6 pb-10 pt-24 lg:h-screen lg:min-h-0 lg:px-12 lg:pb-12 lg:pt-36">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -82,7 +82,7 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="relative flex h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-secondary-50/50 sm:h-[340px] lg:h-[min(560px,calc(100vh-13rem))]"
+            className="relative flex h-60 items-center justify-center overflow-hidden rounded-2xl border border-border bg-secondary-50/50 sm:h-85 lg:h-[min(560px,calc(100vh-13rem))]"
           >
             <Image
               src="/toples.png"

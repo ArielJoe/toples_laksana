@@ -26,6 +26,8 @@ interface ProductCardProps {
   isInquirySelected?: boolean;
   priceType?: string[];
   viewMode?: "grid" | "list";
+  onInquirySelect?: (productId: string, unit: "pcs" | "bal" | "") => void;
+  selectedUnit?: "pcs" | "bal" | "";
 }
 
 export default function ProductCard({
@@ -36,6 +38,8 @@ export default function ProductCard({
   isInquirySelected = false,
   priceType,
   viewMode = "grid",
+  onInquirySelect,
+  selectedUnit = "",
 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist, user } = useApp();
   const volume = getSpecValue(product, "volume_ml");
@@ -194,10 +198,6 @@ export default function ProductCard({
             </h3>
           </div>
 
-          {meta && (
-            <p className="mt-2 line-clamp-1 text-xs font-medium text-text-muted">{meta}</p>
-          )}
-
           <p className={cn(
             "mt-2 text-[0.65rem] font-bold uppercase tracking-widest",
             product.isAvailable !== false ? "text-emerald-600" : "text-red-500"
@@ -210,14 +210,17 @@ export default function ProductCard({
             {priceContent}
           </div>
 
-          {/* Compare */}
-          <div className="mt-3 flex items-center">
+          {/* Compare & Inquiry Selector */}
+          <div className="mt-3 flex items-center justify-between gap-2">
             <label
               className="pointer-events-auto flex cursor-pointer items-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
               <Checkbox
-                className="size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50"
+                className={cn(
+                  "size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50",
+                  onInquirySelect && "rounded-full"
+                )}
                 checked={isComparing}
                 onCheckedChange={() => onCompareToggle?.(product.id)}
               />
@@ -225,6 +228,24 @@ export default function ProductCard({
                 Bandingkan
               </span>
             </label>
+
+            {onInquirySelect && (
+              <label
+                className="pointer-events-auto flex cursor-pointer items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Checkbox
+                  className="size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50 rounded-sm data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                  checked={!!selectedUnit}
+                  onCheckedChange={(checked) => {
+                    onInquirySelect(product.id, checked ? "pcs" : "");
+                  }}
+                />
+                <span className="text-xs font-medium text-text-muted">
+                  Tanya
+                </span>
+              </label>
+            )}
           </div>
         </div>
       </div>

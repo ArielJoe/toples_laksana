@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={cn("h-full", "antialiased", jakarta.variable, "font-sans")}>
+    <html lang="id" className={cn("h-full", "antialiased", jakarta.variable, "font-sans")} suppressHydrationWarning>
       <body className="min-h-full flex flex-col">
         <AppProvider>
           <LayoutShell>
