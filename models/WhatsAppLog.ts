@@ -3,6 +3,7 @@ import { Schema, model, models } from "mongoose";
 export interface IWhatsAppLogDetail {
   productId: string;
   lidColorId?: string;
+  unit?: "pcs" | "bal";
   quantity: number;
   priceAtThatTime: number;
   subtotal: number;
@@ -24,6 +25,7 @@ const WhatsAppLogDetailSchema = new Schema<IWhatsAppLogDetail>(
   {
     productId: { type: String, required: true },
     lidColorId: { type: String, default: null },
+    unit: { type: String, enum: ["pcs", "bal"], default: "pcs" },
     quantity: { type: Number, required: true, default: 1 },
     priceAtThatTime: { type: Number, required: true },
     subtotal: { type: Number, required: true },

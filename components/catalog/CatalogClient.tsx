@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useProductFilters } from "@/hooks/useProductFilters";
 import ProductCard from "@/components/catalog/ProductCard";
 import FilterSidebar from "@/components/catalog/FilterSidebar";
@@ -15,8 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CatalogFilters, FacetCounts, PaginatedResponse, Product, formatAttributeLabel, getSpecValue, getLowestRetailPrice, getLowestWholesalePrice, getPrimaryImage } from "@/types/product";
-import { formatPrice } from "@/lib/price-calculator";
+import { CatalogFilters, FacetCounts, PaginatedResponse, Product } from "@/types/product";
 
 const SORT_LABELS: Record<string, string> = {
   popular: "Terpopuler",
@@ -239,23 +237,27 @@ function CatalogContent() {
             <div className="w-full">
               {loading ? (
                 /* Skeleton Grid */
-                <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+                <div className={viewMode === "grid" ? "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3 lg:grid-cols-4" : "grid grid-cols-1 items-stretch gap-4"}>
                 {Array.from({ length: 8 }).map((_, i) => (
                   viewMode === "grid" ? (
-                    <div key={i} className="bg-white border border-gray-100 overflow-hidden rounded-lg animate-pulse">
-                      <div className="aspect-square bg-gray-50" />
-                      <div className="p-4 space-y-3">
-                        <div className="h-4 bg-gray-50 w-3/4 rounded" />
-                        <div className="h-4 bg-gray-50 w-1/2 rounded" />
+                    <div key={i} className="h-full overflow-hidden rounded-xl border border-border bg-white animate-pulse">
+                      <div className="aspect-square bg-secondary-50" />
+                      <div className="border-t border-border/60 p-4 space-y-3">
+                        <div className="h-4 bg-secondary-50 w-3/4 rounded" />
+                        <div className="h-3 bg-secondary-50 w-1/2 rounded" />
+                        <div className="h-4 bg-secondary-50 w-2/3 rounded" />
                       </div>
                     </div>
                   ) : (
-                    <div key={i} className="bg-white border border-gray-100 rounded-lg animate-pulse flex gap-4 p-4">
-                      <div className="w-24 h-24 bg-gray-50 rounded-lg shrink-0" />
-                      <div className="flex-1 space-y-3 py-1">
-                        <div className="h-4 bg-gray-50 w-3/4 rounded" />
-                        <div className="h-3 bg-gray-50 w-full rounded" />
-                        <div className="h-4 bg-gray-50 w-1/4 rounded" />
+                    <div key={i} className="h-full overflow-hidden rounded-xl border border-border bg-white animate-pulse">
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="aspect-square w-full shrink-0 bg-secondary-50 sm:size-40 lg:size-44" />
+                        <div className="flex-1 space-y-3 border-t border-border/60 p-4 sm:border-l sm:border-t-0 sm:p-5">
+                          <div className="h-4 bg-secondary-50 w-3/4 rounded" />
+                          <div className="h-3 bg-secondary-50 w-1/2 rounded" />
+                          <div className="h-3 bg-secondary-50 w-1/4 rounded" />
+                          <div className="h-4 bg-secondary-50 w-1/3 rounded" />
+                        </div>
                       </div>
                     </div>
                   )
@@ -282,7 +284,7 @@ function CatalogContent() {
               <>
                 {viewMode === "grid" ? (
                   /* Product Cards Grid */
-                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3 lg:grid-cols-4">
                     {products.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -294,77 +296,18 @@ function CatalogContent() {
                     ))}
                   </div>
                 ) : (
-                  /* Product List View (2 Columns) */
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {products.map((product) => {
-                      const volume = getSpecValue(product, "volume_ml");
-                      const heroImage = getPrimaryImage(product);
-
-                      const priceTypes = filters.price_type || [];
-                      const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
-                      const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
-                      const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
-
-                      const retailPrice = getLowestRetailPrice(product);
-                      const wholesalePrice = getLowestWholesalePrice(product);
-
-                      return (
-                        <Link
-                          key={product.id}
-                          href={`/products/${product.id}`}
-                          className="group flex items-center gap-4 bg-white border border-gray-100 rounded-xl p-4 transition-all"
-                        >
-                          <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-lg overflow-hidden relative flex items-center justify-center">
-                            {heroImage ? (
-                              <Image
-                                src={heroImage}
-                                alt={product.name}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                sizes="96px"
-                              />
-                            ) : (
-                              <AppIcon name="inventory_2" className="text-3xl text-gray-200" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-semibold text-gray-900 group-hover:text-primary-500 transition-colors line-clamp-1">{product.name}</h3>
-                            <p className="text-xs text-gray-400 mt-1 line-clamp-1">
-                              {product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial)}{volume ? ` - ${volume}ml` : ""}
-                            </p>
-                            <div className="space-y-0.5 mt-1">
-                              {onlyWholesale && wholesalePrice > 0 ? (
-                                <span className="text-sm font-bold text-gray-900 block">
-                                  {formatPrice(wholesalePrice)} <span className="text-[10px] text-gray-400 font-medium">/ bal</span>
-                                </span>
-                              ) : onlyRetail && retailPrice > 0 ? (
-                                <span className="text-sm font-bold text-gray-900 block">
-                                  {formatPrice(retailPrice)} <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
-                                </span>
-                              ) : showBoth ? (
-                                <>
-                                  {retailPrice > 0 ? (
-                                    <span className="text-sm font-bold text-gray-900 block">
-                                      {formatPrice(retailPrice)} <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
-                                    </span>
-                                  ) : (
-                                    <span className="text-sm font-bold text-gray-900 block">Hubungi Kami</span>
-                                  )}
-                                  {wholesalePrice > 0 && (
-                                    <span className="text-[10px] text-primary-600 font-black tracking-wide block">
-                                      Grosir: {formatPrice(wholesalePrice)} <span className="text-text-muted font-medium">/ bal</span>
-                                    </span>
-                                  )}
-                                </>
-                              ) : (
-                                <span className="text-sm font-bold text-gray-900 block">Hubungi Kami</span>
-                              )}
-                            </div>
-                          </div>
-                          <AppIcon name="chevron_right" className="shrink-0 text-gray-300 transition-colors group-hover:text-primary-500" />
-                        </Link>
-                      );
-                    })}
+                  /* Product List View */
+                  <div className="grid grid-cols-1 items-stretch gap-4">
+                    {products.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onCompareToggle={handleCompareToggle}
+                        isComparing={compareIds.includes(product.id)}
+                        priceType={filters.price_type}
+                        viewMode="list"
+                      />
+                    ))}
                   </div>
                 )}
 

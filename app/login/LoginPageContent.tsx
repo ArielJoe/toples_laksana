@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRightIcon, HomeIcon, LockIcon, MailIcon, LoaderCircleIcon } from "lucide-react";
+import { ArrowRightIcon, LockIcon, MailIcon, LoaderCircleIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,7 +53,6 @@ export default function LoginPageContent() {
             href="/"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-full bg-white/70 font-bold uppercase tracking-widest text-text-secondary backdrop-blur-sm hover:text-primary")}
           >
-            <HomeIcon className="size-3.5" />
             Beranda
           </Link>
         </div>

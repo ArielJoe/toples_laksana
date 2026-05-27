@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/types/product";
 import {
+  formatAttributeLabel,
   getAvailabilityLabel,
   getLowestRetailPrice,
   getLowestWholesalePrice,
@@ -24,6 +25,7 @@ interface ProductCardProps {
   onInquiryToggle?: (productId: string) => void;
   isInquirySelected?: boolean;
   priceType?: string[];
+  viewMode?: "grid" | "list";
 }
 
 export default function ProductCard({
@@ -33,23 +35,89 @@ export default function ProductCard({
   onInquiryToggle,
   isInquirySelected = false,
   priceType,
+  viewMode = "grid",
 }: ProductCardProps) {
-  const { toggleWishlist, isInWishlist } = useApp();
+  const { toggleWishlist, isInWishlist, user } = useApp();
   const volume = getSpecValue(product, "volume_ml");
   const heroImage = getPrimaryImage(product);
   const productHref = `/products/${product.id}`;
   const wishlisted = isInWishlist(product.id);
+  const material = product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial);
+  const meta = [
+    material && material !== "-" ? material : null,
+    volume ? `${volume}ml` : null,
+  ].filter(Boolean).join(" • ");
+  const isList = viewMode === "list";
+
+  const priceContent = (() => {
+    const priceTypes = priceType || [];
+    const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
+    const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
+    const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
+
+    const retailPrice = getLowestRetailPrice(product);
+    const wholesalePrice = getLowestWholesalePrice(product);
+
+    if (onlyWholesale && wholesalePrice > 0) {
+      return (
+        <div className="flex items-baseline gap-1">
+          <span className="text-base font-bold text-text-primary">{formatPrice(wholesalePrice)}</span>
+          <span className="text-[10px] font-medium text-text-muted">/ bal</span>
+        </div>
+      );
+    }
+
+    if (onlyRetail && retailPrice > 0) {
+      return (
+        <div className="flex items-baseline gap-1">
+          <span className="text-base font-bold text-text-primary">{formatPrice(retailPrice)}</span>
+          <span className="text-[10px] font-medium text-text-muted">/ pcs</span>
+        </div>
+      );
+    }
+
+    if (showBoth) {
+      return (
+        <div className="space-y-0.5">
+          {retailPrice > 0 ? (
+            <div className="flex items-baseline gap-1">
+              <span className="text-base font-bold text-text-primary">{formatPrice(retailPrice)}</span>
+              <span className="text-[10px] font-medium text-text-muted">/ pcs</span>
+            </div>
+          ) : (
+            <div className="text-sm font-bold text-text-primary">Hubungi Kami</div>
+          )}
+          {wholesalePrice > 0 && (
+            <div className="text-[10px] font-black tracking-wide text-primary-600">
+              Grosir: {formatPrice(wholesalePrice)} <span className="font-medium text-text-muted">/ bal</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <div className="text-sm font-bold text-text-primary">Hubungi Kami</div>;
+  })();
 
   const handleInteraction = async () => {
     try {
-      await fetch(`/api/products/${product.id}/interact`, { method: "POST" });
+      await fetch(`/api/products/${product.id}/interact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.email || "guest" }),
+      });
     } catch (error) {
       console.error("Failed to track interaction:", error);
     }
   };
 
   return (
-    <Card className="group relative overflow-hidden rounded-lg border border-border bg-card py-0 transition-all duration-300">
+    <Card
+      className={cn(
+        "group relative h-full overflow-hidden rounded-xl border border-border bg-white p-0 transition-colors hover:border-primary-300 hover:bg-secondary-50/40",
+        isList ? "flex" : "flex flex-col"
+      )}
+    >
       {/* WhatsApp Selection Checkbox */}
       {onInquiryToggle && (
         <div
@@ -84,117 +152,76 @@ export default function ProductCard({
         />
       </button>
       {/* Image Section */}
-      <Link
-        href={productHref}
-        onClick={handleInteraction}
-        className="relative block aspect-square overflow-hidden bg-white p-6 cursor-pointer"
-      >
-        {heroImage ? (
-          <div className="relative w-full h-full transform transition-transform duration-500 scale-75 group-hover:scale-90">
-            <Image
-              alt={product.name}
-              fill
-              className="object-contain"
-              src={heroImage}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <PackageIcon className="size-14 text-muted-foreground/30" />
-          </div>
-        )}
-      </Link>
-
-      {/* Info Section */}
-      <div className="px-4 pb-4 pt-2 border-t border-gray-50">
-        {/* Product Name */}
-        <Link href={productHref} onClick={handleInteraction} className="block mb-2 cursor-pointer">
-          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-primary-500 transition-colors">
-            {product.name}
-          </h3>
+      <div className={cn("flex h-full w-full", isList ? "flex-col sm:flex-row" : "flex-col")}>
+        <Link
+          href={productHref}
+          onClick={handleInteraction}
+          className={cn(
+            "relative block shrink-0 cursor-pointer overflow-hidden bg-secondary-50",
+            isList ? "aspect-square w-full p-5 sm:size-40 sm:aspect-auto lg:size-44" : "aspect-square w-full p-5"
+          )}
+        >
+          {heroImage ? (
+            <div className="relative h-full w-full transform transition-transform duration-500 group-hover:scale-105">
+              <Image
+                alt={product.name}
+                fill
+                className="object-contain"
+                src={heroImage}
+                sizes={isList ? "(max-width: 640px) 100vw, 176px" : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"}
+              />
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <PackageIcon className="size-14 text-muted-foreground/30" />
+            </div>
+          )}
         </Link>
 
-        {/* Volume */}
-        {volume && (
-          <p className="text-xs text-gray-400 mb-2">{volume}ml</p>
-        )}
+        {/* Info Section */}
+        <div className={cn(
+          "flex min-w-0 flex-1 flex-col border-t border-border/60 px-4 pb-4 pt-3",
+          isList && "sm:border-l sm:border-t-0 sm:px-5 sm:py-4 sm:pr-12"
+        )}>
+          {/* Product Name */}
+          <Link href={productHref} onClick={handleInteraction} className="block cursor-pointer">
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-primary-500">
+              {product.name}
+            </h3>
+          </Link>
 
-        <p className={`mb-2 text-[0.65rem] font-bold uppercase tracking-widest ${product.isAvailable !== false ? "text-emerald-600" : "text-red-500"}`}>
-          {getAvailabilityLabel(product.isAvailable)}
-        </p>
+          {meta && (
+            <p className="mt-2 line-clamp-1 text-xs font-medium text-text-muted">{meta}</p>
+          )}
 
-        {/* Price Section */}
-        <div className="space-y-1 mt-2 mb-2">
-          {(() => {
-            const priceTypes = priceType || [];
-            const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
-            const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
-            const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
+          <p className={cn(
+            "mt-2 text-[0.65rem] font-bold uppercase tracking-widest",
+            product.isAvailable !== false ? "text-emerald-600" : "text-red-500"
+          )}>
+            {getAvailabilityLabel(product.isAvailable)}
+          </p>
 
-            const retailPrice = getLowestRetailPrice(product);
-            const wholesalePrice = getLowestWholesalePrice(product);
+          {/* Price Section */}
+          <div className="mt-auto space-y-1 pt-3">
+            {priceContent}
+          </div>
 
-            if (onlyWholesale && wholesalePrice > 0) {
-              return (
-                <div className="flex items-baseline gap-1">
-                  <span className="text-base font-bold text-gray-900">
-                    {formatPrice(wholesalePrice)}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-medium">/ bal</span>
-                </div>
-              );
-            }
-            if (onlyRetail && retailPrice > 0) {
-              return (
-                <div className="flex items-baseline gap-1">
-                  <span className="text-base font-bold text-gray-900">
-                    {formatPrice(retailPrice)}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
-                </div>
-              );
-            }
-            if (showBoth) {
-              return (
-                <div className="space-y-0.5">
-                  {retailPrice > 0 ? (
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-base font-bold text-gray-900">
-                        {formatPrice(retailPrice)}
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-medium">/ pcs</span>
-                    </div>
-                  ) : (
-                    <div className="text-sm font-bold text-gray-900">Hubungi Kami</div>
-                  )}
-                  {wholesalePrice > 0 && (
-                    <div className="text-[10px] text-primary-600 font-black tracking-wide">
-                      Grosir: {formatPrice(wholesalePrice)} <span className="text-text-muted font-medium">/ bal</span>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-            return <div className="text-sm font-bold text-gray-900">Hubungi Kami</div>;
-          })()}
-        </div>
-
-        {/* Compare */}
-        <div className="mt-3 flex items-center">
-          <label
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Checkbox
-              className="size-3.5 hover:border-blue-500 hover:bg-blue-50/50 transition-all cursor-pointer"
-              checked={isComparing}
-              onCheckedChange={() => onCompareToggle?.(product.id)}
-            />
-            <span className="text-xs text-gray-400 font-medium">
-              Bandingkan
-            </span>
-          </label>
+          {/* Compare */}
+          <div className="mt-3 flex items-center">
+            <label
+              className="flex cursor-pointer items-center gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                className="size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50"
+                checked={isComparing}
+                onCheckedChange={() => onCompareToggle?.(product.id)}
+              />
+              <span className="text-xs font-medium text-text-muted">
+                Bandingkan
+              </span>
+            </label>
+          </div>
         </div>
       </div>
     </Card>

@@ -5,7 +5,11 @@ import { formatRupiah } from "@/lib/price-calculator";
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER;
 
-export function buildWhatsAppUrl(
+function buildWhatsAppUrlFromMessage(message: string): string {
+  return `https://wa.me/${WA_NUMBER || "6281234567890"}?text=${encodeURIComponent(message)}`;
+}
+
+export function buildWhatsAppMessage(
   product: Product,
   price: ProductPrice,
   calc: CalculatorResult,
@@ -44,7 +48,15 @@ export function buildWhatsAppUrl(
     "Terima kasih!",
   );
 
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return lines.join("\n");
+}
+
+export function buildWhatsAppUrl(
+  product: Product,
+  price: ProductPrice,
+  calc: CalculatorResult,
+): string {
+  return buildWhatsAppUrlFromMessage(buildWhatsAppMessage(product, price, calc));
 }
 
 export function buildInquiryUrl(product: Product): string {
@@ -69,10 +81,10 @@ export function buildInquiryUrl(product: Product): string {
     "Terima kasih!",
   );
 
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return buildWhatsAppUrlFromMessage(lines.join("\n"));
 }
 
-export function buildBulkInquiryUrl(
+export function buildBulkInquiryMessage(
   product: Product,
   price: ProductPrice,
   desiredQty: number,
@@ -109,7 +121,15 @@ export function buildBulkInquiryUrl(
     "Terima kasih!",
   );
 
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return lines.join("\n");
+}
+
+export function buildBulkInquiryUrl(
+  product: Product,
+  price: ProductPrice,
+  desiredQty: number,
+): string {
+  return buildWhatsAppUrlFromMessage(buildBulkInquiryMessage(product, price, desiredQty));
 }
 
 export function buildWishlistInquiryUrl(products: Product[]): string {
@@ -134,7 +154,7 @@ export function buildWishlistInquiryUrl(products: Product[]): string {
     "Terima kasih!",
   );
 
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return buildWhatsAppUrlFromMessage(lines.join("\n"));
 }
 
 export interface WishlistInquiryItem {
@@ -143,7 +163,7 @@ export interface WishlistInquiryItem {
   unit: "pcs" | "bal";
 }
 
-export function buildWishlistInquiryWithPricesUrl(items: WishlistInquiryItem[]): string {
+export function buildWishlistInquiryWithPricesMessage(items: WishlistInquiryItem[]): string {
   const lines: string[] = [
     "Halo Admin Toples Laksana,",
     "Saya tertarik dengan beberapa produk berikut:",
@@ -188,5 +208,9 @@ export function buildWishlistInquiryWithPricesUrl(items: WishlistInquiryItem[]):
     "Terima kasih!"
   );
 
-  return `https://wa.me/${WA_NUMBER || "6281234567890"}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return lines.join("\n");
+}
+
+export function buildWishlistInquiryWithPricesUrl(items: WishlistInquiryItem[]): string {
+  return buildWhatsAppUrlFromMessage(buildWishlistInquiryWithPricesMessage(items));
 }

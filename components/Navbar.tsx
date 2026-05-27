@@ -188,7 +188,7 @@ export default function Navbar() {
               variant="ghost"
               size="icon-lg"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden rounded-full bg-white/20 text-white hover:bg-white/30 hover:text-white"
+              className="size-10 rounded-full bg-white/20 text-white hover:bg-white/30 hover:text-white lg:hidden"
             >
               {mobileMenuOpen ? <XIcon className="size-5" /> : <MenuIcon className="size-5" />}
             </Button>
@@ -224,62 +224,6 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="mt-auto border-t border-white/20 pt-6 space-y-3">
-              {/* Wishlist Link for Mobile */}
-              {user && (
-                <Link
-                  href="/wishlist"
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all cursor-pointer"
-                >
-                  <Heart className="size-5" />
-                  <span>Wishlist Saya</span>
-                </Link>
-              )}
-
-              {/* Google Login for Mobile */}
-              {user ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 px-4 py-2">
-                    <Image
-                      src={user.photoURL || "/toples.png"}
-                      alt={user.displayName || "User"}
-                      width={40}
-                      height={40}
-                      className="rounded-full border border-white/20 object-cover"
-                      unoptimized
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-white font-bold truncate">{user.displayName}</p>
-                      <p className="text-white/60 text-xs truncate">{user.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={logout}
-                    className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition-all cursor-pointer"
-                  >
-                    <AppIcon name="logout" />
-                    <span>Keluar</span>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={loginWithGoogle}
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white text-primary-600 font-bold transition-all cursor-pointer"
-                >
-                  <AppIcon name="google" />
-                  <span>Masuk dengan Google</span>
-                </button>
-              )}
-
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all cursor-pointer"
-              >
-                <ShieldUserIcon className="size-5" />
-                <span>Login Admin</span>
-              </Link>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

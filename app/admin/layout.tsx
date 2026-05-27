@@ -1,7 +1,7 @@
 import connectDB from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
 import InteractionModel from "@/models/Interaction";
-import CategoryModel from "@/models/Category";
+import WhatsAppLogModel from "@/models/WhatsAppLog";
 import { Metadata } from "next";
 import AdminLayoutClient from "./AdminLayoutClient";
 
@@ -21,8 +21,8 @@ export default async function AdminLayout({
   // Fetch counts for sidebar badges
   const [productCount, interactionCount, waLogsCount] = await Promise.all([
     ProductModel.countDocuments({ deletedAt: null }),
-    InteractionModel.countDocuments(),
-    InteractionModel.countDocuments({ interactionType: "whatsapp_share" }),
+    InteractionModel.countDocuments({ interactionType: "detail_click" }),
+    WhatsAppLogModel.countDocuments(),
   ]);
 
   return (

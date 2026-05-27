@@ -3,6 +3,10 @@ import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Interaction from "@/models/Interaction";
 
+function normalizeUserId(userId: unknown) {
+  return typeof userId === "string" && userId.includes("@") ? userId : "guest";
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -10,6 +14,7 @@ export async function POST(
   try {
     await connectDB();
     const { id } = await params;
+    const body = await request.json().catch(() => ({}));
     const product = await Product.findOne({
       deletedAt: null,
       $or: [{ id }, { sku: id }],
@@ -21,7 +26,7 @@ export async function POST(
 
     await Interaction.create({
       id: `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      userId: "guest",
+      userId: normalizeUserId(body.userId),
       productId: product.id,
       interactionType: "detail_click",
     });

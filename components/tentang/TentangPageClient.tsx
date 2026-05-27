@@ -17,19 +17,19 @@ const VALUES = [
   {
     step: "01",
     title: "Pilihan Lengkap",
-    text: "Menyediakan toples, jar, kaleng, dan kemasan pendukung untuk kebutuhan ritel maupun produksi.",
+    text: "Menyediakan toples plastik, jar kaca, kaleng, dan kemasan pendukung untuk kebutuhan usaha.",
     icon: BoxesIcon,
   },
   {
     step: "02",
     title: "Konsultasi Ukuran",
-    text: "Membantu pelanggan mencocokkan kapasitas, bentuk, dan tipe tutup dengan karakter produk.",
+    text: "Membantu mencocokkan kapasitas, bentuk, dan tipe tutup dengan kebutuhan produk.",
     icon: HandshakeIcon,
   },
   {
     step: "03",
     title: "Siap Grosir",
-    text: "Cocok untuk UMKM, reseller, toko bahan kue, hampers, dan kebutuhan stok kemasan musiman.",
+    text: "Melayani pembelian ecer dan grosir untuk UMKM, reseller, hampers, dan stok produksi.",
     icon: BadgeCheckIcon,
   },
 ];
@@ -38,24 +38,20 @@ export default function TentangPageClient() {
   return (
     <main className="bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative w-full lg:h-[calc(100vh-5rem)] flex items-center pt-12 pb-20 lg:py-0">
-        <div className="mx-auto max-w-screen-2xl w-full px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
+      <section className="relative flex min-h-[100svh] w-full flex-col justify-center overflow-hidden pb-8 pt-24 lg:block lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-0">
+        <div className="z-10 mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 px-6 lg:h-full lg:grid-cols-2 lg:gap-12 lg:px-12">
           {/* Hero Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="lg:col-span-1 space-y-6"
+            className="space-y-5 lg:col-span-1"
           >
-            <span className="inline-block text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full">
-              Tentang Kami
-            </span>
             <h1 className="text-4xl font-extrabold tracking-tight text-text-primary lg:text-6xl leading-[1.1]">
-              Partner kemasan untuk bisnis yang terus bertumbuh.
+              Toko kemasan di Bandung untuk kebutuhan ecer dan grosir.
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-text-secondary lg:text-lg">
-              Toples Laksana adalah toko kemasan di Bandung yang melayani kebutuhan toples, jar, kaleng, dan
-              kemasan pendukung untuk usaha makanan, hampers, reseller, dan kebutuhan industri.
+              Toples Laksana menyediakan toples, jar, kaleng, dan kemasan pendukung untuk usaha makanan, hampers, reseller, dan kebutuhan produksi.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row pt-2">
               <Link
@@ -84,7 +80,7 @@ export default function TentangPageClient() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="relative lg:absolute lg:right-0 lg:top-0 lg:bottom-0 w-full lg:w-1/2 h-[400px] lg:h-full z-0 overflow-hidden"
+          className="relative z-0 mt-8 h-[240px] w-full overflow-hidden lg:absolute lg:bottom-0 lg:right-0 lg:top-0 lg:mt-0 lg:h-full lg:w-1/2"
           style={{
             maskImage: "linear-gradient(to right, transparent 10%, white 70%)",
             WebkitMaskImage: "linear-gradient(to right, transparent 10%, white 70%)",
@@ -101,19 +97,16 @@ export default function TentangPageClient() {
         </motion.div>
       </section>
 
-      {/* Scrollytelling Journey Section ("Cara Kami Bekerja") */}
+      {/* Process Section */}
       <section className="border-y border-border bg-secondary-50/50 px-6 py-20 lg:px-12 relative">
         <div className="mx-auto max-w-screen-2xl">
           {/* Header */}
           <div className="mb-16 text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full inline-block">
-              Cara Kami Bekerja
-            </span>
             <h2 className="text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">
-              Praktis, jelas, dan dekat dengan kebutuhan pembeli.
+              Proses pembelian yang jelas.
             </h2>
             <p className="text-text-secondary max-w-xl mx-auto text-sm sm:text-base">
-              Kami memandu Anda dari pencarian awal hingga penyediaan stok dalam jumlah besar.
+              Dari pemilihan ukuran sampai konfirmasi stok, informasi dibuat mudah diperiksa sebelum pelanggan memesan.
             </p>
           </div>
 
@@ -183,14 +176,11 @@ export default function TentangPageClient() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-5 space-y-4"
           >
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full inline-block">
-              Target Pengguna
-            </span>
             <h2 className="text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">
-              Untuk siapa Toples Laksana?
+              Melayani berbagai kebutuhan usaha.
             </h2>
             <p className="text-text-secondary text-sm sm:text-base leading-relaxed">
-              Kami melayani berbagai skala usaha, membantu menyajikan kemasan terbaik untuk meningkatkan penjualan produk Anda.
+              Kami membantu pembeli memilih kemasan berdasarkan jenis produk, kapasitas, bahan, dan kebutuhan stok.
             </p>
           </motion.div>
 
@@ -198,18 +188,15 @@ export default function TentangPageClient() {
             {[
               {
                 title: "UMKM & Ritel Kuliner",
-                desc: "Solusi kemasan toples plastik, jar kaca tebal untuk makanan ringan, kue kering, sambal, selai, dan produk olahan rumahan.",
-                bg: "from-blue-500/10 to-indigo-500/10",
+                desc: "Kemasan untuk makanan ringan, kue kering, sambal, selai, dan produk olahan rumahan.",
               },
               {
                 title: "Reseller & Toko Bahan Kue",
-                desc: "Penyediaan stok kemasan berkelanjutan dengan harga distributor bersaing untuk reseller kemasan dan toko ritel bahan kue.",
-                bg: "from-emerald-500/10 to-teal-500/10",
+                desc: "Pilihan stok kemasan untuk penjualan ulang dan kebutuhan toko ritel bahan kue.",
               },
               {
                 title: "Event Organizer & Hampers",
-                desc: "Pilihan toples tabung/cylinder, kaleng tin eksklusif untuk seasonal hampers, souvenir pernikahan, dan custom packaging unik.",
-                bg: "from-amber-500/10 to-orange-500/10",
+                desc: "Toples tabung, jar, dan kaleng untuk hampers, souvenir, dan kebutuhan acara.",
               },
             ].map((item, i) => (
               <motion.div
@@ -243,14 +230,11 @@ export default function TentangPageClient() {
           transition={{ duration: 0.6 }}
           className="lg:col-span-5 space-y-6"
         >
-          <span className="inline-block text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full">
-            Lokasi Toko
-          </span>
           <h2 className="text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">
             Kunjungi Toples Laksana
           </h2>
           <p className="text-base leading-relaxed text-text-secondary">
-            Datang langsung untuk melihat pilihan kemasan, mencocokkan ukuran, dan konsultasi kebutuhan grosir.
+            Datang langsung untuk melihat pilihan kemasan, mencocokkan ukuran, dan menanyakan stok yang tersedia.
           </p>
 
           <div className="space-y-4 pt-2">
@@ -307,19 +291,16 @@ export default function TentangPageClient() {
         </motion.div>
       </section>
 
-      {/* Google Reviews Section */}
+      {/* Reviews Section */}
       <section className="border-y border-border bg-secondary-50/50 px-6 py-20 lg:px-12">
         <div className="mx-auto max-w-screen-2xl">
           <div className="mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div className="space-y-2">
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-primary-500 bg-primary-50 px-3 py-1.5 rounded-full inline-block">
-                Google Review
-              </span>
               <h2 className="text-3xl font-extrabold tracking-tight text-text-primary">
-                Cuplikan Review Pelanggan
+                Review pelanggan
               </h2>
               <p className="max-w-2xl text-text-secondary text-sm">
-                Review Google ditampilkan langsung melalui embed resmi widget.
+                Ulasan Google membantu pelanggan baru melihat pengalaman pembeli lain.
               </p>
             </div>
             <a

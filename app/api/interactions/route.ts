@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import InteractionModel from "@/models/Interaction";
 
+function normalizeUserId(userId: unknown) {
+  return typeof userId === "string" && userId.includes("@") ? userId : "guest";
+}
+
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -24,7 +28,7 @@ export async function POST(req: Request) {
       productId: productId || null,
       pagePath: pagePath || "",
       interactionType,
-      userId: userId || "anonymous",
+      userId: normalizeUserId(userId),
     });
 
     return NextResponse.json({ success: true, data: interaction });

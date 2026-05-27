@@ -14,8 +14,8 @@ export default async function WaLogsPage() {
   await connectDB();
   
   const [{ data: logs }, rawProducts] = await Promise.all([
-    getWaLogs({ limit: 1000 }),
-    ProductModel.find({ deletedAt: null }).select("id name").lean(),
+    getWaLogs({ limit: 10000 }),
+    ProductModel.find({ deletedAt: null }).select("id name sku").lean(),
   ]);
 
   return (

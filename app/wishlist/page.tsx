@@ -8,7 +8,10 @@ import ProductCard from "@/components/catalog/ProductCard";
 import { Product, getLowestRetailPrice, getLowestWholesalePrice } from "@/types/product";
 import { Heart } from "lucide-react";
 import { AppIcon } from "@/components/ui/app-icon";
-import { buildWishlistInquiryWithPricesUrl } from "@/lib/whatsapp-builder";
+import {
+  buildWishlistInquiryWithPricesMessage,
+  buildWishlistInquiryWithPricesUrl,
+} from "@/lib/whatsapp-builder";
 import { formatPrice } from "@/lib/price-calculator";
 
 interface ModalItem {
@@ -102,6 +105,49 @@ export default function WishlistPage() {
           : item
       )
     );
+  };
+
+  const getModalItemPricing = (item: ModalItem) => {
+    const isWholesale = item.unit === "bal";
+    const wholesalePrice = getLowestWholesalePrice(item.product);
+    const retailPrice = getLowestRetailPrice(item.product);
+    const unitPrice = isWholesale && wholesalePrice > 0
+      ? wholesalePrice
+      : isWholesale
+      ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
+      : retailPrice;
+
+    return {
+      unitPrice,
+      subtotal: unitPrice * item.quantity,
+    };
+  };
+
+  const handleSendWishlistInquiry = () => {
+    const details = modalItems.map((item) => {
+      const { unitPrice, subtotal } = getModalItemPricing(item);
+
+      return {
+        productId: item.product.id,
+        unit: item.unit,
+        quantity: item.quantity,
+        priceAtThatTime: unitPrice,
+        subtotal,
+      };
+    });
+
+    fetch("/api/whatsapp-logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.email || "guest",
+        message: buildWishlistInquiryWithPricesMessage(modalItems),
+        grandTotal: details.reduce((sum, detail) => sum + detail.subtotal, 0),
+        details,
+      }),
+    }).catch(console.error);
+
+    setIsModalOpen(false);
   };
 
   return (
@@ -396,7 +442,7 @@ export default function WishlistPage() {
                   href={buildWishlistInquiryWithPricesUrl(modalItems)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleSendWishlistInquiry}
                   className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-600 shadow-sm transition-all active:scale-[0.97] cursor-pointer"
                 >
                   Kirim ke WhatsApp
@@ -409,4 +455,3 @@ export default function WishlistPage() {
     </main>
   );
 }
-

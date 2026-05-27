@@ -1,6 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import AdminDatePickerField, {
+  parseDateInputValue,
+} from "@/components/admin/AdminDatePickerField";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,24 +42,35 @@ function getDateValue(date?: string) {
   return date ? new Date(date).getTime() : 0;
 }
 
-function getInteractionLabel(type: InteractionType) {
-  switch (type) {
-    case "view":
-      return "Dilihat";
-    case "detail_click":
-      return "Klik Detail";
-    case "whatsapp_share":
-      return "Klik WhatsApp";
-    case "promo_click":
-      return "Klik Promo";
-    case "page_view":
-    default:
-      return "Page View";
+function parseInteractionDate(date?: string) {
+  if (!date) return null;
+
+  const parsed = new Date(date);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
+}
+
+function getStartOfDateInput(value: string) {
+  return new Date(`${value}T00:00:00`);
+}
+
+function getEndOfDateInput(value: string) {
+  return new Date(`${value}T23:59:59.999`);
+}
+
+function getDisplayUser(userId: string) {
+  const normalizedUserId = userId.trim();
+
+  if (normalizedUserId.includes("@")) {
+    return normalizedUserId;
   }
+
+  return "guest";
 }
 
 export default function InteractionsPageContent({ initialInteractions, products }: InteractionsPageContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const productMap = useMemo(
     () => Object.fromEntries(products.map((product) => [product.id, product.name])),
@@ -67,18 +81,27 @@ export default function InteractionsPageContent({ initialInteractions, products 
     return initialInteractions
       .filter((interaction) => {
         const productName = productMap[interaction.productId || ""] || interaction.productId || "";
+        const displayUser = getDisplayUser(interaction.userId);
         const query = searchQuery.toLowerCase();
+        const date = parseInteractionDate(interaction.createdAt);
+        const isAfterStart = startDate
+          ? date !== null && date >= getStartOfDateInput(startDate)
+          : true;
+        const isBeforeEnd = endDate
+          ? date !== null && date <= getEndOfDateInput(endDate)
+          : true;
 
         return (
-          productName.toLowerCase().includes(query) ||
-          interaction.userId.toLowerCase().includes(query) ||
-          interaction.interactionType.toLowerCase().includes(query)
+          isAfterStart &&
+          isBeforeEnd &&
+          (productName.toLowerCase().includes(query) ||
+            displayUser.toLowerCase().includes(query))
         );
       })
       .sort((a, b) => {
         return getDateValue(b.createdAt) - getDateValue(a.createdAt); // Descending (newest first)
       });
-  }, [initialInteractions, productMap, searchQuery]);
+  }, [endDate, initialInteractions, productMap, searchQuery, startDate]);
 
   return (
     <>
@@ -91,36 +114,69 @@ export default function InteractionsPageContent({ initialInteractions, products 
       <div className="p-6 lg:p-10 space-y-6 flex-1 w-full max-w-full">
         {/* Table Card */}
         <Card className="shadow-none overflow-hidden bg-white border border-border">
-          <div className="px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white gap-4 border-b border-border">
-            <div className="relative flex-1 sm:max-w-md group">
-              <AppIcon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-text-muted transition-colors group-focus-within:text-primary-500" />
-              <Input
-                type="text"
-                placeholder="Cari interaksi..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
+          <div className="border-b border-border bg-white px-6 pb-5 pt-0 lg:px-8">
+            <div className="grid grid-cols-1 items-end gap-4 xl:grid-cols-[minmax(320px,552px)_200px_200px_112px_116px] xl:justify-between">
+              <div className="relative group xl:self-end">
+                <AppIcon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-text-muted transition-colors group-focus-within:text-primary-500" />
+                <Input
+                  type="text"
+                  placeholder="Cari produk atau email..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  className="h-12 w-full rounded-lg border-border bg-secondary-50/30 pl-12 pr-6 text-sm font-bold text-text-primary shadow-none transition-all focus:bg-white focus:border-primary-500"
+                />
+              </div>
+
+              <AdminDatePickerField
+                label="Dari"
+                value={startDate}
+                onChange={(value) => {
+                  setStartDate(value);
+                  if (endDate && value && getStartOfDateInput(value) > getEndOfDateInput(endDate)) {
+                    setEndDate("");
+                  }
+                }}
+                maxDate={parseDateInputValue(endDate)}
               />
+
+              <AdminDatePickerField
+                label="Sampai"
+                value={endDate}
+                onChange={setEndDate}
+                minDate={parseDateInputValue(startDate)}
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStartDate("");
+                  setEndDate("");
+                }}
+                className="h-12 rounded-lg border border-border bg-white px-4 text-[0.65rem] font-black uppercase tracking-[0.12em] text-text-secondary transition-all hover:bg-secondary-50 hover:text-text-primary"
+              >
+                Reset
+              </button>
+
+              <Badge variant="secondary" className="h-12 justify-center rounded-lg bg-primary-50 px-4 text-xs font-black text-primary-600 border-none">
+                {filteredInteractions.length} data
+              </Badge>
             </div>
-            <Badge variant="secondary" className="bg-primary-50 text-primary-600 border-none px-3 py-1 text-xs font-black self-start sm:self-auto">
-              {filteredInteractions.length} data
-            </Badge>
           </div>
 
           <div className="overflow-x-auto">
-            <Table className="min-w-[900px]">
+            <Table className="min-w-190">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Waktu</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Tipe Interaksi</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Produk</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User ID</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredInteractions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="p-20 text-center">
+                    <TableCell colSpan={3} className="p-20 text-center">
                       <div className="flex flex-col items-center justify-center text-text-muted">
                         <AppIcon name="touch_app" className="text-6xl opacity-10 mb-4" />
                         <p className="text-lg font-black text-text-primary">Interaksi tidak ditemukan</p>
@@ -143,17 +199,14 @@ export default function InteractionsPageContent({ initialInteractions, products 
                         </p>
                       </TableCell>
                       <TableCell className="px-8 py-5">
-                        <Badge variant="outline" className="font-black text-[0.6rem] uppercase tracking-widest px-2 py-1 border-border bg-secondary-50/50">
-                          {getInteractionLabel(interaction.interactionType)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-8 py-5">
                         <p className="text-sm font-bold text-text-primary group-hover:text-primary-600 transition-colors line-clamp-1">
                           {productMap[interaction.productId || ""] || interaction.productId || "-"}
                         </p>
                       </TableCell>
-                      <TableCell className="px-8 py-5 font-mono text-[10px] text-text-muted tracking-tighter">
-                        {interaction.userId}
+                      <TableCell className="px-8 py-5">
+                        <p className="font-mono text-xs font-bold text-text-secondary">
+                          {getDisplayUser(interaction.userId)}
+                        </p>
                       </TableCell>
                     </TableRow>
                   ))

@@ -1,186 +1,245 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { AppIcon } from "@/components/ui/app-icon";
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowRightIcon,
+  BadgeCheckIcon,
+  MessageCircleIcon,
+} from "lucide-react";
+
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
 const CATEGORIES = [
   {
     name: "Jar Cylinder",
-    icon: "inventory_2",
-    desc: "Pilihan utama untuk cookies dan snack premium dengan tampilan modern transparan.",
+    desc: "Toples silinder untuk makanan kering, display produk, dan kebutuhan ritel.",
     image: "/toples.png",
   },
   {
     name: "Jar Kaca",
-    icon: "liquor",
-    desc: "Material kaca tebal grade industri, cocok untuk selai, madu, dan produk artisan.",
+    desc: "Kemasan kaca untuk selai, madu, sambal, dan produk makanan rumahan.",
     image: "/toples.png",
   },
   {
     name: "Tin Kaleng",
-    icon: "deployed_code",
-    desc: "Proteksi maksimal dengan material metalic yang memberikan kesan klasik dan eksklusif.",
+    desc: "Kemasan metal untuk hampers, souvenir, dan produk yang perlu perlindungan ekstra.",
     image: "/toples.png",
   },
   {
     name: "Jar Plastik",
-    icon: "layers",
-    desc: "Ringan, ekonomis, dan tahan banting. Tersedia dalam berbagai ukuran praktis.",
+    desc: "Pilihan ringan untuk stok harian UMKM, reseller, dan toko bahan kue.",
     image: "/toples.png",
   },
 ];
 
+const TRENDING_PRODUCTS = [
+  { name: "Jar Cylinder 200 ml", price: "Rp 2.500", img: "/toples.png" },
+  { name: "Jar Cylinder 350 ml", price: "Rp 3.200", img: "/toples.png" },
+  { name: "Toples Plastik 500 ml", price: "Rp 4.500", img: "/toples.png" },
+  { name: "Jar Kaca Premium", price: "Hubungi Kami", img: "/toples.png" },
+];
+
 export default function HomePage() {
   return (
-    <main className="bg-background">
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center pt-28 pb-12 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
-          <div className="lg:col-span-7">
-            <span className="inline-block text-primary-600 font-bold tracking-[0.2em] text-xs mb-4 uppercase">
-              Distributor Kemasan Premium
-            </span>
-            <h1 className="text-5xl lg:text-7xl font-extrabold text-text-primary leading-[1.1] tracking-tight mb-6">
-              Pilih Toples <br />Sesuai Kebutuhan
+    <main className="overflow-hidden bg-white">
+      {/* Hero Section */}
+      <section className="relative flex min-h-[100svh] items-center px-6 pb-10 pt-32 lg:h-screen lg:min-h-0 lg:px-12 lg:pb-12 lg:pt-36">
+        <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-5"
+          >
+            <h1 className="text-4xl font-extrabold leading-[1.1] text-text-primary lg:text-6xl">
+              Kemasan toples untuk kebutuhan usaha.
             </h1>
-            <p className="text-lg text-text-secondary max-w-xl mb-10 leading-relaxed">
-              Tingkatkan nilai produk ritel atau horeka Anda dengan koleksi kemasan organik pilihan kami, dirancang untuk menghadirkan keindahan taktil pada ruang sehari-hari.
+            <p className="max-w-2xl text-base leading-relaxed text-text-secondary lg:text-lg">
+              Toples Laksana menyediakan toples plastik, jar kaca, dan kaleng untuk UMKM, reseller, hampers, dan kebutuhan produksi. Tersedia pilihan ecer dan grosir.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Link
                 href="/catalog"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "bg-primary-500 text-white rounded-xl font-bold transition-all hover:bg-primary-600 gap-2 h-12 px-7 cursor-pointer"
-                )}
+                className={cn(buttonVariants({ size: "lg" }), "h-12 rounded-xl bg-primary-500 px-6 font-bold text-white transition-all hover:bg-primary-600")}
               >
                 Jelajahi Katalog
-                <AppIcon name="arrow_forward" />
+                <ArrowRightIcon className="size-4" />
+              </Link>
+              <Link
+                href="/tentang"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl border-border px-6 font-bold transition-all hover:bg-secondary-50")}
+              >
+                Tentang Kami
               </Link>
             </div>
-          </div>
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="aspect-4/5 w-full max-w-112.5 max-h-[75vh] rounded-2xl overflow-hidden relative group">
-              <Image
-                src="/toples.png"
-                alt="Koleksi Jar Premium"
-                fill
-                className="object-contain group-hover:scale-[0.82] transition-transform duration-700 scale-75"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                priority
-              />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="relative flex h-[240px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-secondary-50/50 sm:h-[340px] lg:h-[min(560px,calc(100vh-13rem))]"
+          >
+            <Image
+              src="/toples.png"
+              alt="Koleksi toples Toples Laksana"
+              fill
+              className="object-contain p-8 transition-transform duration-700 hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Category Section */}
+      <section className="border-y border-border bg-secondary-50/50 px-6 py-20 lg:px-12">
+        <div className="mx-auto max-w-screen-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end"
+          >
+            <div className="max-w-2xl space-y-4">
+              <h2 className="text-3xl font-extrabold text-text-primary lg:text-4xl">
+                Kategori kemasan yang tersedia.
+              </h2>
+              <p className="text-sm leading-relaxed text-text-secondary sm:text-base">
+                Lihat pilihan berdasarkan jenis kemasan, lalu bandingkan ukuran, warna tutup, dan harga di katalog.
+              </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-          <div>
-            <h2 className="text-3xl font-extrabold text-text-primary tracking-tight">Koleksi Pilihan</h2>
-            <p className="text-text-secondary mt-2">Dikurasi untuk pembeli profesional dan studio desain.</p>
-          </div>
-          <Link href="/catalog" className="text-primary-500 font-bold hover:underline flex items-center gap-1 cursor-pointer">
-            Lihat Semua Kategori <AppIcon name="arrow_forward" className="text-sm" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {CATEGORIES.map((cat) => (
             <Link
-              key={cat.name}
-              href={`/catalog?category=${encodeURIComponent(cat.name)}`}
-              className="group flex flex-col cursor-pointer"
+              href="/catalog"
+              className={cn(buttonVariants({ variant: "outline" }), "h-11 rounded-xl bg-white px-5 font-bold transition-all hover:bg-secondary-50")}
             >
-              <div className="aspect-square rounded-xl bg-white border border-border overflow-hidden mb-4 relative transition-all">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-contain scale-75 group-hover:scale-[0.82] transition-transform duration-700"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                />
-              </div>
-              <h3 className="text-lg font-bold text-text-primary transition-colors">
-                {cat.name}
-              </h3>
-              <p className="text-sm text-text-secondary line-clamp-2 mt-1">{cat.desc}</p>
+              Lihat Semua
+              <ArrowRightIcon className="size-4" />
             </Link>
-          ))}
+          </motion.div>
+
+          <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {CATEGORIES.map((cat, index) => (
+              <motion.div
+                key={cat.name}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
+                className="h-full"
+              >
+                <Link
+                  href={`/catalog?category=${encodeURIComponent(cat.name)}`}
+                  className="group flex h-full flex-col rounded-2xl border border-border bg-white p-4 transition-colors hover:border-primary-300 hover:bg-secondary-50/40"
+                >
+                  <div className="relative mb-5 aspect-square overflow-hidden rounded-xl bg-secondary-50">
+                    <Image
+                      src={cat.image}
+                      alt={cat.name}
+                      fill
+                      className="object-contain p-6 transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col">
+                    <h3 className="text-base font-black text-text-primary">{cat.name}</h3>
+                    <p className="mt-2 line-clamp-3 text-sm font-semibold leading-relaxed text-text-secondary">{cat.desc}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Trending */}
-      <section className="py-24 bg-secondary-50 px-6 lg:px-12">
-        <div className="max-w-screen-2xl mx-auto text-center mb-16">
-          <span className="text-primary-500 font-black tracking-widest text-xs uppercase mb-4 block">Paling Banyak Diminati</span>
-          <h2 className="text-4xl font-extrabold text-text-primary tracking-tight">Sedang Tren</h2>
-          <p className="text-text-secondary mt-4 max-w-xl mx-auto">
-            Produk terpopuler kami berdasarkan interaksi pelanggan dan permintaan grosir bulan ini.
+      {/* Trending Section */}
+      <section className="border-y border-border bg-secondary-50/50 px-6 py-20 lg:px-12">
+        <div className="mx-auto max-w-screen-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="mx-auto mb-12 max-w-3xl space-y-4 text-center"
+          >
+            <h2 className="text-3xl font-extrabold text-text-primary lg:text-4xl">Produk yang sering dicari.</h2>
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-text-secondary sm:text-base">
+              Beberapa pilihan kemasan yang banyak digunakan untuk ritel, hampers, dan stok produksi.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TRENDING_PRODUCTS.map((item, index) => (
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
+                className="h-full"
+              >
+                <Card className="group h-full overflow-hidden rounded-2xl border border-border bg-white p-0 transition-colors hover:border-primary-300 hover:bg-secondary-50/40">
+                  <CardContent className="flex h-full flex-col p-4">
+                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl bg-secondary-50">
+                      <Image
+                        src={item.img}
+                        alt={item.name}
+                        fill
+                        className="object-contain p-6 transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col justify-end">
+                      <h3 className="text-sm font-black text-text-primary sm:text-base">{item.name}</h3>
+                      <p className="mt-2 text-sm font-bold text-primary-500">{item.price}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="mx-auto max-w-screen-2xl px-6 py-20 text-center lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mx-auto max-w-4xl space-y-6"
+        >
+          <h2 className="text-3xl font-extrabold leading-[1.1] text-text-primary lg:text-5xl">
+            Cari kemasan yang sesuai dengan produk Anda.
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
+            Buka katalog untuk melihat produk yang tersedia, atau hubungi tim kami untuk konfirmasi stok, warna, dan harga grosir.
           </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-screen-2xl mx-auto">
-          {[
-            { name: "Sage Stoneware Mug", price: "Rp 12.500", img: "/toples.png" },
-            { name: "Oatmeal Linen Napkins", price: "Rp 45.000", img: "/toples.png" },
-            { name: "Ribbed Ceramic Canister", price: "Rp 32.000", img: "/toples.png" },
-            { name: "Olive Wood Board", price: "Rp 85.000", img: "/toples.png" },
-          ].map((item) => (
-            <Card key={item.name} className="overflow-hidden border border-border transition-all group rounded-xl bg-white p-0">
-              <CardContent className="p-4">
-                <div className="aspect-square rounded-lg bg-secondary-50 overflow-hidden mb-4 relative">
-                  <Image
-                    src={item.img}
-                    alt={item.name}
-                    fill
-                    className="object-contain group-hover:scale-110 transition-transform duration-700 scale-75"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                </div>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-bold text-text-primary text-sm sm:text-base">{item.name}</h4>
-                    <p className="text-primary-500 font-bold mt-1 text-sm">{item.price}</p>
-                  </div>
-                  <div className="bg-primary-50 text-primary-500 p-2 rounded-lg shrink-0">
-                    <AppIcon name="trending_up" className="text-sm" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 px-6 lg:px-12 text-center max-w-7xl mx-auto">
-        <h2 className="text-4xl lg:text-6xl font-extrabold text-text-primary tracking-tight mb-8">
-          Siap meningkatkan estetika <br />
-          <span className="text-primary-500">bisnis Anda?</span>
-        </h2>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link
-            href="/catalog"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-all gap-3 h-14 px-10"
-            )}
-          >
-            Buka Katalog
-            <AppIcon name="shopping_bag" />
-          </Link>
-          <a
-            href="https://wa.me/6281234567890"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "bg-white text-text-primary border-2 border-primary-500 rounded-xl font-bold text-lg hover:bg-primary-50 transition-all gap-3 h-14 px-10 cursor-pointer"
-            )}
-          >
-            Hubungi Kami
-            <AppIcon name="chat" />
-          </a>
-        </div>
+          <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row">
+            <Link
+              href="/catalog"
+              className={cn(buttonVariants({ size: "lg" }), "h-12 rounded-xl bg-primary-500 px-6 font-bold text-white transition-all hover:bg-primary-600")}
+            >
+              Buka Katalog
+              <BadgeCheckIcon className="size-4" />
+            </Link>
+            <a
+              href="https://wa.me/6282240923336?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples."
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl border-border bg-white px-6 font-bold transition-all hover:bg-secondary-50")}
+            >
+              <MessageCircleIcon className="size-4" />
+              Hubungi Kami
+            </a>
+          </div>
+        </motion.div>
       </section>
     </main>
   );

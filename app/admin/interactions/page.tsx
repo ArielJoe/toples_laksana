@@ -14,7 +14,7 @@ export default async function InteractionsPage() {
   await connectDB();
   
   const [{ data: interactions }, rawProducts] = await Promise.all([
-    getInteractions({ limit: 1000 }),
+    getInteractions({ type: "detail_click", limit: 10000 }),
     ProductModel.find({ deletedAt: null }).select("id name").lean(),
   ]);
 
