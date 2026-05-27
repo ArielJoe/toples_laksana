@@ -4,12 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/types/product";
 import {
-  formatAttributeLabel,
   getAvailabilityLabel,
   getLowestRetailPrice,
   getLowestWholesalePrice,
   getPrimaryImage,
-  getSpecValue,
 } from "@/types/product";
 import { formatPrice } from "@/lib/price-calculator";
 import { Card } from "@/components/ui/card";
@@ -42,15 +40,9 @@ export default function ProductCard({
   selectedUnit = "",
 }: ProductCardProps) {
   const { toggleWishlist, isInWishlist, user } = useApp();
-  const volume = getSpecValue(product, "volume_ml");
   const heroImage = getPrimaryImage(product);
   const productHref = `/products/${product.id}`;
   const wishlisted = isInWishlist(product.id);
-  const material = product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial);
-  const meta = [
-    material && material !== "-" ? material : null,
-    volume ? `${volume}ml` : null,
-  ].filter(Boolean).join(" • ");
   const isList = viewMode === "list";
 
   const priceContent = (() => {

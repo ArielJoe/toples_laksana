@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE_NAME, TOKEN_EXPIRY, TOKEN_MAX_AGE } from "@/lib/constants";
@@ -10,6 +11,17 @@ function getJwtSecret() {
   return new TextEncoder().encode(secret);
 }
 
+function safeCompare(value: string, expected: string) {
+  const valueBuffer = Buffer.from(value);
+  const expectedBuffer = Buffer.from(expected);
+
+  if (valueBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(valueBuffer, expectedBuffer);
+}
+
 // Validate admin credentials against environment variables
 export function validateCredentials(email: string, password: string): boolean {
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -19,7 +31,7 @@ export function validateCredentials(email: string, password: string): boolean {
     return false;
   }
 
-  return email === adminEmail && password === adminPassword;
+  return safeCompare(email, adminEmail) && safeCompare(password, adminPassword);
 }
 
 // Create a signed JWT token for the admin session

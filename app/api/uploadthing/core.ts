@@ -1,4 +1,5 @@
-import { createUploadthing, type FileRouter } from "uploadthing/server";
+import { createUploadthing, UploadThingError, type FileRouter } from "uploadthing/server";
+import { getAdminSession } from "@/lib/auth";
 
 const f = createUploadthing();
 
@@ -9,6 +10,20 @@ export const ourFileRouter = {
       maxFileCount: 4,
     },
   })
+    .middleware(async () => {
+      const session = await getAdminSession();
+
+      if (!session) {
+        throw new UploadThingError({
+          code: "FORBIDDEN",
+          message: "Unauthorized",
+        });
+      }
+
+      return {
+        uploadedBy: typeof session.email === "string" ? session.email : "admin",
+      };
+    })
     .onUploadComplete(async ({ file }) => {
       console.log("Upload complete for file:", file.name);
       console.log("File URL:", file.url);

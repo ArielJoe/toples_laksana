@@ -10,6 +10,20 @@ import LidVariant from "@/models/LidVariant";
 type MongoFilter = Record<string, unknown>;
 type MongoRange = Record<string, number>;
 
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parsePositiveInt(value: string | null, fallback: number) {
+  const parsed = Number.parseInt(value || "", 10);
+
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  return Math.max(1, parsed);
+}
+
 async function resolveCategoryIds(values: string[]): Promise<string[]> {
   if (values.length === 0) return [];
 
@@ -26,10 +40,10 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = request.nextUrl;
-    const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(50, Number.parseInt(searchParams.get("limit") || "10", 10));
+    const page = parsePositiveInt(searchParams.get("page"), 1);
+    const limit = Math.min(50, parsePositiveInt(searchParams.get("limit"), 10));
     const sort = searchParams.get("sort") || "popular";
-    const search = searchParams.get("search") || "";
+    const search = (searchParams.get("search") || "").trim().slice(0, 80);
     const categories = searchParams.getAll("category");
     const materialBody = searchParams.getAll("material_body");
     const lidMaterial = searchParams.getAll("lid_material");
@@ -50,7 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      filter.name = { $regex: search, $options: "i" };
+      filter.name = { $regex: escapeRegex(search), $options: "i" };
     }
 
     const categoryIds = await resolveCategoryIds(categories);

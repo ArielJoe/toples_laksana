@@ -21,6 +21,11 @@ interface ComparePageProps {
   searchParams: Promise<{ ids?: string }>;
 }
 
+interface LookupDoc {
+  id: string;
+  name: string;
+}
+
 // Grid columns based on product count (+1 for label column)
 function getGridCols(count: number) {
   if (count === 1) return "grid-cols-2";
@@ -40,26 +45,26 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
       deletedAt: null,
     }).lean();
 
-    const rawProducts = JSON.parse(JSON.stringify(fetched));
+    const rawProducts = JSON.parse(JSON.stringify(fetched)) as Product[];
 
     // Fetch and map metadata from DB for Bahan Badan, Bahan Tutup, Variasi Tutup, etc.
     const materialIds = [
-      ...new Set(rawProducts.flatMap((product: any) => [product.bodyMaterial, product.lidMaterial]).filter(Boolean)),
+      ...new Set(rawProducts.flatMap((product) => [product.bodyMaterial, product.lidMaterial]).filter(Boolean)),
     ];
-    const lidTypeIds = [...new Set(rawProducts.map((product: any) => product.lidType).filter(Boolean))];
-    const lidVariantIds = [...new Set(rawProducts.map((product: any) => product.lidVariant).filter(Boolean))];
+    const lidTypeIds = [...new Set(rawProducts.map((product) => product.lidType).filter(Boolean))];
+    const lidVariantIds = [...new Set(rawProducts.map((product) => product.lidVariant).filter(Boolean))];
 
-    const [materials, lidTypes, lidVariants] = await Promise.all([
+    const [materials, lidTypes, lidVariants] = (await Promise.all([
       Material.find({ id: { $in: materialIds } }).select("id name").lean(),
       LidType.find({ id: { $in: lidTypeIds } }).select("id name").lean(),
       LidVariant.find({ id: { $in: lidVariantIds } }).select("id name").lean(),
-    ]);
+    ])) as [LookupDoc[], LookupDoc[], LookupDoc[]];
 
-    const materialMap = new Map(materials.map((m: any) => [m.id, m.name]));
-    const lidTypeMap = new Map(lidTypes.map((t: any) => [t.id, t.name]));
-    const lidVariantMap = new Map(lidVariants.map((v: any) => [v.id, v.name]));
+    const materialMap = new Map(materials.map((m) => [m.id, m.name]));
+    const lidTypeMap = new Map(lidTypes.map((t) => [t.id, t.name]));
+    const lidVariantMap = new Map(lidVariants.map((v) => [v.id, v.name]));
 
-    products = rawProducts.map((product: any) => ({
+    products = rawProducts.map((product) => ({
       ...product,
       bodyMaterialName: materialMap.get(product.bodyMaterial) || "",
       lidMaterialName: materialMap.get(product.lidMaterial) || "",
