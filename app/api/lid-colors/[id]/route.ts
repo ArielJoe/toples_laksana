@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
+import { countProductsUsingMasterData, masterDataInUseResponse } from "@/lib/master-data-usage";
 import LidColor from "@/models/LidColor";
 
 export async function PATCH(
@@ -31,10 +32,17 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const item = await LidColor.findOneAndDelete({ id });
+    const item = await LidColor.findOne({ id }).lean();
     if (!item) {
       return NextResponse.json({ error: "Lid color not found" }, { status: 404 });
     }
+
+    const productCount = await countProductsUsingMasterData({ "prices.lidColorId": id });
+    if (productCount > 0) {
+      return masterDataInUseResponse("Warna tutup", productCount);
+    }
+
+    await LidColor.deleteOne({ id });
 
     return NextResponse.json({ message: "Lid color deleted successfully" });
   } catch (error) {

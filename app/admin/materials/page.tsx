@@ -23,7 +23,7 @@ export default async function MaterialsPage() {
       apiPath="/api/materials"
       initialItems={JSON.parse(JSON.stringify(rawMaterials))}
       fields={[
-        { name: "id", label: "ID Bahan", type: "text", placeholder: "misal: plastik_pet", required: true },
+        { name: "id", label: "ID", type: "text", placeholder: "misal: plastik_pet", required: true },
         { name: "name", label: "Nama Bahan", type: "text", placeholder: "misal: Plastik PET", required: true },
         {
           name: "usage",

@@ -23,7 +23,7 @@ interface UnitsPageContentProps {
 }
 
 const UNIT_FIELDS: MasterDataField[] = [
-  { name: "id", label: "ID Satuan", type: "text", placeholder: "misal: box", required: true },
+  { name: "id", label: "ID", type: "text", placeholder: "misal: box", required: true },
   { name: "name", label: "Nama Satuan", type: "text", placeholder: "misal: Box", required: true },
   { name: "symbol", label: "Simbol/Abbrev", type: "text", placeholder: "misal: bx", required: true },
 ];
@@ -180,7 +180,7 @@ export default function UnitsPageContent({ initialUnits }: UnitsPageContentProps
             <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Satuan</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Satuan</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Simbol</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>

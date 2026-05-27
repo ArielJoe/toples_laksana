@@ -525,7 +525,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               <Table>
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Kategori</TableHead>
+                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Kategori</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Jml Produk</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
@@ -566,7 +566,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               <Table>
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Warna</TableHead>
+                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Preview</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Warna</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
@@ -609,7 +609,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               <Table>
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Tipe</TableHead>
+                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Tipe</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                   </TableRow>
@@ -646,7 +646,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               <Table>
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Satuan</TableHead>
+                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Satuan</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Simbol</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
@@ -687,7 +687,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
               <Table>
                 <TableHeader>
                   <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Tipe</TableHead>
+                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Deskripsi</TableHead>
                     <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>

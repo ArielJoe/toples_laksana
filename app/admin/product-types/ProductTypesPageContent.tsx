@@ -23,7 +23,7 @@ interface ProductTypesPageContentProps {
 }
 
 const PRODUCT_TYPE_FIELDS: MasterDataField[] = [
-  { name: "id", label: "ID Tipe Produk", type: "text", placeholder: "misal: toples-jar", required: true },
+  { name: "id", label: "ID", type: "text", placeholder: "misal: toples-jar", required: true },
   { name: "name", label: "Nama Tipe Produk", type: "text", placeholder: "misal: Toples Jar", required: true },
 ];
 
@@ -178,7 +178,7 @@ export default function ProductTypesPageContent({ initialProductTypes }: Product
             <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Tipe</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Tipe Produk</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                 </TableRow>

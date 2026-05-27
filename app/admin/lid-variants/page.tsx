@@ -23,7 +23,7 @@ export default async function LidVariantsPage() {
       apiPath="/api/lid-variants"
       initialItems={JSON.parse(JSON.stringify(rawLidVariants))}
       fields={[
-        { name: "id", label: "ID Variasi Tutup", type: "text", placeholder: "misal: twist_off", required: true },
+        { name: "id", label: "ID", type: "text", placeholder: "misal: twist_off", required: true },
         { name: "name", label: "Nama Variasi Tutup", type: "text", placeholder: "misal: Twist Off", required: true },
         { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat variasi tutup" },
       ]}

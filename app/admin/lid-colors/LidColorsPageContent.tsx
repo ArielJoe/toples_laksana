@@ -23,7 +23,7 @@ interface LidColorsPageContentProps {
 }
 
 const LID_COLOR_FIELDS: MasterDataField[] = [
-  { name: "id", label: "ID Warna", type: "text", placeholder: "misal: merah", required: true },
+  { name: "id", label: "ID", type: "text", placeholder: "misal: merah", required: true },
   { name: "color", label: "Nama Warna", type: "text", placeholder: "misal: Merah", required: true },
   { name: "colorCode", label: "Kode Warna (HEX)", type: "color", placeholder: "misal: #FF0000", required: true },
 ];
@@ -179,7 +179,7 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
             <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Warna</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Preview</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Warna</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>

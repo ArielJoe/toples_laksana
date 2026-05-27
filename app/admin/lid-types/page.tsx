@@ -23,7 +23,7 @@ export default async function LidTypesPage() {
       apiPath="/api/lid-types"
       initialItems={JSON.parse(JSON.stringify(rawLidTypes))}
       fields={[
-        { name: "id", label: "ID Jenis Tutup", type: "text", placeholder: "misal: ulir", required: true },
+        { name: "id", label: "ID", type: "text", placeholder: "misal: ulir", required: true },
         { name: "name", label: "Nama Jenis Tutup", type: "text", placeholder: "misal: Ulir", required: true },
         { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat jenis tutup" },
       ]}

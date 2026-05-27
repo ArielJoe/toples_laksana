@@ -23,7 +23,7 @@ interface PriceTypesPageContentProps {
 }
 
 const PRICE_TYPE_FIELDS: MasterDataField[] = [
-  { name: "id", label: "ID Tipe", type: "text", placeholder: "misal: retail", required: true },
+  { name: "id", label: "ID", type: "text", placeholder: "misal: retail", required: true },
   { name: "name", label: "Nama Tipe", type: "text", placeholder: "misal: Retail", required: true },
   { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi tipe harga (opsional)" },
 ];
@@ -180,7 +180,7 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
             <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Tipe</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Deskripsi</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>

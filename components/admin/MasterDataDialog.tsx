@@ -182,14 +182,14 @@ export default function MasterDataDialog({
                 type="button"
                 variant="secondary"
                 onClick={onClose}
-                className="flex-1 font-black uppercase tracking-widest text-[0.65rem] h-12 rounded-xl"
+                className="flex-1 font-black uppercase tracking-widest text-xs h-12 rounded-xl"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-[2] bg-primary-500 hover:bg-primary-600 text-white font-black uppercase tracking-widest text-[0.65rem] h-12 rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-50"
+                className="flex-[2] bg-primary-500 hover:bg-primary-600 text-white font-black uppercase tracking-widest text-xs h-12 rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>

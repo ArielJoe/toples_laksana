@@ -625,10 +625,10 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
 
           <div className="flex-none border-t border-border bg-white/95 px-8 py-6 backdrop-blur-md">
             <div className="flex gap-3">
-              <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-12 font-black uppercase tracking-widest text-[0.65rem] rounded-xl">
+              <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-12 font-black uppercase tracking-widest text-xs rounded-xl">
                 Batal
               </Button>
-              <Button type="submit" disabled={loading} className="flex-2 h-12 font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 text-[0.65rem] rounded-xl bg-primary-500 hover:bg-primary-600 text-white">
+              <Button type="submit" disabled={loading} className="flex-2 h-12 font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 text-xs rounded-xl bg-primary-500 hover:bg-primary-600 text-white">
                 {loading ? "Menyimpan..." : product ? "Simpan Perubahan" : "Tambah Produk"}
               </Button>
             </div>

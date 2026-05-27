@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
+import { countProductsUsingMasterData, masterDataInUseResponse } from "@/lib/master-data-usage";
 import ProductType from "@/models/ProductType";
 
 export async function PATCH(
@@ -31,10 +32,17 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const item = await ProductType.findOneAndDelete({ id });
+    const item = await ProductType.findOne({ id }).lean();
     if (!item) {
       return NextResponse.json({ error: "Product type not found" }, { status: 404 });
     }
+
+    const productCount = await countProductsUsingMasterData({ productTypeId: id });
+    if (productCount > 0) {
+      return masterDataInUseResponse("Tipe produk", productCount);
+    }
+
+    await ProductType.deleteOne({ id });
 
     return NextResponse.json({ message: "Product type deleted successfully" });
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
+import { countProductsUsingMasterData, masterDataInUseResponse } from "@/lib/master-data-usage";
 import Material from "@/models/Material";
 
 export async function PATCH(
@@ -34,10 +35,19 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const item = await Material.findOneAndDelete({ id });
+    const item = await Material.findOne({ id }).lean();
     if (!item) {
       return NextResponse.json({ error: "Material not found" }, { status: 404 });
     }
+
+    const productCount = await countProductsUsingMasterData({
+      $or: [{ bodyMaterial: id }, { lidMaterial: id }],
+    });
+    if (productCount > 0) {
+      return masterDataInUseResponse("Bahan produk", productCount);
+    }
+
+    await Material.deleteOne({ id });
 
     return NextResponse.json({ message: "Material deleted successfully" });
   } catch (error) {

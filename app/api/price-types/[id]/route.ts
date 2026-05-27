@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
+import { countProductsUsingMasterData, masterDataInUseResponse } from "@/lib/master-data-usage";
 import PriceType from "@/models/PriceType";
 
 export async function PATCH(
@@ -31,10 +32,17 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const item = await PriceType.findOneAndDelete({ id });
+    const item = await PriceType.findOne({ id }).lean();
     if (!item) {
       return NextResponse.json({ error: "Price type not found" }, { status: 404 });
     }
+
+    const productCount = await countProductsUsingMasterData({ "prices.priceTypeId": id });
+    if (productCount > 0) {
+      return masterDataInUseResponse("Tipe harga", productCount);
+    }
+
+    await PriceType.deleteOne({ id });
 
     return NextResponse.json({ message: "Price type deleted successfully" });
   } catch (error) {

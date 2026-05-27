@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
+import { countProductsUsingMasterData, masterDataInUseResponse } from "@/lib/master-data-usage";
 import LidVariant from "@/models/LidVariant";
 
 export async function PATCH(
@@ -34,10 +35,17 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const item = await LidVariant.findOneAndDelete({ id });
+    const item = await LidVariant.findOne({ id }).lean();
     if (!item) {
       return NextResponse.json({ error: "Lid variant not found" }, { status: 404 });
     }
+
+    const productCount = await countProductsUsingMasterData({ lidVariant: id });
+    if (productCount > 0) {
+      return masterDataInUseResponse("Variasi tutup", productCount);
+    }
+
+    await LidVariant.deleteOne({ id });
 
     return NextResponse.json({ message: "Lid variant deleted successfully" });
   } catch (error) {

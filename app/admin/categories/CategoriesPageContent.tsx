@@ -26,7 +26,7 @@ interface CategoriesPageContentProps {
 }
 
 const CATEGORY_FIELDS: MasterDataField[] = [
-  { name: "id", label: "ID Kategori", type: "text", placeholder: "misal: toples-bulat", required: true },
+  { name: "id", label: "ID", type: "text", placeholder: "misal: toples-bulat", required: true },
   { name: "name", label: "Nama Kategori", type: "text", placeholder: "misal: Toples Bulat", required: true },
   { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi kategori (opsional)" },
 ];
@@ -190,7 +190,7 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
             <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID Kategori</TableHead>
+                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Kategori</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Jumlah Produk</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
