@@ -322,7 +322,7 @@ export default function WishlistPage() {
         ) : (
           <>
             {/* WhatsApp Inquiry Selection Toolbar */}
-            <div className="sticky top-16 lg:top-20 z-40 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-border shadow-xs">
+            <div className="sticky top-26 lg:top-20 z-40 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-border shadow-xs">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-text-secondary uppercase tracking-wider">
                   Pilih produk untuk ditanyakan
@@ -443,7 +443,7 @@ export default function WishlistPage() {
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary hover:text-red-500 hover:border-red-100 transition-colors cursor-pointer"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white border border-border text-text-secondary hover:text-red-500 hover:border-red-100 transition-colors cursor-pointer"
               >
                 <AppIcon name="close" className="text-lg" />
               </button>
@@ -458,96 +458,109 @@ export default function WishlistPage() {
                 const priceOptions = getPriceVariantOptions(product);
 
                 return (
-                  <div key={product.id} className={`flex items-center gap-4 ${idx > 0 ? "pt-4" : ""}`}>
-                    {/* Product Image */}
-                    <div className="relative size-16 shrink-0 border border-border rounded-xl bg-gray-50 overflow-hidden flex items-center justify-center p-2">
-                      <Image src={image} alt={product.name} fill className="object-contain" sizes="64px" />
+                  <div key={product.id} className={`flex flex-col gap-3.5 ${idx > 0 ? "pt-5" : ""}`}>
+                    {/* Top Info Area: Image + Text info */}
+                    <div className="flex items-start gap-4">
+                      {/* Product Image */}
+                      <div className="relative size-16 shrink-0 border border-border rounded-xl bg-gray-50 overflow-hidden flex items-center justify-center p-2">
+                        <Image src={image} alt={product.name} fill className="object-contain" sizes="64px" />
+                      </div>
+
+                      {/* Text Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base font-black text-text-primary truncate">{product.name}</h4>
+                        <p className="text-[10px] text-text-secondary font-mono tracking-wider mt-0.5">{product.sku}</p>
+                        {item.lidColorId && (
+                          <p className="text-[10px] text-text-muted mt-1 flex items-center gap-1.5 font-bold uppercase tracking-wider">
+                            Warna Tutup: <span className="text-text-primary">{
+                              (() => {
+                                const match = (product.prices || []).find(p => p.lidColorId === item.lidColorId);
+                                return match?.lidColorName || getCleanColorName(item.lidColorId);
+                              })()
+                            }</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-black text-text-primary truncate">{product.name}</h4>
-                      <p className="text-[10px] text-text-secondary font-mono tracking-wider mt-0.5">{product.sku}</p>
-                      {item.lidColorId && (
-                        <p className="text-[10px] text-text-muted mt-1 flex items-center gap-1.5 font-bold uppercase tracking-wider">
-                          Warna Tutup: <span className="text-text-primary">{
-                            (() => {
-                              const match = (product.prices || []).find(p => p.lidColorId === item.lidColorId);
-                              return match?.lidColorName || getCleanColorName(item.lidColorId);
-                            })()
-                          }</span>
+                    {/* Price Variants Selector */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {priceOptions.length === 0 ? (
+                        <span className="inline-block px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-primary-500 text-white border border-primary-500">
+                          {item.unit === "bal" ? "Harga Per Bal" : "Harga Per Pcs"}
+                        </span>
+                      ) : priceOptions.map((option) => {
+                        const isActive = item.priceTypeId
+                          ? option.id === item.priceTypeId
+                          : (item.unit === "bal" && option.id === PRICE_TYPE_IDS.perBal) ||
+                          (item.unit === "pcs" && option.id === PRICE_TYPE_IDS.withLid) ||
+                          (priceOptions.length === 1);
+
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              handleUpdatePriceType(product.id, option.id);
+                            }}
+                            className={`flex-1 sm:flex-none flex min-w-[120px] flex-col rounded-xl border px-3 py-1.5 text-left transition-all cursor-pointer ${isActive
+                                ? "bg-primary-500 text-white border-primary-500 shadow-xs"
+                                : "bg-slate-50 text-gray-500 border-slate-200 hover:bg-slate-100 hover:text-gray-700"
+                              }`}
+                          >
+                            <span className="text-[9px] font-black uppercase tracking-wider leading-tight">{option.name}</span>
+                            <span className={`mt-0.5 text-[10px] font-bold leading-tight ${isActive ? "text-white/80" : "text-text-muted"}`}>
+                              {option.quantity} pcs / {formatPrice(option.price)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Bottom Controller & Subtotal Area */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3 mt-1">
+                      {/* Left: Unit Price & Quantity Calculation Details */}
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-sm font-black text-primary-500">
+                          {formatPrice(unitPrice)} <span className="text-xs font-bold text-text-muted">/ {variantQuantity} pcs</span>
                         </p>
-                      )}
-                      <div className="mt-1.5 flex flex-wrap gap-1">
-                        {priceOptions.length === 0 ? (
-                          <span className="inline-block px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-primary-500 text-white border border-primary-500">
-                            {item.unit === "bal" ? "Harga Per Bal" : "Harga Per Pcs"}
+                        <p className="text-[10px] font-bold text-text-muted">
+                          Jumlah: {item.quantity} x {variantQuantity} pcs = <span className="text-text-primary font-black">{totalPcs} pcs</span>
+                        </p>
+                      </div>
+
+                      {/* Right: Quantity Input Controller and Total Price */}
+                      <div className="flex items-center justify-between sm:justify-end gap-4">
+                        {/* Quantity Controller */}
+                        <div className="flex items-center gap-1 bg-gray-50 border border-border rounded-xl p-0.5">
+                          <button
+                            onClick={() => handleUpdateQuantity(product.id, item.quantity - 1)}
+                            className="size-8 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-lg bg-white border border-border hover:bg-gray-50 cursor-pointer text-base font-black active:scale-90 transition-all"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            min={1}
+                            onChange={(e) => handleUpdateQuantity(product.id, parseInt(e.target.value) || 1)}
+                            className="w-10 text-center bg-transparent border-none outline-none font-black text-sm"
+                          />
+                          <button
+                            onClick={() => handleUpdateQuantity(product.id, item.quantity + 1)}
+                            className="size-8 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-lg bg-white border border-border hover:bg-gray-50 cursor-pointer text-base font-black active:scale-90 transition-all"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        {/* Subtotal Display */}
+                        <div className="text-right">
+                          <span className="block text-[9px] font-bold text-text-muted uppercase tracking-wider">Subtotal</span>
+                          <span className="text-sm font-black text-text-primary">
+                            {formatPrice(subtotal)}
                           </span>
-                        ) : priceOptions.map((option) => {
-                          const isActive = item.priceTypeId
-                            ? option.id === item.priceTypeId
-                            : (item.unit === "bal" && option.id === PRICE_TYPE_IDS.perBal) ||
-                            (item.unit === "pcs" && option.id === PRICE_TYPE_IDS.withLid) ||
-                            (priceOptions.length === 1);
-
-                          return (
-                            <button
-                              key={option.id}
-                              onClick={() => {
-                                handleUpdatePriceType(product.id, option.id);
-                              }}
-                              className={`flex min-w-28 flex-col rounded-md border px-2 py-1 text-left transition-all cursor-pointer ${isActive
-                                  ? "bg-primary-500 text-white border-primary-500 shadow-xs"
-                                  : "bg-slate-50 text-gray-500 border-slate-200 hover:bg-slate-100 hover:text-gray-700"
-                                }`}
-                            >
-                              <span className="text-[9px] font-black uppercase tracking-wider leading-tight">{option.name}</span>
-                              <span className={`mt-0.5 text-[9px] font-bold leading-tight ${isActive ? "text-white/80" : "text-text-muted"}`}>
-                                {option.quantity} pcs / {formatPrice(option.price)}
-                              </span>
-                            </button>
-                          );
-                        })}
+                        </div>
                       </div>
-                      <p className="text-xs font-black text-primary-500 mt-1">
-                        {formatPrice(unitPrice)} <span className="text-[10px] font-bold text-text-muted">/ {variantQuantity} pcs</span>
-                      </p>
-                      <p className="text-[10px] font-bold text-text-muted mt-0.5">
-                        Jumlah: {item.quantity} x {variantQuantity} pcs = {totalPcs} pcs
-                      </p>
-                    </div>
-
-                    {/* Quantity Controller & Price */}
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-
-                      {/* Quantity Controller */}
-                      <div className="flex items-center gap-1 bg-gray-50 border border-border rounded-lg p-0.5">
-                        <button
-                          onClick={() => handleUpdateQuantity(product.id, item.quantity - 1)}
-                          className="size-7 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-md bg-white border border-border hover:bg-gray-50 cursor-pointer text-sm font-black active:scale-90 transition-all"
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          min={1}
-                          onChange={(e) => handleUpdateQuantity(product.id, parseInt(e.target.value) || 1)}
-                          className="w-10 text-center bg-transparent border-none outline-none font-bold text-xs"
-                        />
-                        <button
-                          onClick={() => handleUpdateQuantity(product.id, item.quantity + 1)}
-                          className="size-7 flex items-center justify-center text-text-secondary hover:text-text-primary rounded-md bg-white border border-border hover:bg-gray-50 cursor-pointer text-sm font-black active:scale-90 transition-all"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <span className="text-xs font-black text-text-primary">
-                        Total: {formatPrice(subtotal)}
-                      </span>
-                      <span className="text-[10px] font-bold text-text-muted">
-                        {totalPcs} pcs
-                      </span>
                     </div>
                   </div>
                 );
