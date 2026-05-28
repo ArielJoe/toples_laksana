@@ -70,7 +70,7 @@ export default function ProductCard({
   return (
     <Card
       className={cn(
-        "group relative h-full overflow-hidden rounded-xl border border-border bg-white p-0 transition-colors hover:border-primary-300 hover:bg-secondary-50/40",
+        "group relative z-10 h-full overflow-hidden rounded-xl border border-border bg-white p-0 transition-colors hover:border-primary-300 hover:bg-secondary-50/40",
         isList ? "flex min-h-36" : "flex flex-col"
       )}
     >
@@ -172,7 +172,7 @@ export default function ProductCard({
             />
           </div>
 
-           {/* Compare & Inquiry Selector */}
+          {/* Compare & Inquiry Selector */}
           <div className="mt-3 flex items-center justify-between gap-2">
             <label
               className="pointer-events-auto flex cursor-pointer items-center gap-2 relative z-20"

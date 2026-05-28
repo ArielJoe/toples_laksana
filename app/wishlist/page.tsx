@@ -229,8 +229,8 @@ export default function WishlistPage() {
       unitPrice = isWholesale && wholesalePrice > 0
         ? wholesalePrice
         : isWholesale
-        ? retailPrice * defaultBalQuantity
-        : retailPrice;
+          ? retailPrice * defaultBalQuantity
+          : retailPrice;
     }
 
     return {
@@ -322,7 +322,7 @@ export default function WishlistPage() {
         ) : (
           <>
             {/* WhatsApp Inquiry Selection Toolbar */}
-            <div className="sticky top-25 z-30 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-border">
+            <div className="sticky top-16 lg:top-20 z-40 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-border shadow-xs">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-text-secondary uppercase tracking-wider">
                   Pilih produk untuk ditanyakan
@@ -487,8 +487,8 @@ export default function WishlistPage() {
                           const isActive = item.priceTypeId
                             ? option.id === item.priceTypeId
                             : (item.unit === "bal" && option.id === PRICE_TYPE_IDS.perBal) ||
-                              (item.unit === "pcs" && option.id === PRICE_TYPE_IDS.withLid) ||
-                              (priceOptions.length === 1);
+                            (item.unit === "pcs" && option.id === PRICE_TYPE_IDS.withLid) ||
+                            (priceOptions.length === 1);
 
                           return (
                             <button
@@ -496,11 +496,10 @@ export default function WishlistPage() {
                               onClick={() => {
                                 handleUpdatePriceType(product.id, option.id);
                               }}
-                              className={`flex min-w-28 flex-col rounded-md border px-2 py-1 text-left transition-all cursor-pointer ${
-                                isActive
+                              className={`flex min-w-28 flex-col rounded-md border px-2 py-1 text-left transition-all cursor-pointer ${isActive
                                   ? "bg-primary-500 text-white border-primary-500 shadow-xs"
                                   : "bg-slate-50 text-gray-500 border-slate-200 hover:bg-slate-100 hover:text-gray-700"
-                              }`}
+                                }`}
                             >
                               <span className="text-[9px] font-black uppercase tracking-wider leading-tight">{option.name}</span>
                               <span className={`mt-0.5 text-[9px] font-bold leading-tight ${isActive ? "text-white/80" : "text-text-muted"}`}>
