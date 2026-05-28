@@ -129,8 +129,8 @@ function CatalogContent() {
                       setFilters({ sort: val as CatalogFilters["sort"] })
                     }
                     className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-all cursor-pointer lg:px-4 ${(filters.sort || "popular") === val
-                        ? "bg-primary-500 text-white"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                      ? "bg-primary-500 text-white"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                   >
                     {label}
