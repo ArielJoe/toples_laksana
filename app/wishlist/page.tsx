@@ -24,7 +24,7 @@ interface ModalItem {
 }
 
 export default function WishlistPage() {
-  const { user, loading, wishlist, loginWithGoogle } = useApp();
+  const { user, loading, wishlist, loginWithGoogle, lidColors } = useApp();
   const [products, setProducts] = useState<Product[]>([]);
   const [fetching, setFetching] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -34,6 +34,8 @@ export default function WishlistPage() {
   const [modalItems, setModalItems] = useState<ModalItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const [priceTypeNames, setPriceTypeNames] = useState<Record<string, string>>({});
+
+  const lidColorNames = Object.fromEntries(lidColors.map(c => [c.id, c.color || c.name || ""]));
 
   useEffect(() => {
     setMounted(true);
@@ -258,7 +260,7 @@ export default function WishlistPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: user?.email || "guest",
-        message: buildWishlistInquiryWithPricesMessage(modalItems, priceTypeNames),
+        message: buildWishlistInquiryWithPricesMessage(modalItems, priceTypeNames, lidColorNames),
         grandTotal: details.reduce((sum, detail) => sum + detail.subtotal, 0),
         details: details.map(({ subtotal, ...rest }) => rest),
       }),
@@ -575,7 +577,7 @@ export default function WishlistPage() {
                   Batal
                 </button>
                 <a
-                  href={buildWishlistInquiryWithPricesUrl(modalItems, priceTypeNames)}
+                  href={buildWishlistInquiryWithPricesUrl(modalItems, priceTypeNames, lidColorNames)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleSendWishlistInquiry}

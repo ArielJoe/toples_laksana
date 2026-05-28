@@ -5,49 +5,31 @@ import { formatRupiah } from "@/lib/price-calculator";
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER;
 
-export function getCleanColorName(colorId?: string): string {
+export function getCleanColorName(colorId?: string, colorMap: Record<string, string> = {}): string {
   if (!colorId) return "-";
   
   const cleanId = colorId.trim().toLowerCase();
   
+  if (colorMap[cleanId]) return colorMap[cleanId];
+  if (colorMap[colorId]) return colorMap[colorId];
+
   // If it's already a friendly name (doesn't start with color_ or lc_ and contains no underscores)
   if (!cleanId.startsWith("color_") && !cleanId.startsWith("lc_") && !cleanId.includes("_")) {
     return colorId.charAt(0).toUpperCase() + colorId.slice(1);
   }
 
-  const colorMap: Record<string, string> = {
-    color_bening: "Bening",
-    color_putih: "Putih",
-    color_cling: "Cling",
-    color_silver: "Silver",
-    color_emas: "Emas",
-    color_rose: "Rose Gold",
-    color_hitam: "Hitam",
-    lc_001: "Bening",
-    lc_002: "Putih",
-    lc_003: "Cling",
-    lc_004: "Silver",
-    lc_005: "Emas",
-    lc_006: "Rose Gold",
-    lc_007: "Hitam",
-  };
-
-  return colorMap[cleanId] || colorId.replace("color_", "").replace("lc_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return colorId.replace("color_", "").replace("lc_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function getCleanPriceTypeName(priceTypeId?: string): string {
+export function getCleanPriceTypeName(priceTypeId?: string, priceTypeMap: Record<string, string> = {}): string {
   if (!priceTypeId) return "-";
 
   const cleanId = priceTypeId.trim().toLowerCase();
 
-  const priceTypeMap: Record<string, string> = {
-    ptype_001: "Harga 30 Pcs",
-    ptype_002: "Harga 24 Pcs",
-    ptype_003: "Harga Per Pcs",
-    ptype_004: "Harga Per Bal",
-  };
+  if (priceTypeMap[cleanId]) return priceTypeMap[cleanId];
+  if (priceTypeMap[priceTypeId]) return priceTypeMap[priceTypeId];
 
-  return priceTypeMap[cleanId] || priceTypeId.replace("ptype_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return priceTypeId.replace("ptype_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function buildWhatsAppUrlFromMessage(message: string): string {
@@ -58,9 +40,11 @@ export function buildWhatsAppMessage(
   product: Product,
   price: ProductPrice,
   calc: CalculatorResult,
+  priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = price?.lidColorName || getCleanColorName(price?.lidColorId);
+  const color = price?.lidColorName || getCleanColorName(price?.lidColorId, lidColorNames);
 
   const lines: string[] = [
     "Halo Admin Toples Laksana,",
@@ -77,7 +61,7 @@ export function buildWhatsAppMessage(
   lines.push(`• *Warna Tutup:* ${color}`);
 
   if (calc && calc.quantity > 0) {
-    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId);
+    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId, priceTypeNames);
     lines.push(
       `• *Tipe Harga:* ${typeLabel}`,
       `• *Jumlah:* ${calc.quantity} (${calc.totalPcs.toLocaleString("id-ID")} pcs)`,
@@ -102,8 +86,10 @@ export function buildWhatsAppUrl(
   product: Product,
   price: ProductPrice,
   calc: CalculatorResult,
+  priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
-  return buildWhatsAppUrlFromMessage(buildWhatsAppMessage(product, price, calc));
+  return buildWhatsAppUrlFromMessage(buildWhatsAppMessage(product, price, calc, priceTypeNames, lidColorNames));
 }
 
 export function buildInquiryUrl(product: Product): string {
@@ -135,9 +121,11 @@ export function buildBulkInquiryMessage(
   product: Product,
   price: ProductPrice,
   desiredQty: number,
+  priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = price?.lidColorName || getCleanColorName(price?.lidColorId);
+  const color = price?.lidColorName || getCleanColorName(price?.lidColorId, lidColorNames);
 
   const lines = [
     "Halo Admin Toples Laksana,",
@@ -154,7 +142,7 @@ export function buildBulkInquiryMessage(
   lines.push(`• *Warna Tutup:* ${color}`);
 
   if (desiredQty > 0) {
-    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId);
+    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId, priceTypeNames);
     lines.push(
       `• *Tipe Harga:* ${typeLabel}`,
       `• *Jumlah:* ${desiredQty} (${(desiredQty * (price.quantity || 1)).toLocaleString("id-ID")} pcs)`,
@@ -179,8 +167,10 @@ export function buildBulkInquiryUrl(
   product: Product,
   price: ProductPrice,
   desiredQty: number,
+  priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
-  return buildWhatsAppUrlFromMessage(buildBulkInquiryMessage(product, price, desiredQty));
+  return buildWhatsAppUrlFromMessage(buildBulkInquiryMessage(product, price, desiredQty, priceTypeNames, lidColorNames));
 }
 
 export function buildWishlistInquiryUrl(products: Product[]): string {
@@ -229,6 +219,7 @@ function getWishlistPriceTypeLabel(
 export function buildWishlistInquiryWithPricesMessage(
   items: WishlistInquiryItem[],
   priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
   const lines: string[] = [
     "Halo Admin Toples Laksana,",
@@ -298,7 +289,7 @@ export function buildWishlistInquiryWithPricesMessage(
     }
     if (item.lidColorId) {
       const colorMatch = (item.product.prices || []).find(p => p.lidColorId === item.lidColorId);
-      lines.push(`   • *Warna Tutup:* ${colorMatch?.lidColorName || getCleanColorName(item.lidColorId)}`);
+      lines.push(`   • *Warna Tutup:* ${colorMatch?.lidColorName || getCleanColorName(item.lidColorId, lidColorNames)}`);
     }
     lines.push(`   • *Tipe Harga:* ${priceTypeLabel}`);
     lines.push(`   • *Jumlah:* ${quantityLabel}`);
@@ -322,6 +313,7 @@ export function buildWishlistInquiryWithPricesMessage(
 export function buildWishlistInquiryWithPricesUrl(
   items: WishlistInquiryItem[],
   priceTypeNames: Record<string, string> = {},
+  lidColorNames: Record<string, string> = {},
 ): string {
-  return buildWhatsAppUrlFromMessage(buildWishlistInquiryWithPricesMessage(items, priceTypeNames));
+  return buildWhatsAppUrlFromMessage(buildWishlistInquiryWithPricesMessage(items, priceTypeNames, lidColorNames));
 }

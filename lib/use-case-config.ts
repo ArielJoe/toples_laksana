@@ -44,20 +44,3 @@ export const LID_TYPE_LABELS: Record<string, { label: string; tooltip: string }>
   },
 };
 
-// Lid color hex swatches. Keys match IDs from LID_COLOR_LABELS and DB IDs.
-export const COLOR_SWATCHES: Record<string, string> = {
-  color_bening: "#FFFFFF",
-  color_putih: "#F5F5F5",
-  color_cling: "#E8E8E0",
-  color_silver: "#C0C0C0",
-  color_emas: "#FFD700",
-  color_rose: "#B76E79",
-  color_hitam: "#1A1A1A",
-  lc_001: "#FFFFFF",
-  lc_002: "#F5F5F5",
-  lc_003: "#E8E8E0",
-  lc_004: "#C0C0C0",
-  lc_005: "#FFD700",
-  lc_006: "#B76E79",
-  lc_007: "#1A1A1A",
-};

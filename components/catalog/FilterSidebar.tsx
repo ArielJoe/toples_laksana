@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { COLOR_SWATCHES } from "@/lib/use-case-config";
 import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, getLidColorLabel } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -289,7 +288,7 @@ export default function FilterSidebar({
           <div className="space-y-1">
             {(facets?.colors || []).map((color) => {
               const isActive = !!filters.colors?.includes(color.value);
-              const hex = color.hex || COLOR_SWATCHES[color.value] || "#ccc";
+              const hex = color.hex || "#ccc";
               const colorName = color.name || getLidColorLabel(color.value);
               return (
                 <label key={color.value} className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors">

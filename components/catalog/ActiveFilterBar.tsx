@@ -2,7 +2,6 @@
 
 import { ReactNode } from "react";
 import { AppIcon } from "@/components/ui/app-icon";
-import { COLOR_SWATCHES } from "@/lib/use-case-config";
 import { CatalogFilters, FacetCounts, formatAttributeLabel, getCategoryLabel, getLidColorLabel } from "@/types/product";
 
 interface ActiveFilterBarProps {
@@ -40,7 +39,7 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
     }
     case "colors": {
       const facetColor = facets?.colors?.find((c) => c.value === value);
-      const hex = facetColor?.hex || COLOR_SWATCHES[value] || "#ccc";
+      const hex = facetColor?.hex || "#ccc";
       const name = facetColor?.name || getLidColorLabel(value);
       return (
         <span className="flex items-center gap-1.5">

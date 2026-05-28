@@ -21,7 +21,6 @@ import {
   buildWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/whatsapp-builder";
-import { COLOR_SWATCHES } from "@/lib/use-case-config";
 import { Heart, Tag } from "lucide-react";
 import { AppIcon } from "@/components/ui/app-icon";
 import { useApp } from "@/context/AppContext";
@@ -40,8 +39,10 @@ function readPositiveInteger(event: React.ChangeEvent<HTMLInputElement>) {
 }
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const { toggleWishlist, isInWishlist, user } = useApp();
+  const { toggleWishlist, isInWishlist, user, lidColors, priceTypes } = useApp();
   const wishlisted = isInWishlist(product.id);
+  const lidColorNames = useMemo(() => Object.fromEntries(lidColors.map(c => [c.id, c.color || c.name || ""])), [lidColors]);
+  const priceTypeNames = useMemo(() => Object.fromEntries(priceTypes.map(pt => [pt.id, pt.name || ""])), [priceTypes]);
   const fallbackPrices = product.prices || [];
 
   // Extract unique price types that actually exist on this product
@@ -149,7 +150,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const handleWhatsAppClick = () => {
     logWhatsAppInquiry(
-      buildWhatsAppMessage(product, safeActivePrice, calcResult),
+      buildWhatsAppMessage(product, safeActivePrice, calcResult, priceTypeNames, lidColorNames),
       calcResult.subtotal,
       calcResult.unitLabel === "bal" ? "bal" : "pcs",
     );
@@ -161,7 +162,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const retailFallbackTotal = retailPriceValue * (wholesalePrice?.quantity || quantityPerPack);
     const unitPrice = wholesalePriceValue > 0 ? wholesalePriceValue : retailFallbackTotal;
     logWhatsAppInquiry(
-      buildBulkInquiryMessage(product, safeActivePrice, quantity),
+      buildBulkInquiryMessage(product, safeActivePrice, quantity, priceTypeNames, lidColorNames),
       unitPrice * quantity,
       "bal",
     );
@@ -175,7 +176,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const lidMaterial = product.lidMaterialName || formatAttributeLabel(product.lidMaterial);
   const lidVariant = product.lidVariantName || formatAttributeLabel(product.lidVariant);
   const selectedColor = activePrice?.lidColorName || getLidColorLabel(activePrice?.lidColorId);
-  const selectedColorHex = activePrice?.lidColorHex || COLOR_SWATCHES[activePrice?.lidColorId || ""] || "#ccc";
+  const selectedColorHex = activePrice?.lidColorHex || "#ccc";
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-6 sm:pt-10 lg:px-12 lg:pt-12">
@@ -307,7 +308,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div className="flex flex-wrap gap-2.5">
                 {priceOptions.map((price, i) => {
                   const colorLabel = price.lidColorName || getLidColorLabel(price.lidColorId);
-                  const hex = price.lidColorHex || COLOR_SWATCHES[price.lidColorId] || "#ccc";
+                  const hex = price.lidColorHex || "#ccc";
                   const isSelected = i === selectedPriceIdx;
                   return (
                     <button
@@ -385,7 +386,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <div className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
-                href={buildWhatsAppUrl(product, safeActivePrice, calcResult)}
+                href={buildWhatsAppUrl(product, safeActivePrice, calcResult, priceTypeNames, lidColorNames)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleWhatsAppClick}
@@ -412,7 +413,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
             {quantity >= 5 && isPackagePrice && (
               <a
-                href={buildBulkInquiryUrl(product, safeActivePrice, quantity)}
+                href={buildBulkInquiryUrl(product, safeActivePrice, quantity, priceTypeNames, lidColorNames)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleBulkInquiryClick}
