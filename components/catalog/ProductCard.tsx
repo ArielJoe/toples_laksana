@@ -2,29 +2,17 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import type { Product, ProductPrice } from "@/types/product";
+import type { Product } from "@/types/product";
 import {
   getAvailabilityLabel,
-  getLowestRetailPrice,
-  getLowestWholesalePrice,
   getPrimaryImage,
 } from "@/types/product";
-import { formatPrice } from "@/lib/price-calculator";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Heart, PackageIcon } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import ProductPriceDropdown from "@/components/product/ProductPriceDropdown";
 import { cn } from "@/lib/utils";
-
-function formatPriceTypeLabel(priceTypeId: string) {
-  return priceTypeId.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function getLowestPriceForType(product: Product, priceTypeId: string): ProductPrice | null {
-  return (product.prices || [])
-    .filter((price) => price.priceTypeId === priceTypeId && price.price > 0)
-    .sort((a, b) => a.price - b.price)[0] || null;
-}
 
 interface ProductCardProps {
   product: Product;
@@ -49,86 +37,11 @@ export default function ProductCard({
   onInquirySelect,
   selectedUnit = "",
 }: ProductCardProps) {
-  const { toggleWishlist, isInWishlist, user } = useApp();
+  const { toggleWishlist, isInWishlist, user, priceTypes, lidColors } = useApp();
   const heroImage = getPrimaryImage(product);
   const productHref = `/products/${product.id}`;
   const wishlisted = isInWishlist(product.id);
   const isList = viewMode === "list";
-
-  const priceContent = (() => {
-    const priceTypes = priceType || [];
-    const selectedPriceTypes = priceTypes
-      .map((type) => getLowestPriceForType(product, type))
-      .filter(Boolean) as ProductPrice[];
-    const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
-    const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
-    const showBoth = priceTypes.length === 0 || (
-      priceTypes.length === 2 &&
-      priceTypes.includes("ptype_001") &&
-      priceTypes.includes("ptype_004")
-    );
-
-    if (priceTypes.length > 0 && selectedPriceTypes.length > 0 && !onlyWholesale && !onlyRetail && !showBoth) {
-      return (
-        <div className="space-y-0.5">
-          {selectedPriceTypes.map((price) => (
-            <div key={price.priceTypeId} className="flex flex-wrap items-baseline gap-x-1">
-              <span className="text-base font-bold text-text-primary">{formatPrice(price.price)}</span>
-              <span className="text-[10px] font-medium text-text-muted">
-                / {price.quantity && price.quantity > 1 ? `${price.quantity} pcs` : "pcs"}
-              </span>
-              <span className="basis-full text-[9px] font-black uppercase tracking-wide text-primary-600">
-                {price.priceTypeName || formatPriceTypeLabel(price.priceTypeId)}
-              </span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    const retailPrice = getLowestRetailPrice(product);
-    const wholesalePrice = getLowestWholesalePrice(product);
-
-    if (onlyWholesale && wholesalePrice > 0) {
-      return (
-        <div className="flex items-baseline gap-1">
-          <span className="text-base font-bold text-text-primary">{formatPrice(wholesalePrice)}</span>
-          <span className="text-[10px] font-medium text-text-muted">/ bal</span>
-        </div>
-      );
-    }
-
-    if (onlyRetail && retailPrice > 0) {
-      return (
-        <div className="flex items-baseline gap-1">
-          <span className="text-base font-bold text-text-primary">{formatPrice(retailPrice)}</span>
-          <span className="text-[10px] font-medium text-text-muted">/ pcs</span>
-        </div>
-      );
-    }
-
-    if (showBoth) {
-      return (
-        <div className="space-y-0.5">
-          {retailPrice > 0 ? (
-            <div className="flex items-baseline gap-1">
-              <span className="text-base font-bold text-text-primary">{formatPrice(retailPrice)}</span>
-              <span className="text-[10px] font-medium text-text-muted">/ pcs</span>
-            </div>
-          ) : (
-            <div className="text-sm font-bold text-text-primary">Hubungi Kami</div>
-          )}
-          {wholesalePrice > 0 && (
-            <div className="text-[10px] font-black tracking-wide text-primary-600">
-              Grosir: {formatPrice(wholesalePrice)} <span className="font-medium text-text-muted">/ bal</span>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return <div className="text-sm font-bold text-text-primary">Hubungi Kami</div>;
-  })();
 
   const handleInteraction = async () => {
     try {
@@ -153,7 +66,7 @@ export default function ProductCard({
         href={productHref}
         onClick={handleInteraction}
         aria-label={`Lihat detail ${product.name}`}
-        className="absolute inset-0 z-0 cursor-pointer"
+        className="absolute inset-0 z-10 cursor-pointer"
       />
       {/* WhatsApp Selection Checkbox */}
       {onInquiryToggle && (
@@ -189,7 +102,7 @@ export default function ProductCard({
         />
       </button>
       {/* Image Section */}
-      <div className={cn("pointer-events-none relative z-10 flex h-full w-full", isList ? "flex-row" : "flex-col")}>
+      <div className={cn("pointer-events-none relative z-20 flex h-full w-full", isList ? "flex-row" : "flex-col")}>
         <div
           className={cn(
             "relative block shrink-0 overflow-hidden bg-secondary-50",
@@ -233,14 +146,22 @@ export default function ProductCard({
           </p>
 
           {/* Price Section */}
-          <div className="mt-auto space-y-1 pt-3">
-            {priceContent}
+          <div
+            className="mt-auto space-y-1 pt-3 pointer-events-auto relative z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ProductPriceDropdown
+              product={product}
+              priceTypes={priceTypes}
+              lidColors={lidColors}
+              fallbackText="Hubungi Kami"
+            />
           </div>
 
-          {/* Compare & Inquiry Selector */}
+           {/* Compare & Inquiry Selector */}
           <div className="mt-3 flex items-center justify-between gap-2">
             <label
-              className="pointer-events-auto flex cursor-pointer items-center gap-2"
+              className="pointer-events-auto flex cursor-pointer items-center gap-2 relative z-20"
               onClick={(e) => e.stopPropagation()}
             >
               <Checkbox
@@ -258,7 +179,7 @@ export default function ProductCard({
 
             {onInquirySelect && (
               <label
-                className="pointer-events-auto flex cursor-pointer items-center gap-2"
+                className="pointer-events-auto flex cursor-pointer items-center gap-2 relative z-20"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Checkbox

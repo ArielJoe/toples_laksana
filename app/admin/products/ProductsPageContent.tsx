@@ -17,7 +17,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import ProductDialog from "@/components/admin/ProductDialog";
-import ProductPriceDropdown from "@/components/admin/ProductPriceDropdown";
+import ProductPriceDropdown from "@/components/product/ProductPriceDropdown";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

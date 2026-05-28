@@ -1,5 +1,4 @@
 "use client";
-
 import { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { formatPrice } from "@/lib/price-calculator";
@@ -20,6 +19,7 @@ interface ProductPriceDropdownProps {
   priceTypes: PriceLookupItem[];
   lidColors: PriceLookupItem[];
   className?: string;
+  fallbackText?: string;
 }
 
 function cleanLabel(value?: string) {
@@ -45,6 +45,7 @@ export default function ProductPriceDropdown({
   priceTypes,
   lidColors,
   className,
+  fallbackText,
 }: ProductPriceDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,7 +71,7 @@ export default function ProductPriceDropdown({
   if (priceRows.length === 0 || !lowestPrice) {
     return (
       <span className={cn("text-xs font-black text-text-muted", className)}>
-        Belum ada harga
+        {fallbackText || "Belum ada harga"}
       </span>
     );
   }
@@ -82,7 +83,7 @@ export default function ProductPriceDropdown({
         onPointerEnter={(event) => openMenu(event.pointerType)}
         onPointerLeave={(event) => closeMenu(event.pointerType)}
         className={cn(
-          "inline-flex max-w-full items-center gap-2 rounded-xl border border-border bg-white px-2.5 py-1.5 text-left transition-all hover:border-primary-200 hover:bg-primary-50 focus-visible:border-primary-500 focus-visible:outline-none data-[state=open]:border-primary-200 data-[state=open]:bg-primary-50",
+          "inline-flex max-w-full items-center gap-2 rounded-xl border border-border bg-white px-2.5 py-1.5 text-left transition-all hover:border-primary-200 hover:bg-primary-50 focus-visible:border-primary-500 focus-visible:outline-none data-[state=open]:border-primary-200 data-[state=open]:bg-primary-50 cursor-pointer",
           className,
         )}
       >
@@ -101,7 +102,7 @@ export default function ProductPriceDropdown({
         sideOffset={4}
         onPointerEnter={(event) => openMenu(event.pointerType)}
         onPointerLeave={(event) => closeMenu(event.pointerType)}
-        className="w-80 border border-slate-200 bg-white p-2 shadow-xl shadow-black/10 rounded-2xl ring-0"
+        className="w-80 border border-slate-200 bg-white p-2 shadow-xl shadow-black/10 rounded-2xl ring-0 z-50"
       >
         <div className="px-2 pb-1">
           <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-text-muted">

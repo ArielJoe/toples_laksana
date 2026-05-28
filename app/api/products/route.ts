@@ -134,25 +134,133 @@ export async function GET(request: NextRequest) {
       filter.prices = { $elemMatch: elemMatch };
     }
 
-    let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
-    switch (sort) {
-      case "price_asc":
-        sortQuery = { "prices.price": 1 };
-        break;
-      case "price_desc":
-        sortQuery = { "prices.price": -1 };
-        break;
-      case "newest":
-      case "popular":
-      default:
-        sortQuery = { createdAt: -1 };
-        break;
+    const skip = (page - 1) * limit;
+    let productsPromise;
+
+    if (sort === "popular") {
+      productsPromise = Product.aggregate([
+        { $match: filter },
+        {
+          $lookup: {
+            from: "interactions",
+            let: { prodId: "$id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$productId", "$$prodId"] },
+                      { $eq: ["$interactionType", "detail_click"] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: "clicks"
+          }
+        },
+        {
+          $addFields: {
+            clickCount: { $size: "$clicks" }
+          }
+        },
+        { $sort: { clickCount: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+    } else if (sort === "price_asc") {
+      const conds = [];
+      if (priceTypes.length > 0) {
+        conds.push({ $in: ["$$price.priceTypeId", priceTypes] });
+      }
+      if (priceMin) {
+        conds.push({ $gte: ["$$price.price", Number.parseInt(priceMin, 10)] });
+      }
+      if (priceMax) {
+        conds.push({ $lte: ["$$price.price", Number.parseInt(priceMax, 10)] });
+      }
+
+      const minPriceExpr = conds.length > 0
+        ? {
+            $min: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$prices",
+                    as: "price",
+                    cond: conds.length === 1 ? conds[0] : { $and: conds }
+                  }
+                },
+                as: "p",
+                in: "$$p.price"
+              }
+            }
+          }
+        : { $min: "$prices.price" };
+
+      productsPromise = Product.aggregate([
+        { $match: filter },
+        {
+          $addFields: {
+            minPrice: { $ifNull: [minPriceExpr, 999999999] }
+          }
+        },
+        { $sort: { minPrice: 1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+    } else if (sort === "price_desc") {
+      const conds = [];
+      if (priceTypes.length > 0) {
+        conds.push({ $in: ["$$price.priceTypeId", priceTypes] });
+      }
+      if (priceMin) {
+        conds.push({ $gte: ["$$price.price", Number.parseInt(priceMin, 10)] });
+      }
+      if (priceMax) {
+        conds.push({ $lte: ["$$price.price", Number.parseInt(priceMax, 10)] });
+      }
+
+      const maxPriceExpr = conds.length > 0
+        ? {
+            $max: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$prices",
+                    as: "price",
+                    cond: conds.length === 1 ? conds[0] : { $and: conds }
+                  }
+                },
+                as: "p",
+                in: "$$p.price"
+              }
+            }
+          }
+        : { $max: "$prices.price" };
+
+      productsPromise = Product.aggregate([
+        { $match: filter },
+        {
+          $addFields: {
+            maxPrice: { $ifNull: [maxPriceExpr, -1] }
+          }
+        },
+        { $sort: { maxPrice: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+    } else {
+      // newest / default
+      productsPromise = Product.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
     }
 
-    const skip = (page - 1) * limit;
-
     const [products, total] = await Promise.all([
-      Product.find(filter).sort(sortQuery).skip(skip).limit(limit).lean(),
+      productsPromise,
       Product.countDocuments(filter),
     ]);
     const materialIds = [

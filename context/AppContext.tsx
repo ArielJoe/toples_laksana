@@ -5,6 +5,14 @@ import { User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/aut
 import { toast } from "sonner";
 import { auth, googleProvider } from "@/lib/firebase";
 
+export interface PriceLookupItem {
+  id: string;
+  name?: string;
+  color?: string;
+  colorCode?: string;
+  hex?: string;
+}
+
 interface AppContextType {
   user: User | null;
   loading: boolean;
@@ -13,6 +21,8 @@ interface AppContextType {
   wishlist: string[];
   toggleWishlist: (productId: string) => Promise<boolean>;
   isInWishlist: (productId: string) => boolean;
+  priceTypes: PriceLookupItem[];
+  lidColors: PriceLookupItem[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -21,6 +31,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const [priceTypes, setPriceTypes] = useState<PriceLookupItem[]>([]);
+  const [lidColors, setLidColors] = useState<PriceLookupItem[]>([]);
+
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      try {
+        const [resPrice, resColor] = await Promise.all([
+          fetch("/api/price-types"),
+          fetch("/api/lid-colors"),
+        ]);
+        const dataPrice = await resPrice.json();
+        const dataColor = await resColor.json();
+        if (dataPrice.data) setPriceTypes(dataPrice.data);
+        if (dataColor.data) setLidColors(dataColor.data);
+      } catch (err) {
+        console.error("Failed to fetch master data in AppContext", err);
+      }
+    };
+    fetchMasterData();
+  }, []);
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
@@ -125,6 +155,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         wishlist,
         toggleWishlist,
         isInWishlist,
+        priceTypes,
+        lidColors,
       }}
     >
       {children}
