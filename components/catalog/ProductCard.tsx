@@ -20,7 +20,6 @@ interface ProductCardProps {
   isComparing?: boolean;
   onInquiryToggle?: (productId: string) => void;
   isInquirySelected?: boolean;
-  priceType?: string[];
   viewMode?: "grid" | "list";
   onInquirySelect?: (productId: string, unit: "pcs" | "bal" | "") => void;
   selectedUnit?: "pcs" | "bal" | "";
@@ -32,7 +31,6 @@ export default function ProductCard({
   isComparing = false,
   onInquiryToggle,
   isInquirySelected = false,
-  priceType,
   viewMode = "grid",
   onInquirySelect,
   selectedUnit = "",

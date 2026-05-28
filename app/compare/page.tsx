@@ -2,16 +2,18 @@ import Link from "next/link";
 import Image from "next/image";
 import connectDB from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
-import { formatPrice } from "@/lib/price-calculator";
 import { buildInquiryUrl } from "@/lib/whatsapp-builder";
 import type { Metadata } from "next";
-import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getSpecValue, Product } from "@/types/product";
+import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getPrimaryImage, getSpecValue, Product } from "@/types/product";
 import { AppIcon } from "@/components/ui/app-icon";
 import { cn } from "@/lib/utils";
 import { Heart } from "lucide-react";
 import Material from "@/models/Material";
 import LidType from "@/models/LidType";
 import LidVariant from "@/models/LidVariant";
+import PriceType from "@/models/PriceType";
+import LidColor from "@/models/LidColor";
+import ComparePriceSelector, { ComparePriceOption } from "@/components/product/ComparePriceSelector";
 
 export const metadata: Metadata = {
   title: "Bandingkan Spesifikasi Kemasan - Toples Laksana",
@@ -26,6 +28,14 @@ interface LookupDoc {
   name: string;
 }
 
+interface LidColorDoc {
+  id: string;
+  name?: string;
+  color?: string;
+  colorCode?: string;
+  hex?: string;
+}
+
 // Grid columns based on product count (+1 for label column)
 function getGridCols(count: number) {
   if (count === 1) return "grid-cols-2";
@@ -36,6 +46,8 @@ function getGridCols(count: number) {
 export default async function ComparisonPage({ searchParams }: ComparePageProps) {
   const { ids } = await searchParams;
   let products: Product[] = [];
+  const priceTypeMap = new Map<string, string>();
+  const lidColorMap = new Map<string, LidColorDoc>();
 
   if (ids) {
     const idArray = ids.split(",").slice(0, 3);
@@ -52,10 +64,24 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
     ];
     const lidVariantIds = [...new Set(rawProducts.map((product) => product.lidVariant).filter(Boolean))];
 
-    const [materials, lidVariants] = (await Promise.all([
+    const [materials, lidVariants, priceTypes, lidColors] = (await Promise.all([
       Material.find({ id: { $in: materialIds } }).select("id name").lean(),
       LidVariant.find({ id: { $in: lidVariantIds } }).select("id name lidTypeId").lean(),
-    ])) as [LookupDoc[], (LookupDoc & { lidTypeId: string })[]];
+      PriceType.find().select("id name").lean(),
+      LidColor.find().select("id color colorCode hex").lean(),
+    ])) as [
+      LookupDoc[],
+      (LookupDoc & { lidTypeId: string })[],
+      LookupDoc[],
+      (LookupDoc & { color?: string; colorCode?: string; hex?: string })[],
+    ];
+
+    for (const pt of priceTypes) {
+      priceTypeMap.set(pt.id, pt.name);
+    }
+    for (const lc of lidColors) {
+      lidColorMap.set(lc.id, lc);
+    }
 
     const lidVariantMap = new Map(lidVariants.map((v) => [v.id, v]));
     const lidTypeIds = [...new Set(lidVariants.map((v) => v.lidTypeId).filter(Boolean))];
@@ -207,13 +233,31 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                     Harga
                   </div>
                   {products.map((p) => {
-                    const price = getLowestRetailPrice(p);
+                    const resolvedPrices: ComparePriceOption[] = (p.prices || [])
+                      .filter((price) => price.price > 0)
+                      .map((price) => {
+                        const colorDoc = lidColorMap.get(price.lidColorId);
+                        const colorName = price.lidColorName || colorDoc?.name || colorDoc?.color || price.lidColorId;
+                        const colorHex = price.lidColorHex || colorDoc?.colorCode || colorDoc?.hex || "#E5E7EB";
+                        const priceTypeName = price.priceTypeName || priceTypeMap.get(price.priceTypeId) || price.priceTypeId;
+                        const qty = price.quantity || 1;
+                        const isPackagePrice = price.priceTypeId === "ptype_004";
+                        const displayPrice = isPackagePrice ? price.price : price.price * qty;
+
+                        return {
+                          lidColorId: price.lidColorId,
+                          priceTypeId: price.priceTypeId,
+                          price: displayPrice,
+                          quantity: qty,
+                          lidColorName: colorName,
+                          lidColorHex: colorHex,
+                          priceTypeName: priceTypeName,
+                        };
+                      });
+
                     return (
-                      <div key={`${p.id}-price`} className="px-6 py-6 text-center flex flex-col items-center justify-center border-r border-border last:border-r-0 bg-white">
-                        <span className="text-xl sm:text-2xl font-black text-primary-600 tracking-tight">
-                          {price > 0 ? formatPrice(price) : "Hubungi Kami"}
-                        </span>
-                        {price > 0 && <span className="text-[10px] font-bold text-primary-400 mt-1 uppercase tracking-widest">/ pcs</span>}
+                      <div key={`${p.id}-price`} className="px-6 py-6 text-center flex flex-col gap-2.5 border-r border-border last:border-r-0 bg-white">
+                        <ComparePriceSelector options={resolvedPrices} />
                       </div>
                     );
                   })}
@@ -242,7 +286,6 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             <div className="block sm:hidden space-y-6">
               {products.map((product) => {
                 const image = getPrimaryImage(product);
-                const price = getLowestRetailPrice(product);
                 return (
                   <div key={product.id} className="bg-white rounded-2xl border border-border overflow-hidden p-5 relative">
                     <Link
@@ -292,15 +335,32 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                       ))}
                     </div>
 
-                    {/* Price Row */}
-                    <div className="flex justify-between items-center p-3 rounded-xl bg-white border border-border mb-4">
-                      <span className="text-[10px] font-black text-primary-700 uppercase tracking-wider">Harga:</span>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-primary-600 tracking-tight block">
-                          {price > 0 ? formatPrice(price) : "Hubungi Kami"}
-                        </span>
-                        {price > 0 && <span className="text-[9px] font-bold text-primary-400 uppercase tracking-widest">/ pcs</span>}
-                      </div>
+                    {/* Price Selector */}
+                    <div className="mb-4">
+                      {(() => {
+                        const resolvedPrices: ComparePriceOption[] = (product.prices || [])
+                          .filter((price) => price.price > 0)
+                          .map((price) => {
+                            const colorDoc = lidColorMap.get(price.lidColorId);
+                            const colorName = price.lidColorName || colorDoc?.name || colorDoc?.color || price.lidColorId;
+                            const colorHex = price.lidColorHex || colorDoc?.colorCode || colorDoc?.hex || "#E5E7EB";
+                            const priceTypeName = price.priceTypeName || priceTypeMap.get(price.priceTypeId) || price.priceTypeId;
+                            const qty = price.quantity || 1;
+                            const isPackagePrice = price.priceTypeId === "ptype_004";
+                            const displayPrice = isPackagePrice ? price.price : price.price * qty;
+
+                            return {
+                              lidColorId: price.lidColorId,
+                              priceTypeId: price.priceTypeId,
+                              price: displayPrice,
+                              quantity: qty,
+                              lidColorName: colorName,
+                              lidColorHex: colorHex,
+                              priceTypeName: priceTypeName,
+                            };
+                          });
+                        return <ComparePriceSelector options={resolvedPrices} />;
+                      })()}
                     </div>
 
                     {/* CTA Button */}

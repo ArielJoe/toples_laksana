@@ -3,7 +3,7 @@
   "database": "toples_laksana-db",
   "engine": "MongoDB",
   "orm": "Mongoose",
-  "totalCollections": 15,
+  "totalCollections": 13,
   "collections": {
     "users": {
       "model": "User",
@@ -38,12 +38,11 @@
         "name": { "type": "String", "required": true },
         "categoryId": { "type": "String", "required": true, "ref": "categories" },
         "productTypeId": { "type": "String", "default": null, "ref": "producttypes" },
-        "unitId": { "type": "String", "required": true, "ref": "units" },
+        "unitId": { "type": "String", "required": true },
         "lidMaterial": { "type": "String", "required": true, "default": "", "ref": "materials" },
         "lidVariant": { "type": "String", "required": true, "default": "", "ref": "lidvariants" },
         "bodyMaterial": { "type": "String", "required": true, "default": "", "ref": "materials" },
-        "lidType": { "type": "String", "required": true, "default": "", "ref": "lidtypes" },
-        "availabilityStatus": { "type": "String", "required": true, "enum": ["available", "limited", "preorder", "unavailable"], "default": "available" },
+        "isAvailable": { "type": "Boolean", "required": true, "default": true },
         "availabilityNote": { "type": "String", "default": "" },
         "description": { "type": "String", "default": "" },
         "dimension": { "type": "Embedded:Dimension", "default": null },
@@ -87,6 +86,7 @@
             "lidColorId": { "type": "String", "required": true, "ref": "lidcolors" },
             "priceTypeId": { "type": "String", "required": true, "ref": "pricetypes" },
             "price": { "type": "Number", "required": true },
+            "quantity": { "type": "Number", "default": 1 },
             "validFrom": { "type": "Date", "required": true, "default": "Date.now" },
             "validUntil": { "type": "Date", "default": null }
           }
@@ -95,11 +95,10 @@
       "indexes": [
         { "fields": { "categoryId": 1 } },
         { "fields": { "productTypeId": 1 } },
-        { "fields": { "availabilityStatus": 1 } },
+        { "fields": { "isAvailable": 1 } },
         { "fields": { "bodyMaterial": 1 } },
         { "fields": { "lidMaterial": 1 } },
-        { "fields": { "lidVariant": 1 } },
-        { "fields": { "lidType": 1 } }
+        { "fields": { "lidVariant": 1 } }
       ]
     },
 
@@ -119,16 +118,6 @@
       "fields": {
         "id": { "type": "String", "required": true, "unique": true },
         "name": { "type": "String", "required": true, "unique": true }
-      }
-    },
-
-    "units": {
-      "model": "Unit",
-      "timestamps": { "createdAt": true, "updatedAt": false },
-      "fields": {
-        "id": { "type": "String", "required": true, "unique": true },
-        "name": { "type": "String", "required": true, "unique": true },
-        "symbol": { "type": "String", "required": true }
       }
     },
 
@@ -170,6 +159,7 @@
       "fields": {
         "id": { "type": "String", "required": true, "unique": true },
         "name": { "type": "String", "required": true, "unique": true },
+        "lidTypeId": { "type": "String", "required": true, "default": "", "ref": "lidtypes" },
         "description": { "type": "String", "default": "" }
       }
     },
@@ -182,31 +172,6 @@
         "name": { "type": "String", "required": true, "unique": true },
         "description": { "type": "String", "default": "" }
       }
-    },
-
-    "promos": {
-      "model": "Promo",
-      "timestamps": { "createdAt": true, "updatedAt": true },
-      "fields": {
-        "id": { "type": "String", "required": true, "unique": true },
-        "promoCode": { "type": "String", "unique": true, "sparse": true },
-        "promoName": { "type": "String", "required": true },
-        "description": { "type": "String", "default": "" },
-        "promoType": { "type": "String", "required": true, "enum": ["percentage", "nominal"], "default": "percentage" },
-        "promoValue": { "type": "Number", "required": true },
-        "minQuantity": { "type": "Number", "required": true, "default": 1 },
-        "productId": { "type": "String", "default": null, "ref": "products" },
-        "lidColorId": { "type": "String", "default": null, "ref": "lidcolors" },
-        "categoryId": { "type": "String", "default": null, "ref": "categories" },
-        "validFrom": { "type": "Date", "required": true },
-        "validUntil": { "type": "Date", "default": null },
-        "maxUsage": { "type": "Number", "default": null },
-        "usedCount": { "type": "Number", "default": 0 },
-        "isActive": { "type": "Boolean", "default": true }
-      },
-      "indexes": [
-        { "fields": { "isActive": 1, "validFrom": 1, "validUntil": 1 } }
-      ]
     },
 
     "wishlists": {
@@ -240,8 +205,7 @@
             "lidColorId": { "type": "String", "default": null, "ref": "lidcolors" },
             "priceTypeId": { "type": "String", "default": null, "ref": "pricetypes" },
             "quantity": { "type": "Number", "required": true, "default": 1, "min": 1 },
-            "note": { "type": "String", "default": "" },
-            "promoAppliedId": { "type": "String", "default": null, "ref": "promos" }
+            "note": { "type": "String", "default": "" }
           }
         }
       },
@@ -259,7 +223,7 @@
         "userId": { "type": "String", "required": true, "ref": "users" },
         "productId": { "type": "String", "default": null, "ref": "products" },
         "pagePath": { "type": "String", "default": "" },
-        "interactionType": { "type": "String", "required": true, "enum": ["page_view", "view", "detail_click", "whatsapp_share", "promo_click"] }
+        "interactionType": { "type": "String", "required": true, "enum": ["page_view", "view", "detail_click", "whatsapp_share"] }
       },
       "indexes": [
         { "fields": { "productId": 1, "interactionType": 1, "createdAt": -1 } },
@@ -276,8 +240,6 @@
         "userId": { "type": "String", "required": true, "ref": "users" },
         "message": { "type": "String", "required": true },
         "destinationNumber": { "type": "String", "required": true },
-        "promoAppliedId": { "type": "String", "default": null, "ref": "promos" },
-        "totalDiscount": { "type": "Number", "required": true, "default": 0 },
         "grandTotal": { "type": "Number", "required": true, "default": 0 },
         "details": { "type": "Array<Embedded:WhatsAppLogDetail>", "required": true, "default": [] }
       },
@@ -287,6 +249,7 @@
           "fields": {
             "productId": { "type": "String", "required": true, "ref": "products" },
             "lidColorId": { "type": "String", "default": null, "ref": "lidcolors" },
+            "unit": { "type": "String", "default": "pcs" },
             "quantity": { "type": "Number", "required": true, "default": 1 },
             "priceAtThatTime": { "type": "Number", "required": true },
             "subtotal": { "type": "Number", "required": true }
@@ -302,16 +265,12 @@
   "relations": [
     { "from": "products.categoryId", "to": "categories.id", "type": "many-to-one" },
     { "from": "products.productTypeId", "to": "producttypes.id", "type": "many-to-one" },
-    { "from": "products.unitId", "to": "units.id", "type": "many-to-one" },
     { "from": "products.lidMaterial", "to": "materials.id", "type": "many-to-one" },
     { "from": "products.bodyMaterial", "to": "materials.id", "type": "many-to-one" },
     { "from": "products.lidVariant", "to": "lidvariants.id", "type": "many-to-one" },
-    { "from": "products.lidType", "to": "lidtypes.id", "type": "many-to-one" },
+    { "from": "lidvariants.lidTypeId", "to": "lidtypes.id", "type": "many-to-one" },
     { "from": "products.prices[].lidColorId", "to": "lidcolors.id", "type": "many-to-one" },
     { "from": "products.prices[].priceTypeId", "to": "pricetypes.id", "type": "many-to-one" },
-    { "from": "promos.productId", "to": "products.id", "type": "many-to-one" },
-    { "from": "promos.lidColorId", "to": "lidcolors.id", "type": "many-to-one" },
-    { "from": "promos.categoryId", "to": "categories.id", "type": "many-to-one" },
     { "from": "wishlists.userId", "to": "users.id", "type": "many-to-one" },
     { "from": "wishlists.productId", "to": "products.id", "type": "many-to-one" },
     { "from": "wishlists.lidColorId", "to": "lidcolors.id", "type": "many-to-one" },
@@ -319,11 +278,9 @@
     { "from": "inquirycarts.items[].productId", "to": "products.id", "type": "many-to-one" },
     { "from": "inquirycarts.items[].lidColorId", "to": "lidcolors.id", "type": "many-to-one" },
     { "from": "inquirycarts.items[].priceTypeId", "to": "pricetypes.id", "type": "many-to-one" },
-    { "from": "inquirycarts.items[].promoAppliedId", "to": "promos.id", "type": "many-to-one" },
     { "from": "interactions.userId", "to": "users.id", "type": "many-to-one" },
     { "from": "interactions.productId", "to": "products.id", "type": "many-to-one" },
     { "from": "whatsapplogs.userId", "to": "users.id", "type": "many-to-one" },
-    { "from": "whatsapplogs.promoAppliedId", "to": "promos.id", "type": "many-to-one" },
     { "from": "whatsapplogs.details[].productId", "to": "products.id", "type": "many-to-one" },
     { "from": "whatsapplogs.details[].lidColorId", "to": "lidcolors.id", "type": "many-to-one" }
   ]

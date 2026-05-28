@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useProductFilters } from "@/hooks/useProductFilters";
 import ProductCard from "@/components/catalog/ProductCard";
 import FilterSidebar from "@/components/catalog/FilterSidebar";
@@ -192,7 +193,7 @@ function CatalogContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] relative">
           {/* Vertical Border Line (Non-breaking) */}
-          <div className="hidden lg:block absolute left-[340px] top-0 bottom-0 border-r border-border z-10" />
+          <div className="hidden lg:block absolute left-85 top-0 bottom-0 border-r border-border z-10" />
 
           {/* Desktop Sidebar (Sticky & Independently Scrollable) */}
           <div className="hidden lg:block sticky top-40 z-20 h-fit max-h-[calc(100vh-10rem)] overflow-y-auto overscroll-contain bg-white px-7 pb-10 pt-6">
@@ -335,7 +336,6 @@ function CatalogContent() {
                           product={product}
                           onCompareToggle={handleCompareToggle}
                           isComparing={compareIds.includes(product.id)}
-                          priceType={filters.price_type}
                         />
                       ))}
                     </div>
@@ -348,7 +348,6 @@ function CatalogContent() {
                           product={product}
                           onCompareToggle={handleCompareToggle}
                           isComparing={compareIds.includes(product.id)}
-                          priceType={filters.price_type}
                           viewMode="list"
                         />
                       ))}
@@ -376,26 +375,33 @@ function CatalogContent() {
       {/* Floating Comparison Bar */}
       {compareIds.length > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-full max-w-2xl px-4 sm:px-6">
-          <div className="bg-primary-900 text-white rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-primary-800/50 backdrop-blur-xl">
+          <div className="bg-white/95 text-text-primary rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border shadow-2xl backdrop-blur-xl">
             <div className="flex items-center gap-3 sm:gap-4 pl-1 sm:pl-2">
               <div className="flex -space-x-3">
-                {compareIds.slice(0, 3).map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-primary-900 bg-primary-700 flex items-center justify-center text-white"
-                  >
-                    <AppIcon
-                      name="inventory_2"
-                      className="text-xs sm:text-base"
-                    />
-                  </div>
-                ))}
+                {compareIds.slice(0, 3).map((id) => {
+                  const product = products.find((p) => p.id === id);
+                  const imageUrl = product?.images?.[0]?.imageUrl || "/toples.png";
+                  return (
+                    <div
+                      key={id}
+                      className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gray-50 overflow-hidden flex items-center justify-center shadow-xs"
+                    >
+                      <Image
+                        src={imageUrl}
+                        alt={product?.name || "Product"}
+                        fill
+                        className="object-contain p-0.5"
+                        sizes="40px"
+                      />
+                    </div>
+                  );
+                })}
               </div>
               <div className="min-w-0">
-                <p className="text-[0.6rem] sm:text-xs font-black uppercase tracking-widest text-primary-200 whitespace-nowrap">
+                <p className="text-[0.6rem] sm:text-xs font-black uppercase tracking-widest text-text-primary whitespace-nowrap">
                   {compareIds.length} Produk Terpilih
                 </p>
-                <p className="text-[0.6rem] sm:text-[0.65rem] text-primary-400 font-medium truncate">
+                <p className="text-[0.6rem] sm:text-[0.65rem] text-text-secondary font-medium truncate">
                   Bandingkan maks. 3 produk
                 </p>
               </div>
@@ -403,13 +409,13 @@ function CatalogContent() {
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <button
                 onClick={() => setCompareIds([])}
-                className="text-[0.65rem] sm:text-xs font-bold text-primary-300 hover:text-white transition-colors px-2 tracking-widest whitespace-nowrap"
+                className="text-[0.65rem] sm:text-xs font-bold text-text-secondary hover:text-text-primary transition-colors px-2 tracking-widest whitespace-nowrap cursor-pointer border-none bg-transparent"
               >
                 BATAL
               </button>
               <Link
                 href={`/compare?ids=${compareIds.join(",")}`}
-                className="flex-1 sm:flex-none bg-primary-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest hover:bg-primary-600 transition-all flex items-center justify-center gap-2 active:scale-95"
+                className="flex-1 sm:flex-none bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[0.65rem] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer border-none shadow-md"
               >
                 Bandingkan
                 <AppIcon name="compare_arrows" className="text-sm" />
