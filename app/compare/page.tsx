@@ -14,6 +14,7 @@ import LidVariant from "@/models/LidVariant";
 import PriceType from "@/models/PriceType";
 import LidColor from "@/models/LidColor";
 import ComparePriceSelector, { ComparePriceOption } from "@/components/product/ComparePriceSelector";
+import CompareLocalStorageHandler from "@/components/product/CompareLocalStorageHandler";
 
 export const metadata: Metadata = {
   title: "Bandingkan Spesifikasi Kemasan - Toples Laksana",
@@ -107,6 +108,9 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
 
   return (
     <div className="bg-[#F8FAFC] text-text-primary font-sans min-h-screen relative overflow-hidden">
+      {/* localStorage Sync Handler */}
+      <CompareLocalStorageHandler ids={ids} />
+
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-125 bg-linear-to-b from-primary-50/20 to-transparent -z-10" />
 

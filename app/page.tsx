@@ -115,7 +115,7 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="w-full lg:w-1/2 h-87.5 sm:h-125 lg:h-full bg-slate-100 flex items-center justify-center relative p-8 sm:p-16 lg:pt-28 lg:pb-12 lg:px-24 overflow-hidden"
+          className="w-full lg:w-1/2 h-87.5 sm:h-125 lg:h-full bg-slate-100 flex items-center justify-center relative p-8 sm:p-16 lg:pt-28 lg:pb-12 lg:px-24 overflow-hidden mt-5"
         >
           <div className="relative w-full h-full flex items-center justify-center">
             <Image
