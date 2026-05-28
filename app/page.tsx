@@ -78,19 +78,19 @@ export default function HomePage() {
   return (
     <main className="overflow-hidden bg-white">
       {/* Hero Section */}
-      <section className="relative flex min-h-svh items-center px-6 pb-10 pt-24 lg:h-screen lg:min-h-0 lg:px-12 lg:pb-12 lg:pt-36">
-        <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* Left: Text Content */}
+      <section className="relative flex min-h-svh flex-col lg:flex-row items-center w-full bg-white pt-20 lg:pt-0">
+        {/* Left: Text Content */}
+        <div className="w-full lg:w-1/2 flex items-center px-6 py-12 lg:px-16 lg:py-0">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-5"
+            className="max-w-xl mx-auto lg:mx-0 w-full space-y-5 lg:space-y-6"
           >
             <h1 className="text-4xl font-extrabold leading-[1.1] text-text-primary lg:text-6xl">
               Kemasan toples untuk kebutuhan usaha.
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed text-text-secondary lg:text-lg">
+            <p className="text-base leading-relaxed text-text-secondary lg:text-lg">
               Toples Laksana menyediakan toples plastik, jar kaca, dan kaleng untuk UMKM, reseller, hampers, dan kebutuhan produksi. Tersedia pilihan ecer dan grosir.
             </p>
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
@@ -109,43 +109,25 @@ export default function HomePage() {
               </Link>
             </div>
           </motion.div>
-
-          {/* Desktop spacer — reserves right column so grid alignment works */}
-          <div className="hidden lg:block" />
         </div>
 
-        {/* Mobile/Tablet: inline image below text */}
+        {/* Right: Centered image in slate container, full column 100vh on desktop, full row on mobile */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="relative mx-auto mt-8 h-60 w-full sm:h-80 lg:hidden"
-        >
-          <Image
-            src="/toples.png"
-            alt="Koleksi toples Toples Laksana"
-            fill
-            className="object-contain transition-transform duration-700 hover:scale-105"
-            sizes="100vw"
-            priority
-          />
-        </motion.div>
-
-        {/* Desktop: full-height absolute right panel (no border, no bg) */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="absolute bottom-0 right-0 top-0 hidden h-full w-1/2 overflow-hidden lg:block"
+          className="w-full lg:w-1/2 h-[320px] sm:h-[480px] lg:h-full bg-slate-100/70 flex items-center justify-center relative p-8 sm:p-12 lg:p-24 overflow-hidden"
         >
-          <Image
-            src="/toples.png"
-            alt="Koleksi toples Toples Laksana"
-            fill
-            className="object-contain p-16 transition-transform duration-700 hover:scale-105"
-            sizes="50vw"
-            priority
-          />
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Image
+              src="/toples.png"
+              alt="Koleksi toples Toples Laksana"
+              fill
+              className="object-contain transition-transform duration-700 hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+          </div>
         </motion.div>
       </section>
 

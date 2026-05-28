@@ -81,11 +81,12 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-110 bg-primary-500 py-5">
+      <nav className="fixed top-0 w-full z-110 bg-primary-500 py-3.5 sm:py-5">
         <div className="flex justify-between items-center px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
           {/* Brand */}
-          <Link href="/" className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2 cursor-pointer shrink-0">
-            Toples Laksana
+          <Link href="/" className="flex flex-col sm:flex-row items-start sm:items-center gap-0 sm:gap-2 leading-none cursor-pointer shrink-0">
+            <span className="text-[16px] sm:text-xl font-extrabold text-white tracking-tight">Toples</span>
+            <span className="text-[16px] sm:text-xl font-extrabold text-white tracking-tight -mt-0.5 sm:mt-0">Laksana</span>
           </Link>
 
           {/* Desktop Nav */}
