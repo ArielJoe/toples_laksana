@@ -11,6 +11,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import {
   buildWishlistInquiryWithPricesMessage,
   buildWishlistInquiryWithPricesUrl,
+  getCleanColorName,
 } from "@/lib/whatsapp-builder";
 import { formatPrice } from "@/lib/price-calculator";
 
@@ -19,6 +20,7 @@ interface ModalItem {
   quantity: number;
   unit: "pcs" | "bal";
   priceTypeId?: string;
+  lidColorId?: string;
 }
 
 export default function WishlistPage() {
@@ -26,7 +28,7 @@ export default function WishlistPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [fetching, setFetching] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [inquirySelections, setInquirySelections] = useState<{ id: string; unit: "pcs" | "bal" }[]>([]);
+  const [inquirySelections, setInquirySelections] = useState<{ id: string; unit: "pcs" | "bal"; lidColorId?: string; priceTypeId?: string }[]>([]);
   const inquiryIds = inquirySelections.map((item) => item.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<ModalItem[]>([]);
@@ -90,8 +92,13 @@ export default function WishlistPage() {
     );
   };
 
-  // Handle inquiry selection with unit
-  const handleInquirySelect = (productId: string, unit: "pcs" | "bal" | "") => {
+  // Handle inquiry selection with unit, color, and price type
+  const handleInquirySelect = (
+    productId: string,
+    unit: "pcs" | "bal" | "",
+    lidColorId?: string,
+    priceTypeId?: string
+  ) => {
     setInquirySelections((prev) => {
       if (!unit) {
         return prev.filter((item) => item.id !== productId);
@@ -99,10 +106,10 @@ export default function WishlistPage() {
       const exists = prev.some((item) => item.id === productId);
       if (exists) {
         return prev.map((item) =>
-          item.id === productId ? { ...item, unit } : item
+          item.id === productId ? { ...item, unit, lidColorId, priceTypeId } : item
         );
       }
-      return [...prev, { id: productId, unit }];
+      return [...prev, { id: productId, unit, lidColorId, priceTypeId }];
     });
   };
 
@@ -114,13 +121,15 @@ export default function WishlistPage() {
         if (!product) return null;
 
         const productPrices = product.prices || [];
-        let defaultPriceType = "";
-        if (sel.unit === "bal") {
-          const wholesalePrice = productPrices.find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal && p.price > 0);
-          defaultPriceType = wholesalePrice ? wholesalePrice.priceTypeId : PRICE_TYPE_IDS.perBal;
-        } else {
-          const retailPrice = productPrices.find(p => p.priceTypeId !== PRICE_TYPE_IDS.perBal && p.price > 0);
-          defaultPriceType = retailPrice ? retailPrice.priceTypeId : PRICE_TYPE_IDS.withLid;
+        let defaultPriceType = sel.priceTypeId || "";
+        if (!defaultPriceType) {
+          if (sel.unit === "bal") {
+            const wholesalePrice = productPrices.find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal && p.price > 0);
+            defaultPriceType = wholesalePrice ? wholesalePrice.priceTypeId : PRICE_TYPE_IDS.perBal;
+          } else {
+            const retailPrice = productPrices.find(p => p.priceTypeId !== PRICE_TYPE_IDS.perBal && p.price > 0);
+            defaultPriceType = retailPrice ? retailPrice.priceTypeId : PRICE_TYPE_IDS.withLid;
+          }
         }
 
         return {
@@ -128,6 +137,7 @@ export default function WishlistPage() {
           quantity: 1,
           unit: sel.unit,
           priceTypeId: defaultPriceType,
+          lidColorId: sel.lidColorId,
         };
       })
       .filter(Boolean) as ModalItem[];
@@ -158,10 +168,12 @@ export default function WishlistPage() {
     if (!item.priceTypeId) return null;
 
     const matches = (item.product.prices || [])
-      .filter((price) => price.priceTypeId === item.priceTypeId && price.price > 0)
+      .filter((price) => price.priceTypeId === item.priceTypeId && price.price > 0 && (!item.lidColorId || price.lidColorId === item.lidColorId))
       .sort((a, b) => a.price - b.price);
 
-    return matches[0] || null;
+    return matches[0] || (item.product.prices || [])
+      .filter((price) => price.priceTypeId === item.priceTypeId && price.price > 0)
+      .sort((a, b) => a.price - b.price)[0] || null;
   };
 
   const getPriceVariantOptions = (product: Product) => {
@@ -455,6 +467,16 @@ export default function WishlistPage() {
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-black text-text-primary truncate">{product.name}</h4>
                       <p className="text-[10px] text-text-secondary font-mono tracking-wider mt-0.5">{product.sku}</p>
+                      {item.lidColorId && (
+                        <p className="text-[10px] text-text-muted mt-1 flex items-center gap-1.5 font-bold uppercase tracking-wider">
+                          Warna Tutup: <span className="text-text-primary">{
+                            (() => {
+                              const match = (product.prices || []).find(p => p.lidColorId === item.lidColorId);
+                              return match?.lidColorName || getCleanColorName(item.lidColorId);
+                            })()
+                          }</span>
+                        </p>
+                      )}
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {priceOptions.length === 0 ? (
                           <span className="inline-block px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-primary-500 text-white border border-primary-500">

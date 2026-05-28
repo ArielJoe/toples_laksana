@@ -477,7 +477,7 @@ export default function DashboardContent({
             </div>
 
             <div className="flex-1 flex items-center justify-center py-4">
-              <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[180px]">
+              <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-45">
                 <PieChart>
                   <ChartTooltip
                     cursor={false}

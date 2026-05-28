@@ -18,6 +18,8 @@ interface ProductPriceDropdownProps {
   product: Product;
   priceTypes: PriceLookupItem[];
   lidColors: PriceLookupItem[];
+  selectedPrice?: ProductPrice | null;
+  onSelectPrice?: (price: ProductPrice) => void;
   className?: string;
   fallbackText?: string;
 }
@@ -44,6 +46,8 @@ export default function ProductPriceDropdown({
   product,
   priceTypes,
   lidColors,
+  selectedPrice,
+  onSelectPrice,
   className,
   fallbackText,
 }: ProductPriceDropdownProps) {
@@ -57,6 +61,8 @@ export default function ProductPriceDropdown({
     null,
   );
 
+  const activePrice = selectedPrice || lowestPrice;
+
   const openMenu = (pointerType?: string) => {
     if (pointerType && pointerType !== "mouse") return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -68,13 +74,16 @@ export default function ProductPriceDropdown({
     closeTimer.current = setTimeout(() => setIsOpen(false), 60);
   };
 
-  if (priceRows.length === 0 || !lowestPrice) {
+  if (priceRows.length === 0 || !activePrice) {
     return (
       <span className={cn("text-xs font-black text-text-muted", className)}>
         {fallbackText || "Belum ada harga"}
       </span>
     );
   }
+
+  const colorHex = getLidColorHex(activePrice, lidColorMap);
+  const colorLabel = getLidColorLabel(activePrice, lidColorMap);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -89,10 +98,16 @@ export default function ProductPriceDropdown({
       >
         <span className="min-w-0">
           <span className="block text-xs font-black leading-none text-text-primary">
-            {formatPrice(lowestPrice.price)}
+            {formatPrice(activePrice.price)}
           </span>
-          <span className="mt-1 block text-[0.58rem] font-black uppercase tracking-wider text-text-muted">
-            {priceRows.length} varian
+          <span className="mt-1 flex items-center gap-1.5 text-[0.58rem] font-bold uppercase tracking-wider text-text-muted">
+            <span
+              className="size-2 rounded-full border border-border shrink-0"
+              style={{ backgroundColor: colorHex }}
+            />
+            <span className="truncate max-w-22.5">{colorLabel}</span>
+            <span className="shrink-0">•</span>
+            <span className="shrink-0">{priceRows.length} varian</span>
           </span>
         </span>
         <ChevronDown className="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
@@ -112,12 +127,23 @@ export default function ProductPriceDropdown({
         <div className="max-h-72 space-y-1 overflow-y-auto">
           {priceRows.map((price, index) => {
             const quantity = price.quantity || 1;
-            const colorHex = getLidColorHex(price, lidColorMap);
+            const rowColorHex = getLidColorHex(price, lidColorMap);
+            const isSelected = activePrice &&
+              activePrice.priceTypeId === price.priceTypeId &&
+              activePrice.lidColorId === price.lidColorId;
 
             return (
-              <div
+              <button
+                type="button"
                 key={`${price.priceTypeId}-${price.lidColorId}-${index}`}
-                className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-lg px-2.5 py-2 hover:bg-secondary-50"
+                onClick={() => {
+                  onSelectPrice?.(price);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-slate-50 transition-colors border border-transparent bg-transparent cursor-pointer outline-none",
+                  isSelected && "bg-primary-50/50 hover:bg-primary-100/50 border-primary-200"
+                )}
               >
                 <div className="min-w-0">
                   <p className="truncate text-xs font-black text-text-primary">
@@ -126,7 +152,7 @@ export default function ProductPriceDropdown({
                   <div className="mt-1 flex items-center gap-1.5 text-[0.62rem] font-bold uppercase tracking-wider text-text-muted">
                     <span
                       className="size-2.5 rounded-full border border-border"
-                      style={{ backgroundColor: colorHex }}
+                      style={{ backgroundColor: rowColorHex }}
                     />
                     <span className="truncate">{getLidColorLabel(price, lidColorMap)}</span>
                     <span>/</span>
@@ -136,7 +162,7 @@ export default function ProductPriceDropdown({
                 <p className="whitespace-nowrap text-right text-xs font-black text-primary-600">
                   {formatPrice(price.price)}
                 </p>
-              </div>
+              </button>
             );
           })}
         </div>

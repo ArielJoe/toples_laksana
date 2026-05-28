@@ -1,8 +1,8 @@
 "use client";
-
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { Product } from "@/types/product";
+import type { Product, ProductPrice } from "@/types/product";
 import {
   getAvailabilityLabel,
   getPrimaryImage,
@@ -21,7 +21,7 @@ interface ProductCardProps {
   onInquiryToggle?: (productId: string) => void;
   isInquirySelected?: boolean;
   viewMode?: "grid" | "list";
-  onInquirySelect?: (productId: string, unit: "pcs" | "bal" | "") => void;
+  onInquirySelect?: (productId: string, unit: "pcs" | "bal" | "", lidColorId?: string, priceTypeId?: string) => void;
   selectedUnit?: "pcs" | "bal" | "";
 }
 
@@ -40,6 +40,20 @@ export default function ProductCard({
   const productHref = `/products/${product.id}`;
   const wishlisted = isInWishlist(product.id);
   const isList = viewMode === "list";
+
+  const priceRows = (product.prices || []).filter((price) => price.price > 0);
+  const lowestPrice = priceRows.reduce<ProductPrice | null>(
+    (lowest, price) => (!lowest || price.price < lowest.price ? price : lowest),
+    null,
+  );
+  const [selectedPrice, setSelectedPrice] = useState<ProductPrice | null>(lowestPrice);
+
+  // Sync selected price variant with inquiry selections when it changes
+  useEffect(() => {
+    if (selectedPrice && selectedUnit && onInquirySelect) {
+      onInquirySelect(product.id, selectedUnit, selectedPrice.lidColorId, selectedPrice.priceTypeId);
+    }
+  }, [selectedPrice, selectedUnit]);
 
   const handleInteraction = async () => {
     try {
@@ -69,7 +83,7 @@ export default function ProductCard({
       {/* WhatsApp Selection Checkbox */}
       {onInquiryToggle && (
         <div
-          className="absolute top-3 left-3 z-20 flex items-center justify-center p-1"
+          className="absolute top-3 left-3 z-30 flex items-center justify-center p-1"
           onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
@@ -87,7 +101,7 @@ export default function ProductCard({
           toggleWishlist(product.id);
         }}
         className={cn(
-          "absolute top-3 right-3 z-20 flex size-8 items-center justify-center rounded-full border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
+          "absolute top-3 right-3 z-30 flex size-8 items-center justify-center rounded-full border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
           wishlisted && "text-red-500 border-red-100 bg-red-50"
         )}
         title={wishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}
@@ -152,6 +166,8 @@ export default function ProductCard({
               product={product}
               priceTypes={priceTypes}
               lidColors={lidColors}
+              selectedPrice={selectedPrice}
+              onSelectPrice={setSelectedPrice}
               fallbackText="Hubungi Kami"
             />
           </div>
@@ -163,10 +179,7 @@ export default function ProductCard({
               onClick={(e) => e.stopPropagation()}
             >
               <Checkbox
-                className={cn(
-                  "size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50",
-                  onInquirySelect && "rounded-full"
-                )}
+                className="size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50 rounded-sm"
                 checked={isComparing}
                 onCheckedChange={() => onCompareToggle?.(product.id)}
               />
@@ -184,7 +197,12 @@ export default function ProductCard({
                   className="size-3.5 cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50 rounded-sm data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                   checked={!!selectedUnit}
                   onCheckedChange={(checked) => {
-                    onInquirySelect(product.id, checked ? "pcs" : "");
+                    onInquirySelect(
+                      product.id,
+                      checked ? "pcs" : "",
+                      selectedPrice?.lidColorId,
+                      selectedPrice?.priceTypeId
+                    );
                   }}
                 />
                 <span className="text-xs font-medium text-text-muted">

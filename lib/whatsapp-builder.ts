@@ -5,6 +5,51 @@ import { formatRupiah } from "@/lib/price-calculator";
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER;
 
+export function getCleanColorName(colorId?: string): string {
+  if (!colorId) return "-";
+  
+  const cleanId = colorId.trim().toLowerCase();
+  
+  // If it's already a friendly name (doesn't start with color_ or lc_ and contains no underscores)
+  if (!cleanId.startsWith("color_") && !cleanId.startsWith("lc_") && !cleanId.includes("_")) {
+    return colorId.charAt(0).toUpperCase() + colorId.slice(1);
+  }
+
+  const colorMap: Record<string, string> = {
+    color_bening: "Bening",
+    color_putih: "Putih",
+    color_cling: "Cling",
+    color_silver: "Silver",
+    color_emas: "Emas",
+    color_rose: "Rose Gold",
+    color_hitam: "Hitam",
+    lc_001: "Bening",
+    lc_002: "Putih",
+    lc_003: "Cling",
+    lc_004: "Silver",
+    lc_005: "Emas",
+    lc_006: "Rose Gold",
+    lc_007: "Hitam",
+  };
+
+  return colorMap[cleanId] || colorId.replace("color_", "").replace("lc_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+export function getCleanPriceTypeName(priceTypeId?: string): string {
+  if (!priceTypeId) return "-";
+
+  const cleanId = priceTypeId.trim().toLowerCase();
+
+  const priceTypeMap: Record<string, string> = {
+    ptype_001: "Harga 30 Pcs",
+    ptype_002: "Harga 24 Pcs",
+    ptype_003: "Harga Per Pcs",
+    ptype_004: "Harga Per Bal",
+  };
+
+  return priceTypeMap[cleanId] || priceTypeId.replace("ptype_", "").replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function buildWhatsAppUrlFromMessage(message: string): string {
   return `https://wa.me/${WA_NUMBER || "6281234567890"}?text=${encodeURIComponent(message)}`;
 }
@@ -15,7 +60,7 @@ export function buildWhatsAppMessage(
   calc: CalculatorResult,
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = price?.lidColorName || price?.lidColorId || "-";
+  const color = price?.lidColorName || getCleanColorName(price?.lidColorId);
 
   const lines: string[] = [
     "Halo Admin Toples Laksana,",
@@ -32,7 +77,7 @@ export function buildWhatsAppMessage(
   lines.push(`• *Warna Tutup:* ${color}`);
 
   if (calc && calc.quantity > 0) {
-    const typeLabel = price.priceTypeName || (price.priceTypeId === "ptype_001" ? "Ecer" : "Grosir");
+    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId);
     lines.push(
       `• *Tipe Harga:* ${typeLabel}`,
       `• *Jumlah:* ${calc.quantity} (${calc.totalPcs.toLocaleString("id-ID")} pcs)`,
@@ -92,7 +137,7 @@ export function buildBulkInquiryMessage(
   desiredQty: number,
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = price?.lidColorName || price?.lidColorId || "-";
+  const color = price?.lidColorName || getCleanColorName(price?.lidColorId);
 
   const lines = [
     "Halo Admin Toples Laksana,",
@@ -109,7 +154,7 @@ export function buildBulkInquiryMessage(
   lines.push(`• *Warna Tutup:* ${color}`);
 
   if (desiredQty > 0) {
-    const typeLabel = price.priceTypeName || "Bal";
+    const typeLabel = price.priceTypeName || getCleanPriceTypeName(price.priceTypeId);
     lines.push(
       `• *Tipe Harga:* ${typeLabel}`,
       `• *Jumlah:* ${desiredQty} (${(desiredQty * (price.quantity || 1)).toLocaleString("id-ID")} pcs)`,
@@ -168,6 +213,7 @@ export interface WishlistInquiryItem {
   quantity: number;
   unit: "pcs" | "bal";
   priceTypeId?: string;
+  lidColorId?: string;
 }
 
 function getWishlistPriceTypeLabel(
@@ -177,9 +223,7 @@ function getWishlistPriceTypeLabel(
 ) {
   if (price?.priceTypeName) return price.priceTypeName;
   if (priceTypeId && priceTypeNames[priceTypeId]) return priceTypeNames[priceTypeId];
-  if (priceTypeId === PRICE_TYPE_IDS.withLid) return "Harga Per Pcs";
-  if (priceTypeId === PRICE_TYPE_IDS.perBal) return "Harga Per Bal";
-  return priceTypeId ? priceTypeId.replace(/[_-]+/g, " ") : "Harga";
+  return getCleanPriceTypeName(priceTypeId);
 }
 
 export function buildWishlistInquiryWithPricesMessage(
@@ -206,13 +250,22 @@ export function buildWishlistInquiryWithPricesMessage(
     let priceTypeLabel = getWishlistPriceTypeLabel(item.priceTypeId, null, priceTypeNames);
     if (item.priceTypeId) {
       const matches = (item.product.prices || []).filter(
-        (p) => p.priceTypeId === item.priceTypeId && p.price > 0
+        (p) => p.priceTypeId === item.priceTypeId && p.price > 0 && (!item.lidColorId || p.lidColorId === item.lidColorId)
       ).sort((a, b) => a.price - b.price);
-      if (matches.length > 0) {
-        unitPrice = matches[0].price;
-        unitPcs = matches[0].quantity || unitPcs;
-        isPackagePrice = matches[0].priceTypeId === PRICE_TYPE_IDS.perBal;
-        priceTypeLabel = getWishlistPriceTypeLabel(item.priceTypeId, matches[0], priceTypeNames);
+      
+      let selectedMatch = matches[0] || null;
+      if (!selectedMatch) {
+        const typeOnlyMatches = (item.product.prices || []).filter(
+          (p) => p.priceTypeId === item.priceTypeId && p.price > 0
+        ).sort((a, b) => a.price - b.price);
+        selectedMatch = typeOnlyMatches[0] || null;
+      }
+
+      if (selectedMatch) {
+        unitPrice = selectedMatch.price;
+        unitPcs = selectedMatch.quantity || unitPcs;
+        isPackagePrice = selectedMatch.priceTypeId === PRICE_TYPE_IDS.perBal;
+        priceTypeLabel = getWishlistPriceTypeLabel(item.priceTypeId, selectedMatch, priceTypeNames);
       }
     }
 
@@ -242,6 +295,10 @@ export function buildWishlistInquiryWithPricesMessage(
     lines.push(`   • *SKU:* ${item.product.sku}`);
     if (volume) {
       lines.push(`   • *Volume:* ${volume}ml`);
+    }
+    if (item.lidColorId) {
+      const colorMatch = (item.product.prices || []).find(p => p.lidColorId === item.lidColorId);
+      lines.push(`   • *Warna Tutup:* ${colorMatch?.lidColorName || getCleanColorName(item.lidColorId)}`);
     }
     lines.push(`   • *Tipe Harga:* ${priceTypeLabel}`);
     lines.push(`   • *Jumlah:* ${quantityLabel}`);

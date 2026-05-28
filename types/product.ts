@@ -74,7 +74,26 @@ export function getCategoryLabel(categoryId: string): string {
 // Fallback label when resolved name is not available from the database
 export function getLidColorLabel(lidColorId?: string): string {
   if (!lidColorId) return "-";
-  return formatAttributeLabel(lidColorId);
+  
+  const cleanId = lidColorId.trim().toLowerCase();
+  const colorMap: Record<string, string> = {
+    color_bening: "Bening",
+    color_putih: "Putih",
+    color_cling: "Cling",
+    color_silver: "Silver",
+    color_emas: "Emas",
+    color_rose: "Rose Gold",
+    color_hitam: "Hitam",
+    lc_001: "Bening",
+    lc_002: "Putih",
+    lc_003: "Cling",
+    lc_004: "Silver",
+    lc_005: "Emas",
+    lc_006: "Rose Gold",
+    lc_007: "Hitam",
+  };
+  
+  return colorMap[cleanId] || formatAttributeLabel(lidColorId);
 }
 
 // Fallback label when resolved name is not available from the database
