@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import connectDB from "@/lib/mongodb";
 import WhatsAppLogModel from "@/models/WhatsAppLog";
+import User from "@/models/User";
 
 interface WhatsAppLogDetailPayload {
   productId?: string;
@@ -17,10 +18,6 @@ interface NormalizedWhatsAppLogDetail {
   unit: string;
   quantity: number;
   priceAtThatTime: number;
-}
-
-function normalizeUserId(userId: unknown) {
-  return typeof userId === "string" && userId.includes("@") ? userId : "guest";
 }
 
 function toNumber(value: unknown) {
@@ -50,9 +47,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing WhatsApp log details" }, { status: 400 });
     }
 
+    let resolvedUserId = "guest";
+    const rawUserId = body.userId;
+    if (typeof rawUserId === "string" && rawUserId.includes("@")) {
+      const user = await User.findOrCreateByEmail(rawUserId);
+      resolvedUserId = user.id;
+    }
+
     const log = await WhatsAppLogModel.create({
       id: crypto.randomUUID(),
-      userId: normalizeUserId(body.userId),
+      userId: resolvedUserId,
       grandTotal: toNumber(body.grandTotal),
       details,
     });

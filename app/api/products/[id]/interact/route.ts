@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Interaction from "@/models/Interaction";
-
-function normalizeUserId(userId: unknown) {
-  return typeof userId === "string" && userId.includes("@") ? userId : "guest";
-}
+import User from "@/models/User";
 
 export async function POST(
   request: NextRequest,
@@ -24,9 +21,16 @@ export async function POST(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    let resolvedUserId = "guest";
+    const rawUserId = body.userId;
+    if (typeof rawUserId === "string" && rawUserId.includes("@")) {
+      const user = await User.findOrCreateByEmail(rawUserId);
+      resolvedUserId = user.id;
+    }
+
     await Interaction.create({
       id: `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      userId: normalizeUserId(body.userId),
+      userId: resolvedUserId,
       productId: product.id,
     });
 

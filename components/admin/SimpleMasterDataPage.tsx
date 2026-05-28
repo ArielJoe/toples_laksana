@@ -21,7 +21,6 @@ export interface SimpleMasterItem {
   id: string;
   name: string;
   usage?: "body" | "lid" | "both";
-  description?: string;
 }
 
 interface SimpleMasterDataPageProps {
@@ -66,8 +65,7 @@ export default function SimpleMasterDataPage({
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.usage ? USAGE_LABELS[item.usage].toLowerCase().includes(searchQuery.toLowerCase()) : false) ||
-    (item.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+    (item.usage ? USAGE_LABELS[item.usage].toLowerCase().includes(searchQuery.toLowerCase()) : false)
   );
   const showUsageColumn = fields.some((field) => field.name === "usage");
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / MASTER_DATA_PAGE_SIZE));
@@ -182,19 +180,18 @@ export default function SimpleMasterDataPage({
             <Table className="min-w-175">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
+                  <TableHead className="w-1/4 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama</TableHead>
                   {showUsageColumn && (
-                    <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Untuk</TableHead>
+                    <TableHead className="w-1/4 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Untuk</TableHead>
                   )}
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Deskripsi</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
+                  <TableHead className="w-32 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={showUsageColumn ? 5 : 4} className="p-20 text-center">
+                    <TableCell colSpan={showUsageColumn ? 4 : 3} className="p-20 text-center">
                       <div className="flex flex-col items-center justify-center text-text-muted">
                         <AppIcon name="inventory_2" className="text-6xl opacity-10 mb-4" />
                         <p className="text-lg font-black text-text-primary">{emptyTitle}</p>
@@ -218,9 +215,7 @@ export default function SimpleMasterDataPage({
                           </span>
                         </TableCell>
                       )}
-                      <TableCell className="px-8 py-3">
-                        <p className="max-w-md text-sm font-medium text-text-secondary truncate">{item.description || "-"}</p>
-                      </TableCell>
+
                       <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
@@ -273,9 +268,7 @@ export default function SimpleMasterDataPage({
                     )}
                   </div>
 
-                  {item.description && (
-                    <p className="text-xs font-medium text-text-secondary line-clamp-2">{item.description}</p>
-                  )}
+
 
                   <div className="flex items-center justify-end gap-2 pt-2 border-t border-secondary-50/50">
                     <button

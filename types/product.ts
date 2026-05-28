@@ -42,11 +42,9 @@ export interface Product {
   lidMaterial: string;
   lidVariant: string;
   bodyMaterial: string;
-  lidType?: string;
   lidMaterialName?: string;
   lidVariantName?: string;
   bodyMaterialName?: string;
-  lidTypeName?: string;
   isAvailable?: boolean;
   description?: string;
   dimension?: ProductDimension;

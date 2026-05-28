@@ -243,10 +243,10 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
             <Table className="min-w-150">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Preview</TableHead>
+                  <TableHead className="w-1/4 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
+                  <TableHead className="w-32 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Preview</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Warna</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
+                  <TableHead className="w-32 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

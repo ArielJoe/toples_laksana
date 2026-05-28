@@ -61,6 +61,14 @@ function getDisplayUser(userId: string) {
     return normalizedUserId;
   }
 
+  if (normalizedUserId === "guest" || normalizedUserId === "anonymous") {
+    return normalizedUserId;
+  }
+
+  if (normalizedUserId.length > 0) {
+    return normalizedUserId;
+  }
+
   return "guest";
 }
 
@@ -184,9 +192,9 @@ export default function InteractionsPageContent({ initialInteractions, products 
             <Table className="min-w-190">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Waktu</TableHead>
+                  <TableHead className="w-1/4 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Waktu</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Produk</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User</TableHead>
+                  <TableHead className="w-2/5 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

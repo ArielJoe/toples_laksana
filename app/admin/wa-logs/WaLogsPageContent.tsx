@@ -67,7 +67,21 @@ function getEndOfDateInput(value: string) {
 }
 
 function getDisplayUser(userId: string) {
-  return userId.includes("@") ? userId : "guest";
+  const normalizedUserId = userId.trim();
+
+  if (normalizedUserId.includes("@")) {
+    return normalizedUserId;
+  }
+
+  if (normalizedUserId === "guest" || normalizedUserId === "anonymous") {
+    return normalizedUserId;
+  }
+
+  if (normalizedUserId.length > 0) {
+    return normalizedUserId;
+  }
+
+  return "guest";
 }
 
 function formatMoney(value?: number) {
@@ -219,10 +233,10 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
             <Table className="min-w-260">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Waktu</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User</TableHead>
+                  <TableHead className="w-1/5 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Waktu</TableHead>
+                  <TableHead className="w-1/3 px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">User</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Produk yang Ditanyakan</TableHead>
-                  <TableHead className="px-8 py-4 text-right text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Total</TableHead>
+                  <TableHead className="w-32 px-8 py-4 text-right text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

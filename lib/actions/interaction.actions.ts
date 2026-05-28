@@ -4,6 +4,7 @@ import connectDB from "@/lib/mongodb";
 import InteractionModel from "@/models/Interaction";
 import ProductModel from "@/models/Product";
 import WhatsAppLogModel from "@/models/WhatsAppLog";
+import UserModel from "@/models/User";
 
 export interface GetInteractionsParams {
   search?: string;
@@ -22,20 +23,27 @@ export async function getInteractions(params: GetInteractionsParams = {}) {
 
     const query: Record<string, unknown> = {};
 
-    // Since searching interactions often involves product names, 
-    // we fetch interactions first and then filter/map if needed, 
-    // or we fetch product IDs first if searching by product name.
     if (search) {
-      const products = await ProductModel.find({
-        name: { $regex: search, $options: "i" },
-        deletedAt: null,
-      }).select("id");
+      const [products, matchingUsers] = await Promise.all([
+        ProductModel.find({
+          name: { $regex: search, $options: "i" },
+          deletedAt: null,
+        }).select("id"),
+        UserModel.find({
+          $or: [
+            { email: { $regex: search, $options: "i" } },
+            { fullName: { $regex: search, $options: "i" } },
+          ],
+        }).select("id"),
+      ]);
 
       const productIds = products.map((product) => product.id);
+      const matchingUserIds = matchingUsers.map((user) => user.id);
 
       query.$or = [
         { productId: { $in: productIds } },
-        { userId: { $regex: search, $options: "i" } },
+        { userId: { $in: matchingUserIds } },
+        { userId: { $regex: search, $options: "i" } }, // Legacy or guest
       ];
     }
 
@@ -48,9 +56,19 @@ export async function getInteractions(params: GetInteractionsParams = {}) {
       InteractionModel.countDocuments(query),
     ]);
 
+    // Enrich interactions with resolved user email addresses
+    const userIds = [...new Set(interactions.map((i) => i.userId).filter(Boolean))];
+    const users = await UserModel.find({ id: { $in: userIds } }).select("id email").lean();
+    const userMap = Object.fromEntries(users.map((u) => [u.id, u.email]));
+
+    const enrichedInteractions = interactions.map((i) => ({
+      ...i,
+      userId: userMap[i.userId] || i.userId,
+    }));
+
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(interactions)),
+      data: JSON.parse(JSON.stringify(enrichedInteractions)),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -73,7 +91,18 @@ export async function getWaLogs(params: GetInteractionsParams = {}) {
     const query: Record<string, unknown> = {};
 
     if (search) {
-      query.userId = { $regex: search, $options: "i" };
+      const matchingUsers = await UserModel.find({
+        $or: [
+          { email: { $regex: search, $options: "i" } },
+          { fullName: { $regex: search, $options: "i" } },
+        ],
+      }).select("id");
+      const matchingUserIds = matchingUsers.map((user) => user.id);
+
+      query.$or = [
+        { userId: { $in: matchingUserIds } },
+        { userId: { $regex: search, $options: "i" } }, // Legacy or guest
+      ];
     }
 
     const [logs, total] = await Promise.all([
@@ -85,9 +114,19 @@ export async function getWaLogs(params: GetInteractionsParams = {}) {
       WhatsAppLogModel.countDocuments(query),
     ]);
 
+    // Enrich logs with resolved user email addresses
+    const userIds = [...new Set(logs.map((l) => l.userId).filter(Boolean))];
+    const users = await UserModel.find({ id: { $in: userIds } }).select("id email").lean();
+    const userMap = Object.fromEntries(users.map((u) => [u.id, u.email]));
+
+    const enrichedLogs = logs.map((l) => ({
+      ...l,
+      userId: userMap[l.userId] || l.userId,
+    }));
+
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(logs)),
+      data: JSON.parse(JSON.stringify(enrichedLogs)),
       total,
       page,
       totalPages: Math.ceil(total / limit),

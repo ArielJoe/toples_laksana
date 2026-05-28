@@ -1,12 +1,3 @@
-// Category display config for catalog filter UI
-export const CATEGORY_CONFIG: Record<string, { icon: string; label: string }> = {
-  cat_tin: { icon: "deployed_code", label: "Tin Kaleng" },
-  cat_jar_plastik: { icon: "layers", label: "Jar Plastik" },
-  cat_jar_kaca: { icon: "liquor", label: "Jar Kaca" },
-  cat_jar_cylinder: { icon: "inventory_2", label: "Jar Cylinder" },
-  cat_botol: { icon: "water_bottle", label: "Botol" },
-  cat_botol_plastik: { icon: "water_bottle", label: "Botol Plastik" },
-};
 
 // Body material labels and tooltips
 export const MATERIAL_LABELS: Record<string, { label: string; tooltip: string }> = {

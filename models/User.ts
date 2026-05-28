@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Model } from "mongoose";
 
 export interface IUser {
   id: string;
@@ -6,6 +6,16 @@ export interface IUser {
   email: string;
   fullName?: string;
   photoUrl?: string;
+}
+
+interface UserModel extends Model<IUser> {
+  findOrCreateFromFirebase(payload: {
+    firebaseUid: string;
+    email: string;
+    fullName?: string;
+    photoUrl?: string;
+  }): Promise<IUser & { _id: any }>;
+  findOrCreateByEmail(email: string): Promise<IUser & { _id: any }>;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -63,6 +73,7 @@ UserSchema.statics.findOrCreateFromFirebase = async function (payload: {
   }
 
   return this.create({
+    id: `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     firebaseUid,
     email,
     fullName: fullName || email?.split("@")[0] || "",
@@ -70,6 +81,23 @@ UserSchema.statics.findOrCreateFromFirebase = async function (payload: {
   });
 };
 
-export const User = models.User || model<IUser>("User", UserSchema);
+// Find an existing user by email or create a new user with generated ID
+UserSchema.statics.findOrCreateByEmail = async function (email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  
+  const user = await this.findOne({ email: normalizedEmail });
+  if (user) {
+    return user;
+  }
+
+  return this.create({
+    id: `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    email: normalizedEmail,
+    fullName: normalizedEmail.split("@")[0],
+    photoUrl: "",
+  });
+};
+
+export const User = (models.User || model<IUser, UserModel>("User", UserSchema)) as UserModel;
 
 export default User;
