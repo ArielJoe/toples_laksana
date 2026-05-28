@@ -1,6 +1,5 @@
 import Category from "./Category";
 import ProductType from "./ProductType";
-import Unit from "./Unit";
 import LidColor from "./LidColor";
 import Material from "./Material";
 import LidType from "./LidType";
@@ -18,9 +17,6 @@ export type { ICategory } from "./Category";
 
 export { ProductType } from "./ProductType";
 export type { IProductType } from "./ProductType";
-
-export { Unit } from "./Unit";
-export type { IUnit } from "./Unit";
 
 export { LidColor } from "./LidColor";
 export type { ILidColor } from "./LidColor";
@@ -65,7 +61,6 @@ export type { IWhatsAppLog, IWhatsAppLogDetail } from "./WhatsAppLog";
 const databaseModels = {
   Category,
   ProductType,
-  Unit,
   LidColor,
   Material,
   LidType,

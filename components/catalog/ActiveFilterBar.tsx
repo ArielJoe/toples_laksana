@@ -34,6 +34,10 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
       const facetPriceType = facets?.price_types?.find((p) => p.value === value);
       return facetPriceType?.name || formatAttributeLabel(value);
     }
+    case "product_type": {
+      const facetProductType = facets?.product_types?.find((p) => p.value === value);
+      return facetProductType?.name || formatAttributeLabel(value);
+    }
     case "colors": {
       const facetColor = facets?.colors?.find((c) => c.value === value);
       const hex = facetColor?.hex || COLOR_SWATCHES[value] || "#ccc";
@@ -64,6 +68,9 @@ export default function ActiveFilterBar({
   }
   filters.category?.forEach((v) =>
     pills.push({ key: "category", value: v, label: getFilterLabel("category", v, facets) })
+  );
+  filters.product_type?.forEach((v) =>
+    pills.push({ key: "product_type", value: v, label: getFilterLabel("product_type", v, facets) })
   );
   if (filters.volume_min || filters.volume_max) {
     pills.push({

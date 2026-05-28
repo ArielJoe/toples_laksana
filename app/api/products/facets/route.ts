@@ -5,6 +5,7 @@ import Category from "@/models/Category";
 import LidColor from "@/models/LidColor";
 import Material from "@/models/Material";
 import PriceType from "@/models/PriceType";
+import ProductType from "@/models/ProductType";
 import { getAvailabilityLabel, getCategoryLabel } from "@/types/product";
 
 export async function GET() {
@@ -26,6 +27,8 @@ export async function GET() {
       lidColorDocs,
       materialDocs,
       priceTypeDocs,
+      productTypes,
+      productTypeDocs,
     ] = await Promise.all([
       Product.aggregate([
         { $match: activeFilter },
@@ -90,12 +93,19 @@ export async function GET() {
       LidColor.find().select("id color colorCode").lean(),
       Material.find().select("id name").lean(),
       PriceType.find().select("id name").lean(),
+      Product.aggregate([
+        { $match: activeFilter },
+        { $group: { _id: "$productTypeId", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      ProductType.find().select("id name").lean(),
     ]);
 
     const categoryNames = new Map(categoryDocs.map((category) => [category.id, category.name]));
     const lidColorMap = new Map(lidColorDocs.map((lc) => [lc.id, lc]));
     const materialMap = new Map(materialDocs.map((material) => [material.id, material.name]));
     const priceTypeMap = new Map(priceTypeDocs.map((priceType) => [priceType.id, priceType.name]));
+    const productTypeMap = new Map(productTypeDocs.map((pt) => [pt.id, pt.name]));
 
     return NextResponse.json({
       categories: categories.map((category) => ({
@@ -124,6 +134,13 @@ export async function GET() {
           value: item._id,
           count: item.count,
           name: priceTypeMap.get(item._id) || item._id,
+        })),
+      product_types: productTypes
+        .filter((item) => item._id)
+        .map((item) => ({
+          value: item._id,
+          count: item.count,
+          name: productTypeMap.get(item._id) || item._id,
         })),
       availability_statuses: availabilityStatuses
         .filter((item) => item.value !== undefined && item.value !== null)

@@ -16,12 +16,13 @@ import {
   SearchIcon,
   SettingsIcon,
   SlidersHorizontalIcon,
+  TagIcon,
 } from "lucide-react";
 
 interface FilterSidebarProps {
   filters: CatalogFilters;
   facets: FacetCounts | null;
-  onToggleArray: (key: "category" | "material_body" | "lid_material" | "colors" | "availability" | "price_type", value: string) => void;
+  onToggleArray: (key: "category" | "material_body" | "lid_material" | "colors" | "availability" | "price_type" | "product_type", value: string) => void;
   onSetFilters: (f: Partial<CatalogFilters>) => void;
 }
 
@@ -37,6 +38,7 @@ export default function FilterSidebar({
 
   const vRange = facets?.volume_range || { min: 0, max: 1500 };
   const categoryList = facets?.categories || [];
+  const productTypeList = facets?.product_types || [];
   const priceTypeList = facets?.price_types?.length
     ? facets.price_types
     : [
@@ -136,6 +138,36 @@ export default function FilterSidebar({
           })}
         </div>
       </section>
+
+      {/* Tipe Produk */}
+      {productTypeList.length > 0 && (
+        <section>
+          <h3 className="text-[0.65rem] font-black uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
+            <TagIcon className="size-4" />
+            Tipe Produk
+          </h3>
+          <div className="space-y-1">
+            {productTypeList.map((type) => {
+              const isActive = !!filters.product_type?.includes(type.value);
+              return (
+                <label
+                  key={type.value}
+                  className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-secondary-50 transition-colors"
+                >
+                  <Checkbox
+                    checked={isActive}
+                    onCheckedChange={() => onToggleArray("product_type", type.value)}
+                  />
+                  <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
+                    {type.name || formatAttributeLabel(type.value)}
+                  </span>
+                  <span className="text-[0.6rem] font-black text-text-muted">{type.count}</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Volume Range */}
       <section>

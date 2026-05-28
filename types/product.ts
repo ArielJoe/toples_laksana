@@ -167,6 +167,7 @@ export function getPricesByType(product: Product, priceTypeId: string): ProductP
 export interface CatalogFilters {
   search?: string;
   category?: string[];
+  product_type?: string[];
   volume_min?: number;
   volume_max?: number;
   price_min?: number;
@@ -199,6 +200,7 @@ export interface FacetCounts {
   lid_materials: { value: string; count: number; name?: string }[];
   colors: { value: string; count: number; name?: string; hex?: string }[];
   price_types?: { value: string; count: number; name?: string }[];
+  product_types?: { value: string; count: number; name?: string }[];
   volume_range: { min: number; max: number };
   price_range: { min: number; max: number };
   availability_statuses?: { value: string; count: number; name?: string }[];

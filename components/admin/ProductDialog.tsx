@@ -44,7 +44,6 @@ interface ProductDialogProps {
   masterData: {
     categories: MasterDataItem[];
     productTypes: MasterDataItem[];
-    units: MasterDataItem[];
     lidColors: MasterDataItem[];
     priceTypes: MasterDataItem[];
     materials: MasterDataItem[];
@@ -241,12 +240,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                 onChange={(value) => setFormData({ ...formData, productTypeId: value })}
                 options={masterData.productTypes.map(pt => [pt.id, pt.name])}
               />
-              <SelectField
-                label="Satuan"
-                value={formData.unitId || ""}
-                onChange={(value) => setFormData({ ...formData, unitId: value })}
-                options={masterData.units.map(u => [u.id, u.name])}
-              />
+
               <SelectField
                 label="Status Ketersediaan"
                 value={formData.isAvailable === false ? "false" : "true"}

@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "popular";
     const search = (searchParams.get("search") || "").trim().slice(0, 80);
     const categories = searchParams.getAll("category");
+    const productTypes = searchParams.getAll("product_type");
     const materialBody = searchParams.getAll("material_body");
     const lidMaterial = searchParams.getAll("lid_material");
     const lidType = searchParams.getAll("lid_type");
@@ -70,6 +71,10 @@ export async function GET(request: NextRequest) {
     const categoryIds = await resolveCategoryIds(categories);
     if (categoryIds.length > 0) {
       filter.categoryId = { $in: categoryIds };
+    }
+
+    if (productTypes.length > 0) {
+      filter.productTypeId = { $in: productTypes };
     }
 
     if (materialBody.length > 0) {

@@ -92,7 +92,7 @@ export default function MasterDataDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] border-none shadow-2xl rounded-2xl overflow-hidden p-0">
+      <DialogContent className="sm:max-w-106.25 border-none shadow-2xl rounded-2xl overflow-hidden p-0">
         <div className="bg-white px-8 py-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-black tracking-tight text-text-primary">{title}</DialogTitle>
@@ -110,7 +110,7 @@ export default function MasterDataDialog({
                     onChange={(e) => handleChange(field.name, e.target.value)}
                     placeholder={field.placeholder}
                     required={field.required}
-                    className="bg-secondary-50/50 border-border font-bold text-sm min-h-[100px] focus:bg-white transition-all rounded-xl"
+                    className="bg-secondary-50/50 border-border font-bold text-sm min-h-25 focus:bg-white transition-all rounded-xl"
                   />
                 ) : field.type === "select" ? (
                   (() => {
@@ -189,7 +189,7 @@ export default function MasterDataDialog({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-[2] bg-primary-500 hover:bg-primary-600 text-white font-black uppercase tracking-widest text-xs h-12 rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-50"
+                className="flex-2 bg-primary-500 hover:bg-primary-600 text-white font-black uppercase tracking-widest text-xs h-12 rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? "Menyimpan..." : initialData ? "Simpan Perubahan" : "Tambah"}
               </Button>

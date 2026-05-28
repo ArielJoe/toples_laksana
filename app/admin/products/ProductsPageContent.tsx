@@ -36,7 +36,6 @@ interface ProductsPageContentProps {
   masterData: {
     categories: MasterDataItem[];
     productTypes: MasterDataItem[];
-    units: MasterDataItem[];
     lidColors: MasterDataItem[];
     priceTypes: MasterDataItem[];
     materials: MasterDataItem[];

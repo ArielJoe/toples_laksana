@@ -11,7 +11,6 @@ const ADMIN_API_PREFIXES = [
   "/api/price-types",
   "/api/product-types",
   "/api/products",
-  "/api/units",
 ];
 
 const PUBLIC_WRITE_API_PATTERNS = [
