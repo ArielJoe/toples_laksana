@@ -104,7 +104,7 @@ function CatalogContent() {
       <main className="w-full">
         {/* Sticky Header: Controls Bar + Active Filters */}
         <div className="sticky top-16 lg:top-20 z-40 min-h-20 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:h-20 sm:px-6 lg:px-10">
-          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-5 sm:h-full sm:flex-row sm:items-center sm:justify-between sm:py-0">
+          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-8 sm:h-full sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <div className="grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-1 sm:items-center">
               {/* Mobile/Tablet filter button */}
               <button
@@ -128,11 +128,10 @@ function CatalogContent() {
                     onClick={() =>
                       setFilters({ sort: val as CatalogFilters["sort"] })
                     }
-                    className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-all cursor-pointer lg:px-4 ${
-                      (filters.sort || "popular") === val
+                    className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-all cursor-pointer lg:px-4 ${(filters.sort || "popular") === val
                         ? "bg-primary-500 text-white"
                         : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {label}
                   </button>

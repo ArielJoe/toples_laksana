@@ -322,7 +322,7 @@ export default function WishlistPage() {
         ) : (
           <>
             {/* WhatsApp Inquiry Selection Toolbar */}
-            <div className="sticky top-26 lg:top-20 z-40 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-border shadow-xs">
+            <div className="sticky top-26 lg:top-28 z-40 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-md rounded-2xl border border-border shadow-xs">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-text-secondary uppercase tracking-wider">
                   Pilih produk untuk ditanyakan
@@ -502,7 +502,7 @@ export default function WishlistPage() {
                             onClick={() => {
                               handleUpdatePriceType(product.id, option.id);
                             }}
-                            className={`flex-1 sm:flex-none flex min-w-[120px] flex-col rounded-xl border px-3 py-1.5 text-left transition-all cursor-pointer ${isActive
+                            className={`flex min-w-28 flex-col rounded-xl border px-3 py-1.5 text-left transition-all cursor-pointer ${isActive
                                 ? "bg-primary-500 text-white border-primary-500 shadow-xs"
                                 : "bg-slate-50 text-gray-500 border-slate-200 hover:bg-slate-100 hover:text-gray-700"
                               }`}
