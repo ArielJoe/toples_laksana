@@ -78,9 +78,9 @@ export default function HomePage() {
   return (
     <main className="overflow-hidden bg-white">
       {/* Hero Section */}
-      <section className="relative flex min-h-svh flex-col lg:flex-row items-center w-full bg-white pt-20 lg:pt-0">
+      <section className="relative flex min-h-svh flex-col lg:flex-row lg:items-stretch w-full bg-white pt-20 lg:pt-0 lg:h-screen lg:min-h-0 overflow-hidden">
         {/* Left: Text Content */}
-        <div className="w-full lg:w-1/2 flex items-center px-6 py-12 lg:px-16 lg:py-0">
+        <div className="w-full lg:w-1/2 flex items-center px-6 py-12 lg:px-16 lg:py-0 lg:h-full">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -116,7 +116,7 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="w-full lg:w-1/2 h-[320px] sm:h-[480px] lg:h-full bg-slate-100/70 flex items-center justify-center relative p-8 sm:p-12 lg:p-24 overflow-hidden"
+          className="w-full lg:w-1/2 h-[350px] sm:h-[500px] lg:h-full bg-slate-100 flex items-center justify-center relative p-8 sm:p-16 lg:p-24 overflow-hidden"
         >
           <div className="relative w-full h-full flex items-center justify-center">
             <Image
