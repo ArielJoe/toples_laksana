@@ -28,7 +28,6 @@ export async function POST(
       id: `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       userId: normalizeUserId(body.userId),
       productId: product.id,
-      interactionType: "detail_click",
     });
 
     return NextResponse.json({ success: true });

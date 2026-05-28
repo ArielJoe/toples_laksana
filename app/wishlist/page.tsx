@@ -260,7 +260,6 @@ export default function WishlistPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: user?.email || "guest",
-        message: buildWishlistInquiryWithPricesMessage(modalItems, priceTypeNames, lidColorNames),
         grandTotal: details.reduce((sum, detail) => sum + detail.subtotal, 0),
         details: details.map(({ subtotal, ...rest }) => rest),
       }),

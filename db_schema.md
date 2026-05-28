@@ -68,7 +68,6 @@ erDiagram
     WhatsAppLog {
         string id PK
         string userId FK
-        string message
         number grandTotal
         WhatsAppLogDetail[] details
         date createdAt
@@ -277,7 +276,7 @@ Mencatat statistik aktivitas klik/kunjungan produk oleh pengguna untuk keperluan
 | :--- | :--- | :--- |
 | `id` | `String` | **Primary Key**, Required, Unique |
 | `userId` | `String` | Foreign Key ke `User.id`, Required |
-| `productId` | `String` | Foreign Key ke `Product.id`, Required |
+| `productId` | `String` | Foreign Key ke `Product.id`, Default: `null` |
 | `createdAt` | `Date` | Timestamp kunjungan (Mongoose `timestamps`) |
 
 * **Indexes**:
@@ -293,7 +292,6 @@ Mencatat log riwayat ekspor keranjang belanja/pesanan yang dikirimkan oleh pengg
 | :--- | :--- | :--- |
 | `id` | `String` | **Primary Key**, Required, Unique |
 | `userId` | `String` | Foreign Key ke `User.id`, Required |
-| `message` | `String` | Teks pesan mentah yang dikirimkan ke WhatsApp, Required |
 | `grandTotal` | `Number` | Total nilai transaksi pada saat dikirimkan, Required, Default: `0` |
 | `details` | `Array` | Detail produk pesanan (Array dari `WhatsAppLogDetailSchema`) |
 | `createdAt` | `Date` | Tanggal pengiriman pesan (Mongoose `timestamps`) |

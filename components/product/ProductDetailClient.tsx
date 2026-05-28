@@ -133,7 +133,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: user?.email || "guest",
-        message,
         grandTotal: subtotal,
         details: [
           {

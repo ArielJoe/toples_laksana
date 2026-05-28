@@ -66,7 +66,6 @@ export async function GET(request: Request) {
     }>([
       {
         $match: {
-          interactionType: "detail_click",
           productId: { $type: "string", $ne: "" },
           createdAt: { $gte: since },
         },

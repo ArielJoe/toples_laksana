@@ -141,10 +141,7 @@ export async function GET(request: NextRequest) {
               {
                 $match: {
                   $expr: {
-                    $and: [
-                      { $eq: ["$productId", "$$prodId"] },
-                      { $eq: ["$interactionType", "detail_click"] }
-                    ]
+                    $eq: ["$productId", "$$prodId"]
                   }
                 }
               }

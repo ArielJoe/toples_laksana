@@ -3,7 +3,7 @@ import { Schema, model, models } from "mongoose";
 export interface IInteraction {
   id: string;
   userId: string;
-  productId: string;
+  productId?: string | null;
   createdAt?: Date;
 }
 
@@ -11,7 +11,7 @@ const InteractionSchema = new Schema<IInteraction>(
   {
     id: { type: String, required: true, unique: true },
     userId: { type: String, required: true },
-    productId: { type: String, required: true },
+    productId: { type: String, default: null },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: false } }
 );

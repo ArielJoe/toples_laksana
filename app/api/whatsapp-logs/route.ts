@@ -53,7 +53,6 @@ export async function POST(req: Request) {
     const log = await WhatsAppLogModel.create({
       id: crypto.randomUUID(),
       userId: normalizeUserId(body.userId),
-      message: typeof body.message === "string" ? body.message : "",
       grandTotal: toNumber(body.grandTotal),
       details,
     });

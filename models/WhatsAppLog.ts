@@ -11,7 +11,6 @@ export interface IWhatsAppLogDetail {
 export interface IWhatsAppLog {
   id: string;
   userId: string;
-  message: string;
   grandTotal: number;
   details: IWhatsAppLogDetail[];
   createdAt?: Date;
@@ -32,7 +31,6 @@ const WhatsAppLogSchema = new Schema<IWhatsAppLog>(
   {
     id: { type: String, required: true, unique: true },
     userId: { type: String, required: true },
-    message: { type: String, required: true },
     grandTotal: { type: Number, required: true, default: 0 },
     details: { type: [WhatsAppLogDetailSchema], required: true, default: [] },
   },

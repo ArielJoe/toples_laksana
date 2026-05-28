@@ -73,10 +73,7 @@ export async function getWaLogs(params: GetInteractionsParams = {}) {
     const query: Record<string, unknown> = {};
 
     if (search) {
-      query.$or = [
-        { userId: { $regex: search, $options: "i" } },
-        { message: { $regex: search, $options: "i" } },
-      ];
+      query.userId = { $regex: search, $options: "i" };
     }
 
     const [logs, total] = await Promise.all([
