@@ -76,6 +76,7 @@ export default function Navbar() {
     { label: "Beranda", href: "/" },
     { label: "Katalog", href: "/catalog" },
     { label: "Wishlist", href: "/wishlist" },
+    { label: "Bandingkan", href: "/compare" },
     { label: "Tentang Kami", href: "/tentang" },
   ];
 
