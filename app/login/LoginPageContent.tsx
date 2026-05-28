@@ -48,7 +48,7 @@ export default function LoginPageContent() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background text-text-primary">
       <main className="relative z-10 mx-auto flex w-full max-w-screen-2xl grow items-center justify-center p-6">
-        <div className="absolute left-8 top-8">
+        <div className="absolute left-4 top-4 sm:left-8 sm:top-8">
           <Link
             href="/"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-full bg-white/70 font-bold uppercase tracking-widest text-text-secondary backdrop-blur-sm hover:text-primary")}
@@ -57,15 +57,15 @@ export default function LoginPageContent() {
           </Link>
         </div>
 
-        <Card className="w-full max-w-[440px] overflow-hidden border border-border bg-white/90 py-0 backdrop-blur-2xl transition-all duration-500">
-          <div className="px-10 pb-6 pt-12 text-center">
+        <Card className="w-full max-w-110 overflow-hidden border border-border bg-white/90 py-0 backdrop-blur-2xl transition-all duration-500">
+          <div className="px-6 pb-6 pt-10 text-center sm:px-10 sm:pt-12">
             <Link href="/" className="mb-6 inline-block text-2xl font-extrabold tracking-tight text-primary-500">
               Toples Laksana
             </Link>
             <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-text-primary">Login Admin</h1>
           </div>
 
-          <form className="space-y-6 px-10 pb-12" onSubmit={handleSubmit}>
+          <form className="space-y-6 px-6 pb-10 sm:px-10 sm:pb-12" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
                 {error}
@@ -74,7 +74,7 @@ export default function LoginPageContent() {
 
             <div className="space-y-2">
               <Label className="px-1" htmlFor="email">
-                Alamat Email
+                Email
               </Label>
               <div className="group relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-text-muted transition-colors group-focus-within:text-primary-500">
@@ -97,7 +97,7 @@ export default function LoginPageContent() {
 
             <div className="space-y-2">
               <div className="flex items-end justify-between px-1">
-                <Label htmlFor="password">Kata Sandi</Label>
+                <Label htmlFor="password">Password</Label>
               </div>
               <div className="group relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-text-muted transition-colors group-focus-within:text-primary-500">

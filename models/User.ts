@@ -1,4 +1,4 @@
-import { Schema, model, models, Model } from "mongoose";
+import { Schema, model, models, Model, Types } from "mongoose";
 
 export interface IUser {
   id: string;
@@ -14,8 +14,8 @@ interface UserModel extends Model<IUser> {
     email: string;
     fullName?: string;
     photoUrl?: string;
-  }): Promise<IUser & { _id: any }>;
-  findOrCreateByEmail(email: string): Promise<IUser & { _id: any }>;
+  }): Promise<IUser & { _id: Types.ObjectId }>;
+  findOrCreateByEmail(email: string): Promise<IUser & { _id: Types.ObjectId }>;
 }
 
 const UserSchema = new Schema<IUser>(

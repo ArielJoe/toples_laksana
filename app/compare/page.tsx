@@ -110,7 +110,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-125 bg-linear-to-b from-primary-50/20 to-transparent -z-10" />
 
-      <main className="max-w-7xl mx-auto px-6 pt-12 pb-6 lg:px-12 lg:py-6 relative">
+      <main className="max-w-7xl mx-auto px-4 pt-10 pb-6 sm:px-6 sm:pt-12 lg:px-12 lg:py-6 relative">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-3">
@@ -125,7 +125,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
             </Link>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-text-primary leading-[1.1] mb-3">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-text-primary leading-[1.1] mb-3">
             Analisis Spesifikasi
           </h1>
           <p className="text-text-secondary max-w-2xl text-base font-medium leading-relaxed opacity-85">
@@ -135,17 +135,17 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
 
         {products.length === 0 ? (
           /* Premium Empty State UI */
-          <div className="py-20 px-6 flex flex-col items-center justify-center text-center bg-white border border-border rounded-2xl max-w-2xl mx-auto shadow-xs">
+          <div className="py-16 px-6 flex flex-col items-center justify-center text-center bg-white border border-border rounded-2xl max-w-2xl mx-auto">
             <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-6 text-text-muted border border-border shadow-2xs">
               <AppIcon name="compare_arrows" className="text-3xl opacity-45" />
             </div>
             <p className="text-xl font-black text-text-primary tracking-tight">Belum Ada Produk Terpilih</p>
-            <p className="text-sm mt-2 mb-10 max-w-md text-text-secondary font-medium opacity-85 leading-relaxed">
+            <p className="text-sm mt-2 mb-8 max-w-md text-text-secondary font-medium leading-relaxed">
               Silakan pilih hingga 3 produk dari katalog terlebih dahulu untuk membandingkan spesifikasinya secara detail di sini.
             </p>
             <Link
               href="/catalog"
-              className="bg-primary-500 text-white px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest hover:bg-primary-600 transition-all text-xs active:scale-95 cursor-pointer shadow-md"
+              className="bg-primary-500 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-primary-600 transition-all text-sm active:scale-95 cursor-pointer shadow-md"
             >
               Jelajahi Katalog
             </Link>

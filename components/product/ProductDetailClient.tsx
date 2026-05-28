@@ -178,7 +178,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const selectedColorHex = activePrice?.lidColorHex || "#ccc";
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-6 sm:pt-10 lg:px-12 lg:pt-12">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pt-10 lg:px-12 lg:pt-12">
       {/* Breadcrumbs */}
       <nav className="mb-6 flex items-center flex-wrap gap-1 text-sm text-gray-400 font-medium">
         <Link className="hover:text-primary-500 transition-colors" href="/catalog">Katalog</Link>
@@ -187,7 +187,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {category}
         </Link>
         <AppIcon name="chevron_right" className="text-xs" />
-        <span className="max-w-45 truncate font-semibold text-gray-900 sm:max-w-[320px]">{product.name}</span>
+        <span className="max-w-40 truncate font-semibold text-gray-900 sm:max-w-[320px]">{product.name}</span>
       </nav>
 
       {/* Main Grid: Image Left + Info Right */}
@@ -482,33 +482,34 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
       <div className="mb-6 border-b border-gray-200">
         <div className="grid grid-cols-3">
           {[
-            { id: "dimensions" as const, label: "Dimensi Detail" },
-            { id: "packaging" as const, label: "Info Pengemasan" },
-            { id: "specs" as const, label: "Spesifikasi Lengkap" },
+            { id: "dimensions" as const, label: "Dimensi", labelFull: "Dimensi Detail" },
+            { id: "packaging" as const, label: "Pengemasan", labelFull: "Info Pengemasan" },
+            { id: "specs" as const, label: "Spesifikasi", labelFull: "Spesifikasi Lengkap" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`min-w-0 border-b-2 px-1.5 py-3 text-center text-[0.7rem] font-medium leading-tight transition-all sm:px-5 sm:text-sm ${activeTab === tab.id ? "border-primary-500 text-primary-500" : "border-transparent text-gray-400 hover:text-gray-600"
+              className={`min-w-0 border-b-2 px-2 py-3 text-center text-xs font-medium leading-tight transition-all sm:px-5 sm:text-sm ${activeTab === tab.id ? "border-primary-500 text-primary-500 font-semibold" : "border-transparent text-gray-400 hover:text-gray-600"
                 }`}
             >
-              {tab.label}
+              <span className="sm:hidden">{tab.label}</span>
+              <span className="hidden sm:inline">{tab.labelFull}</span>
             </button>
           ))}
         </div>
       </div>
 
       {activeTab === "dimensions" && (
-        <div className="grid max-w-full grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid max-w-full grid-cols-3 gap-3 sm:gap-4">
           {[
             { label: "Tinggi", value: height, unit: "cm" },
             { label: "Diameter", value: diameter, unit: "cm" },
             { label: "Berat", value: weight, unit: "gr" },
           ].map((item) => (
-            <div key={item.label} className="bg-white p-5 rounded-xl border border-gray-100">
-              <span className="text-xs text-gray-400 uppercase tracking-wider block mb-1">{item.label}</span>
-              <span className="text-2xl font-bold text-gray-900">{item.value || "-"}</span>
-              <span className="text-sm text-gray-400 ml-1">{item.unit}</span>
+            <div key={item.label} className="bg-white p-3 sm:p-5 rounded-xl border border-gray-100">
+              <span className="text-[0.6rem] sm:text-xs text-gray-400 uppercase tracking-wider block mb-1">{item.label}</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">{item.value || "-"}</span>
+              <span className="text-xs sm:text-sm text-gray-400 ml-1">{item.unit}</span>
             </div>
           ))}
         </div>

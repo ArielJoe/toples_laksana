@@ -80,6 +80,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative flex min-h-svh items-center px-6 pb-10 pt-24 lg:h-screen lg:min-h-0 lg:px-12 lg:pb-12 lg:pt-36">
         <div className="mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          {/* Left: Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -109,22 +110,43 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="relative flex h-60 items-center justify-center overflow-hidden rounded-2xl border border-border bg-secondary-50/50 sm:h-85 lg:h-[min(560px,calc(100vh-13rem))]"
-          >
-            <Image
-              src="/toples.png"
-              alt="Koleksi toples Toples Laksana"
-              fill
-              className="object-contain p-8 transition-transform duration-700 hover:scale-105"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-            />
-          </motion.div>
+          {/* Desktop spacer — reserves right column so grid alignment works */}
+          <div className="hidden lg:block" />
         </div>
+
+        {/* Mobile/Tablet: inline image below text */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="relative mx-auto mt-8 h-60 w-full sm:h-80 lg:hidden"
+        >
+          <Image
+            src="/toples.png"
+            alt="Koleksi toples Toples Laksana"
+            fill
+            className="object-contain transition-transform duration-700 hover:scale-105"
+            sizes="100vw"
+            priority
+          />
+        </motion.div>
+
+        {/* Desktop: full-height absolute right panel (no border, no bg) */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute bottom-0 right-0 top-0 hidden h-full w-1/2 overflow-hidden lg:block"
+        >
+          <Image
+            src="/toples.png"
+            alt="Koleksi toples Toples Laksana"
+            fill
+            className="object-contain p-16 transition-transform duration-700 hover:scale-105"
+            sizes="50vw"
+            priority
+          />
+        </motion.div>
       </section>
 
       {/* Category Section */}

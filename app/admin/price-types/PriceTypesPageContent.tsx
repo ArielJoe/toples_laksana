@@ -16,8 +16,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IPriceType } from "@/models/PriceType";
 
 interface PriceTypesPageContentProps {

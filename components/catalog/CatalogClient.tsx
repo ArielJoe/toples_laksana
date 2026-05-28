@@ -30,6 +30,15 @@ const SORT_LABELS: Record<string, string> = {
   newest: "Produk Terbaru",
 };
 
+const INITIAL_PAGINATION = {
+  page: 1,
+  limit: 10,
+  total: 0,
+  totalPages: 0,
+  hasNext: false,
+  hasPrev: false,
+};
+
 function CatalogContent() {
   const {
     filters,
@@ -43,14 +52,7 @@ function CatalogContent() {
   } = useProductFilters();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrev: false,
-  });
+  const [pagination, setPagination] = useState(INITIAL_PAGINATION);
   const [facets, setFacets] = useState<FacetCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -75,10 +77,16 @@ function CatalogContent() {
       .then((r) => r.json())
       .then((data: PaginatedResponse<Product>) => {
         if (ignore) return;
-        setProducts(data.data || []);
-        setPagination(data.pagination);
+        setProducts(data?.data || []);
+        setPagination(data?.pagination || INITIAL_PAGINATION);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error("Failed to fetch products:", err);
+        if (!ignore) {
+          setProducts([]);
+          setPagination(INITIAL_PAGINATION);
+        }
+      })
       .finally(() => {
         if (!ignore) setLoading(false);
       });
@@ -104,7 +112,7 @@ function CatalogContent() {
       <main className="w-full">
         {/* Sticky Header: Controls Bar + Active Filters */}
         <div className="sticky top-16 lg:top-20 z-40 min-h-20 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:h-20 sm:px-6 lg:px-10">
-          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-8 sm:h-full sm:flex-row sm:items-center sm:justify-between sm:py-0">
+          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-12 sm:h-full sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <div className="grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-1 sm:items-center">
               {/* Mobile/Tablet filter button */}
               <button
@@ -184,7 +192,7 @@ function CatalogContent() {
                 </button>
               </div>
               <span className="text-sm text-gray-400">
-                {pagination.total} produk
+                {(pagination?.total ?? 0)} produk
               </span>
             </div>
           </div>
@@ -251,7 +259,7 @@ function CatalogContent() {
                       onClick={() => setMobileFilterOpen(false)}
                       className="w-full py-4 bg-primary-900 text-white font-black uppercase tracking-widest rounded-xl text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
-                      Tampilkan {pagination.total} Produk
+                      Tampilkan {(pagination?.total ?? 0)} Produk
                       <AppIcon name="arrow_forward" className="text-base" />
                     </button>
                   </div>
@@ -303,23 +311,23 @@ function CatalogContent() {
                 </div>
               ) : products.length === 0 ? (
                 /* Empty State */
-                <div className="p-20 flex flex-col items-center justify-center text-text-muted text-center bg-white rounded-xl border border-dashed border-border">
-                  <div className="flex items-center justify-center mb-6">
+                <div className="py-16 px-6 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-border">
+                  <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-6 text-text-muted border border-border">
                     <AppIcon
                       name="inventory_2"
-                      className="text-6xl opacity-20"
+                      className="text-3xl opacity-45"
                     />
                   </div>
                   <p className="text-xl font-black text-text-primary tracking-tight">
                     Produk tidak ditemukan
                   </p>
-                  <p className="text-sm mt-2 mb-8 max-w-md text-text-secondary font-medium">
+                  <p className="text-sm mt-2 mb-8 max-w-md text-text-secondary font-medium leading-relaxed">
                     Coba sesuaikan filter atau kata kunci pencarian Anda untuk
                     menemukan produk yang Anda cari.
                   </p>
                   <button
                     onClick={clearAll}
-                    className="px-8 py-3 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-all border border-primary-600"
+                    className="px-8 py-3 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-all border border-primary-600 cursor-pointer"
                   >
                     Hapus Semua Filter
                   </button>
@@ -354,9 +362,9 @@ function CatalogContent() {
                   )}
 
                   {/* Pagination */}
-                  {pagination.totalPages > 1 && (
+                  {pagination && pagination.totalPages > 1 && (
                     <PaginationControls
-                      page={pagination.page}
+                      page={pagination.page || 1}
                       totalPages={pagination.totalPages}
                       onPageChange={setPage}
                       className="mt-16"

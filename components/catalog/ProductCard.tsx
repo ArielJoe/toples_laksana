@@ -53,7 +53,7 @@ export default function ProductCard({
     if (selectedPrice && selectedUnit && onInquirySelect) {
       onInquirySelect(product.id, selectedUnit, selectedPrice.lidColorId, selectedPrice.priceTypeId);
     }
-  }, [selectedPrice, selectedUnit]);
+  }, [selectedPrice, selectedUnit, onInquirySelect, product.id]);
 
   const handleInteraction = async () => {
     try {

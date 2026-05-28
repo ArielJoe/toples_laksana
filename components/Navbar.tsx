@@ -75,17 +75,16 @@ export default function Navbar() {
   const navLinks = [
     { label: "Beranda", href: "/" },
     { label: "Katalog", href: "/catalog" },
+    { label: "Wishlist", href: "/wishlist" },
     { label: "Tentang Kami", href: "/tentang" },
   ];
 
   return (
     <>
-      <nav
-        className="fixed top-0 w-full z-110 bg-primary-500 py-5"
-      >
-        <div className="flex justify-between items-center px-6 lg:px-12 max-w-screen-2xl mx-auto">
+      <nav className="fixed top-0 w-full z-110 bg-primary-500 py-5">
+        <div className="flex justify-between items-center px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
           {/* Brand */}
-          <Link href="/" className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2 cursor-pointer">
+          <Link href="/" className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2 cursor-pointer shrink-0">
             Toples Laksana
           </Link>
 
@@ -157,23 +156,22 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={loginWithGoogle}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white bg-white text-primary-600 text-xs font-black uppercase tracking-wider hover:bg-primary-50 cursor-pointer shadow-sm transition-all"
+                className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white bg-white text-primary-600 text-[0.65rem] sm:text-xs font-black uppercase tracking-wider hover:bg-primary-50 cursor-pointer shadow-sm transition-all"
               >
                 Masuk
               </button>
             )}
 
-            {/* Wishlist Link (if user is logged in) */}
-            {user && (
-              <Link
-                href="/wishlist"
-                className="flex items-center justify-center size-10 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 cursor-pointer"
-                title="Wishlist Saya"
-              >
-                <Heart className="size-5" />
-              </Link>
-            )}
+            {/* Wishlist icon — shown on mobile only (desktop has it in nav text) */}
+            <Link
+              href="/wishlist"
+              className={`flex items-center justify-center size-10 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 cursor-pointer lg:hidden ${pathname === "/wishlist" ? "bg-white/20" : ""}`}
+              title="Wishlist Saya"
+            >
+              <Heart className="size-5" />
+            </Link>
 
+            {/* Admin Login */}
             <Link
               href="/login"
               className="flex items-center justify-center size-10 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 cursor-pointer"
