@@ -65,26 +65,26 @@ interface InvoiceTotals {
 }
 
 const inputClass =
-  "h-10 rounded-lg border-neutral-300 bg-white text-sm font-bold text-black shadow-none focus-visible:border-black";
+  "h-10 rounded-lg border-border bg-secondary-50/30 text-sm font-bold text-text-primary shadow-none transition-all focus-visible:border-primary-500";
 
 const compactInputClass =
-  "h-9 rounded-lg border-neutral-300 bg-white text-sm font-bold text-black shadow-none focus-visible:border-black";
+  "h-9 rounded-lg border-border bg-secondary-50/30 text-sm font-bold text-text-primary shadow-none transition-all focus-visible:border-primary-500";
 
 const INVOICE_ITEMS_PAGE_SIZE = 8;
 
 const labelClass =
-  "text-[0.68rem] font-black uppercase tracking-[0.16em] text-neutral-600";
+  "text-[0.68rem] font-black uppercase tracking-[0.16em] text-text-muted";
 
 const textareaClass =
-  "rounded-lg border-neutral-300 bg-white text-sm font-bold text-black shadow-none resize-none focus-visible:border-black";
+  "rounded-lg border-border bg-secondary-50/30 text-sm font-bold text-text-primary shadow-none resize-none transition-all focus-visible:border-primary-500";
 
 const selectTriggerClass =
-  "h-10 w-full rounded-lg border-neutral-300 bg-white text-black shadow-none focus-visible:border-black";
+  "h-10 w-full rounded-lg border-border bg-secondary-50/30 text-text-primary shadow-none transition-all focus-visible:border-primary-500";
 
-const selectContentClass = "border-neutral-300 bg-white text-black";
+const selectContentClass = "border-border bg-white text-text-primary";
 
 const selectItemClass =
-  "focus:bg-neutral-100 focus:text-black focus:**:text-black";
+  "focus:bg-secondary-50 focus:text-text-primary focus:**:text-text-primary";
 
 const PDF_BLACK = "#000000";
 const PDF_WHITE = "#ffffff";
@@ -442,7 +442,7 @@ export default function InvoicePageContent() {
     <>
       <header className="hidden lg:flex h-24 bg-white border-b border-border items-center justify-between px-10 sticky top-0 z-40">
         <div>
-          <h2 className="text-[1.6rem] font-black text-black tracking-tight">
+          <h2 className="text-[1.6rem] font-black text-text-primary tracking-tight">
             Invoice
           </h2>
         </div>
@@ -451,7 +451,7 @@ export default function InvoicePageContent() {
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="h-11 rounded-xl border-black bg-white px-5 text-xs font-black uppercase tracking-[0.14em] text-black shadow-none hover:bg-neutral-100 hover:text-black focus-visible:border-black"
+            className="h-11 rounded-xl border-border bg-white px-5 text-xs font-black uppercase tracking-[0.14em] text-text-secondary shadow-none hover:bg-secondary-50 hover:text-text-primary focus-visible:border-primary-500"
           >
             <AppIcon name="reset" className="text-sm" />
             Atur Ulang
@@ -460,7 +460,7 @@ export default function InvoicePageContent() {
             type="button"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="h-11 rounded-xl bg-black px-6 text-sm font-black text-white shadow-none hover:bg-neutral-800 focus-visible:border-black"
+            className="h-11 rounded-xl bg-primary-500 px-6 text-sm font-black text-white shadow-lg shadow-primary-500/20 hover:bg-primary-600 focus-visible:border-primary-500 cursor-pointer"
           >
             <AppIcon name="download" className="text-lg" />
             {isDownloading ? "Menyiapkan..." : "Unduh PDF"}
@@ -474,7 +474,7 @@ export default function InvoicePageContent() {
             type="button"
             variant="ghost"
             onClick={handleReset}
-            className="h-10 shrink-0 rounded-xl text-xs font-black uppercase tracking-[0.14em] text-neutral-700 shadow-none hover:bg-neutral-100 hover:text-black"
+            className="h-10 shrink-0 rounded-xl text-xs font-black uppercase tracking-[0.14em] text-text-secondary shadow-none hover:bg-secondary-50 hover:text-text-primary cursor-pointer"
           >
             <AppIcon name="reset" className="text-sm" />
             Atur Ulang
@@ -483,7 +483,7 @@ export default function InvoicePageContent() {
             type="button"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="h-10 flex-1 rounded-xl bg-black text-xs font-black text-white shadow-none hover:bg-neutral-800 focus-visible:border-black"
+            className="h-10 flex-1 rounded-xl bg-primary-500 text-xs font-black text-white shadow-lg shadow-primary-500/20 hover:bg-primary-600 focus-visible:border-primary-500"
           >
             <AppIcon name="download" className="text-sm" />
             {isDownloading ? "Menyiapkan..." : "Unduh PDF"}
@@ -491,8 +491,8 @@ export default function InvoicePageContent() {
         </div>
 
         <div className="w-full">
-          <section className="min-w-0 overflow-x-auto">
-            <Card className="w-full min-w-240 rounded-xl border border-neutral-300 bg-white p-9 lg:p-12 shadow-sm">
+          <section className="min-w-0 w-full">
+            <Card className="w-full min-w-0 rounded-xl border border-border bg-white p-6 sm:p-9 shadow-none lg:p-12">
               <input
                 ref={logoInputRef}
                 type="file"
@@ -501,7 +501,7 @@ export default function InvoicePageContent() {
                 onChange={handleLogoChange}
               />
 
-              <div className="mb-10 grid grid-cols-2 gap-4 border-b border-neutral-300 pb-6 max-w-xl">
+              <div className="mb-10 grid max-w-xl grid-cols-2 gap-4 border-b border-border pb-6">
                 <div className="space-y-2">
                   <Label className={labelClass}>Dokumen</Label>
                   <Select
@@ -538,13 +538,13 @@ export default function InvoicePageContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1fr)_360px] gap-16">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8 lg:gap-16">
                 <div className="space-y-7">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => logoInputRef.current?.click()}
-                    className="h-28 w-44 rounded-lg border-neutral-300 bg-white p-0 text-neutral-700 shadow-none hover:border-black hover:bg-neutral-100 hover:text-black focus-visible:border-black"
+                    className="h-28 w-44 rounded-lg border-border bg-secondary-50/30 p-0 text-text-secondary shadow-none hover:border-primary-500 hover:bg-white hover:text-primary-600 focus-visible:border-primary-500 cursor-pointer"
                   >
                     {form.logoDataUrl ? (
                       <NextImage
@@ -588,7 +588,7 @@ export default function InvoicePageContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                     <div className="space-y-2">
                       <Label className={labelClass}>Ditagihkan Kepada</Label>
                       <Textarea
@@ -609,12 +609,12 @@ export default function InvoicePageContent() {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="w-full text-right text-5xl font-black tracking-tight text-black">
+                  <div className="w-full text-left lg:text-right text-4xl sm:text-5xl font-black tracking-tight text-text-primary">
                     {form.documentTitle}
                   </div>
 
-                  <div className="ml-auto grid w-44 grid-cols-[36px_1fr] overflow-hidden rounded-lg border border-neutral-300">
-                    <div className="flex items-center justify-center border-r border-neutral-300 bg-neutral-100 text-sm font-black text-neutral-700">
+                  <div className="mr-auto lg:mr-0 lg:ml-auto grid w-44 grid-cols-[36px_1fr] overflow-hidden rounded-lg border border-border">
+                    <div className="flex items-center justify-center border-r border-border bg-secondary-50 text-sm font-black text-text-secondary">
                       #
                     </div>
                     <Input
@@ -622,7 +622,7 @@ export default function InvoicePageContent() {
                       onChange={(event) =>
                         updateForm("invoiceNumber", event.target.value)
                       }
-                      className="h-10 w-full rounded-none border-none bg-white px-3 text-right text-sm font-black text-black shadow-none focus-visible:border-transparent"
+                      className="h-10 w-full rounded-none border-none bg-secondary-50/30 px-3 text-right text-sm font-black text-text-primary shadow-none focus-visible:border-transparent"
                       aria-label="Nomor invoice"
                     />
                   </div>
@@ -637,24 +637,24 @@ export default function InvoicePageContent() {
                           aria-label="Pilih tanggal invoice"
                           className={cn(
                             compactInputClass,
-                            "flex w-full items-center justify-between border border-neutral-300 px-4 text-left text-black transition-all hover:bg-neutral-100 focus-visible:border-black focus-visible:outline-none",
+                            "flex w-full items-center justify-between border border-border px-4 text-left text-text-primary transition-all hover:bg-secondary-50 focus-visible:border-primary-500 focus-visible:outline-none cursor-pointer",
                           )}
                         >
                           <span>{formatDateButtonValue(form.invoiceDate)}</span>
                           <CalendarIcon
                             aria-hidden="true"
-                            className="size-4 text-black"
+                            className="size-4 text-text-muted"
                           />
                         </PopoverTrigger>
                         <PopoverContent
                           align="end"
                           sideOffset={8}
-                          className="w-auto border border-neutral-300 bg-white p-0 text-black"
+                          className="w-auto border border-border bg-white p-0 text-text-primary"
                         >
                           <Calendar
                             mode="single"
                             captionLayout="dropdown"
-                            className="**:data-[selected-single=true]:bg-black **:data-[selected-single=true]:text-white **:data-[range-end=true]:bg-black **:data-[range-end=true]:text-white **:data-[range-start=true]:bg-black **:data-[range-start=true]:text-white"
+                            className="**:data-[selected-single=true]:bg-primary-500 **:data-[selected-single=true]:text-white **:data-[range-end=true]:bg-primary-500 **:data-[range-end=true]:text-white **:data-[range-start=true]:bg-primary-500 **:data-[range-start=true]:text-white"
                             selected={parseDateInputValue(form.invoiceDate)}
                             onSelect={(date) => {
                               if (!date) return;
@@ -689,75 +689,77 @@ export default function InvoicePageContent() {
               </div>
 
 
-              <div className="mt-14 overflow-hidden">
-                <div className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center rounded-t-xl bg-black px-6 py-3.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white">
-                  <div>Item</div>
-                  <div className="text-center">Jumlah</div>
-                  <div className="text-right">Harga</div>
-                  <div className="text-right">Total</div>
-                  <div />
-                </div>
+              <div className="mt-14 overflow-x-auto -mx-6 px-6 sm:-mx-9 sm:px-9 lg:mx-0 lg:px-0">
+                <div className="min-w-[810px]">
+                  <div className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center rounded-t-xl bg-primary-500 px-6 py-3.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white">
+                    <div>Item</div>
+                    <div className="text-center">Jumlah</div>
+                    <div className="text-right">Harga</div>
+                    <div className="text-right">Total</div>
+                    <div />
+                  </div>
 
-                <div className="divide-y divide-neutral-300">
-                  {paginatedLineItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center gap-3 py-2"
-                    >
-                      <Input
-                        value={item.description}
-                        onChange={(event) =>
-                          updateItem(item.id, "description", event.target.value)
-                        }
-                        className={compactInputClass}
-                        aria-label="Nama item"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        value={item.quantity}
-                        onChange={(event) =>
-                          updateItem(
-                            item.id,
-                            "quantity",
-                            toOptionalNumber(event.target.value),
-                          )
-                        }
-                        className={cn(compactInputClass, "text-center")}
-                        aria-label="Kuantitas"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        value={item.rate}
-                        onChange={(event) =>
-                          updateItem(item.id, "rate", toOptionalNumber(event.target.value))
-                        }
-                        className={cn(compactInputClass, "text-right")}
-                        aria-label="Harga satuan"
-                      />
-                      <div className="h-9 rounded-lg bg-neutral-100 px-4 flex items-center justify-end text-sm font-black text-black">
-                        {formatMoney(calculateLineItemAmount(item), form.currency)}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                        disabled={form.items.length === 1}
-                        className="h-9 w-9 rounded-lg text-neutral-600 shadow-none hover:bg-neutral-100 hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-600"
-                        aria-label="Hapus item"
+                  <div className="divide-y divide-border">
+                    {paginatedLineItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center gap-3 py-2 px-1"
                       >
-                        <AppIcon name="close" className="text-base" />
-                      </Button>
-                    </div>
-                  ))}
+                        <Input
+                          value={item.description}
+                          onChange={(event) =>
+                            updateItem(item.id, "description", event.target.value)
+                          }
+                          className={compactInputClass}
+                          aria-label="Nama item"
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          value={item.quantity}
+                          onChange={(event) =>
+                            updateItem(
+                              item.id,
+                              "quantity",
+                              toOptionalNumber(event.target.value),
+                            )
+                          }
+                          className={cn(compactInputClass, "text-center")}
+                          aria-label="Kuantitas"
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          value={item.rate}
+                          onChange={(event) =>
+                            updateItem(item.id, "rate", toOptionalNumber(event.target.value))
+                          }
+                          className={cn(compactInputClass, "text-right")}
+                          aria-label="Harga satuan"
+                        />
+                        <div className="flex h-9 items-center justify-end rounded-lg bg-secondary-50 px-4 text-sm font-black text-text-primary">
+                          {formatMoney(calculateLineItemAmount(item), form.currency)}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                          disabled={form.items.length === 1}
+                          className="h-9 w-9 rounded-lg text-text-muted shadow-none hover:bg-secondary-50 hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-muted cursor-pointer"
+                          aria-label="Hapus item"
+                        >
+                          <AppIcon name="close" className="text-base" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {form.items.length > INVOICE_ITEMS_PAGE_SIZE && (
-                  <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-neutral-300 pt-4 sm:flex-row">
-                    <span className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-neutral-600">
-                      Menampilkan <span className="text-black">{lineItemStartIndex}-{lineItemEndIndex}</span> dari <span className="text-black">{form.items.length}</span> item
+                  <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-border pt-4 sm:flex-row">
+                    <span className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-text-muted">
+                      Menampilkan <span className="text-text-primary">{lineItemStartIndex}-{lineItemEndIndex}</span> dari <span className="text-text-primary">{form.items.length}</span> item
                     </span>
                     <PaginationControls
                       page={safeLineItemPage}
@@ -765,8 +767,8 @@ export default function InvoicePageContent() {
                       onPageChange={setLineItemPage}
                       className="mx-0 w-auto"
                       contentClassName="gap-1"
-                      linkClassName="size-9 border-neutral-300 text-[0.65rem] font-black text-black hover:bg-neutral-100 hover:text-black data-[active=true]:border-black data-[active=true]:bg-black data-[active=true]:text-white data-[active=true]:hover:bg-neutral-900"
-                      previousNextClassName="h-9 border-neutral-300 text-black hover:bg-neutral-100 hover:text-black"
+                      linkClassName="size-9 border-border text-[0.65rem] font-black text-text-primary hover:bg-secondary-50 hover:text-text-primary data-[active=true]:border-primary-500 data-[active=true]:bg-primary-500 data-[active=true]:text-white data-[active=true]:hover:bg-primary-600"
+                      previousNextClassName="h-9 border-border text-text-primary hover:bg-secondary-50 hover:text-text-primary"
                     />
                   </div>
                 )}
@@ -775,14 +777,14 @@ export default function InvoicePageContent() {
                   type="button"
                   variant="outline"
                   onClick={addItem}
-                  className="mt-3 h-9 rounded-lg border-black bg-white px-4 text-xs font-black text-black shadow-none hover:bg-neutral-100 hover:text-black focus-visible:border-black"
+                  className="mt-3 h-9 rounded-lg border-border bg-white px-4 text-xs font-black text-text-secondary shadow-none hover:bg-secondary-50 hover:text-text-primary focus-visible:border-primary-500 cursor-pointer"
                 >
                   <AppIcon name="add" className="text-sm" />
                   Tambah Item
                 </Button>
               </div>
 
-              <div className="mt-8 grid grid-cols-[1fr_330px] gap-8">
+              <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1fr_330px] gap-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className={labelClass}>Catatan</Label>
@@ -806,7 +808,7 @@ export default function InvoicePageContent() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-neutral-300 bg-white p-5 space-y-3 text-sm self-start">
+                <div className="space-y-3 self-start rounded-xl border border-border bg-secondary-50/30 p-5 text-sm">
                   <TotalRow label="Subtotal" value={formatMoney(totals.subtotal, form.currency)} />
                   <TotalInputRow
                     label="Pajak"
@@ -826,7 +828,7 @@ export default function InvoicePageContent() {
                     prefix={form.currency === "IDR" ? "Rp" : "$"}
                     onChange={(value) => updateForm("shipping", value)}
                   />
-                  <div className="border-t border-neutral-300 pt-4 mt-4">
+                  <div className="mt-4 border-t border-border pt-4">
                     <TotalRow
                       label="Total"
                       value={formatMoney(totals.total, form.currency)}
@@ -852,7 +854,7 @@ function FieldRow({
 }) {
   return (
     <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-      <Label className="text-[0.8rem] font-bold text-neutral-700">{label}</Label>
+      <Label className="text-[0.8rem] font-bold text-text-secondary">{label}</Label>
       {children}
     </div>
   );
@@ -874,10 +876,10 @@ function TotalRow({
         strong && "text-base",
       )}
     >
-      <span className={cn("font-bold text-neutral-700", strong && "text-black font-black")}>
+      <span className={cn("font-bold text-text-secondary", strong && "font-black text-text-primary")}>
         {label}
       </span>
-      <span className={cn("text-right font-black text-black")}>{value}</span>
+      <span className={cn("text-right font-black text-text-primary")}>{value}</span>
     </div>
   );
 }
@@ -897,10 +899,10 @@ function TotalInputRow({
 }) {
   return (
     <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-      <span className="font-bold text-neutral-700">{label}</span>
-      <div className="flex h-9 overflow-hidden rounded-lg border border-neutral-300 bg-white">
+      <span className="font-bold text-text-secondary">{label}</span>
+      <div className="flex h-9 overflow-hidden rounded-lg border border-border bg-white">
         {prefix && (
-          <span className="flex w-11 items-center justify-center border-r border-neutral-300 text-sm font-black text-neutral-700">
+          <span className="flex w-11 items-center justify-center border-r border-border bg-secondary-50 text-sm font-black text-text-secondary">
             {prefix}
           </span>
         )}
@@ -909,10 +911,10 @@ function TotalInputRow({
           min="0"
           value={value}
           onChange={(event) => onChange(toNumber(event.target.value))}
-          className="h-full min-w-0 flex-1 rounded-none border-none bg-white px-3 text-right text-sm font-black text-black shadow-none focus-visible:border-transparent"
+          className="h-full min-w-0 flex-1 rounded-none border-none bg-white px-3 text-right text-sm font-black text-text-primary shadow-none focus-visible:border-transparent"
         />
         {suffix && (
-          <span className="flex w-10 items-center justify-center text-sm font-black text-neutral-700">
+          <span className="flex w-10 items-center justify-center bg-secondary-50 text-sm font-black text-text-secondary">
             {suffix}
           </span>
         )}

@@ -360,7 +360,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
 
           {/* Pagination */}
           {filteredProducts.length > 0 && (
-            <div className="px-8 py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
+            <div className="px-8 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
               <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
                 Showing <span className="text-text-primary font-black">{productStartIndex}-{productEndIndex}</span> of <span className="text-text-primary font-black">{filteredProducts.length}</span> items
               </span>

@@ -201,9 +201,8 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
     if (pagination.totalItems === 0) {
       return null;
     }
-
     return (
-      <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
           Menampilkan <span className="text-text-primary font-black">{pagination.startIndex}-{pagination.endIndex}</span> dari <span className="text-text-primary font-black">{pagination.totalItems}</span> {label}
         </span>
@@ -486,10 +485,9 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   </Table>
                 )}
               </div>
-
               {/* Pagination */}
               {products.length > 0 && (
-                <div className="px-8 py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
+                <div className="px-8 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-[#F9FAFB]/30 gap-4">
                   <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
                     Showing <span className="text-text-primary font-black">{productStartIndex}-{productEndIndex}</span> of <span className="text-text-primary font-black">{products.length}</span> items
                   </span>

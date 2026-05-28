@@ -188,7 +188,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {category}
         </Link>
         <AppIcon name="chevron_right" className="text-xs" />
-        <span className="max-w-[180px] truncate font-semibold text-gray-900 sm:max-w-[320px]">{product.name}</span>
+        <span className="max-w-45 truncate font-semibold text-gray-900 sm:max-w-[320px]">{product.name}</span>
       </nav>
 
       {/* Main Grid: Image Left + Info Right */}
@@ -249,7 +249,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         {/* Right Column: Product Info */}
         <div className="min-w-0">
           {/* Name & SKU */}
-          <h1 className="mb-2 break-words text-xl font-bold text-gray-900 sm:text-2xl">{product.name}</h1>
+          <h1 className="mb-2 wrap-break-word text-xl font-bold text-gray-900 sm:text-2xl">{product.name}</h1>
           <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400">
             <span className="min-w-0 break-all">SKU: {product.sku}</span>
             <span>
@@ -271,7 +271,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
           {/* Price */}
           <div className="mb-6 flex flex-wrap items-baseline gap-2">
-            <span className="break-words text-2xl font-bold text-gray-900">
+            <span className="wrap-break-word text-2xl font-bold text-gray-900">
               {calcResult.pricePerPcs > 0 ? formatPrice(calcResult.pricePerPcs) : "Hubungi Kami"}
             </span>
           </div>
@@ -285,11 +285,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <button
                     key={type.id}
                     onClick={() => { setSelectedPriceTypeId(type.id); setQuantity(1); setSelectedPriceIdx(0); }}
-                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all cursor-pointer ${
-                      isActive
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all cursor-pointer ${isActive
                         ? "bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/10"
                         : "bg-slate-50 text-gray-600 border-slate-200 hover:bg-slate-100"
-                    }`}
+                      }`}
                   >
                     {type.name}
                   </button>
@@ -316,8 +315,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                       key={`${price.lidColorId}-${price.priceTypeId}`}
                       onClick={() => { setSelectedPriceIdx(i); setQuantity(1); }}
                       className={`flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 transition-all cursor-pointer ${isSelected
-                          ? "border-2 border-primary-500 bg-primary-50/50 text-primary-700 font-bold"
-                          : "border-gray-200 hover:border-gray-300 text-gray-600 bg-white"
+                        ? "border-2 border-primary-500 bg-primary-50/50 text-primary-700 font-bold"
+                        : "border-gray-200 hover:border-gray-300 text-gray-600 bg-white"
                         }`}
                       title={colorLabel}
                     >
@@ -349,7 +348,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             ].map((item) => (
               <div className="flex justify-between gap-4" key={item.label}>
                 <span className="shrink-0 text-gray-400">{item.label}</span>
-                <span className="min-w-0 break-words text-right font-medium text-gray-900">{item.value}</span>
+                <span className="min-w-0 wrap-break-word text-right font-medium text-gray-900">{item.value}</span>
               </div>
             ))}
           </div>
@@ -357,7 +356,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {/* Quantity */}
           <div className="mb-6">
             <p className="text-sm text-gray-600 mb-2">
-              Quantity: <span className="text-gray-400">({isPackagePrice ? "bal" : "pcs"})</span>
+              Quantity: {isPackagePrice && <span className="text-gray-400">(bal)</span>}
             </p>
             <div className="flex items-center gap-2">
               <input
@@ -370,7 +369,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
             {activeQuantityPerPack > 1 && (
               <p className="text-xs text-gray-400 mt-2">
-                1 {isPackagePrice ? "bal" : "pilihan"} = {activeQuantityPerPack} pcs. Total: <span className="font-semibold text-gray-900">{calcResult.totalPcs.toLocaleString("id-ID")} pcs</span>
+                1 {isPackagePrice ? "bal" : "pilihan"} = {activeQuantityPerPack}. Total: <span className="font-semibold text-gray-900">{calcResult.totalPcs.toLocaleString("id-ID")}</span>
               </p>
             )}
           </div>
@@ -378,7 +377,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {/* Subtotal */}
           <div className="mb-6 flex flex-col gap-1 border-t border-gray-100 pt-4 sm:flex-row sm:items-baseline sm:justify-between">
             <span className="text-sm text-gray-500">Subtotal:</span>
-            <span className="break-words text-xl font-bold text-gray-900">
+            <span className="wrap-break-word text-xl font-bold text-gray-900">
               {calcResult.subtotal > 0 ? formatPrice(calcResult.subtotal) : "-"}
             </span>
           </div>
@@ -483,26 +482,26 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
     <>
       <div className="mb-6 border-b border-gray-200">
         <div className="grid grid-cols-3">
-        {[
-          { id: "dimensions" as const, label: "Dimensi Detail" },
-          { id: "packaging" as const, label: "Info Pengemasan" },
-          { id: "specs" as const, label: "Spesifikasi Lengkap" },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`min-w-0 border-b-2 px-1.5 py-3 text-center text-[0.7rem] font-medium leading-tight transition-all sm:px-5 sm:text-sm ${activeTab === tab.id ? "border-primary-500 text-primary-500" : "border-transparent text-gray-400 hover:text-gray-600"
-              }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+          {[
+            { id: "dimensions" as const, label: "Dimensi Detail" },
+            { id: "packaging" as const, label: "Info Pengemasan" },
+            { id: "specs" as const, label: "Spesifikasi Lengkap" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`min-w-0 border-b-2 px-1.5 py-3 text-center text-[0.7rem] font-medium leading-tight transition-all sm:px-5 sm:text-sm ${activeTab === tab.id ? "border-primary-500 text-primary-500" : "border-transparent text-gray-400 hover:text-gray-600"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {activeTab === "dimensions" && (
         <div className="grid max-w-full grid-cols-1 gap-4 sm:grid-cols-3">
-          {[ 
+          {[
             { label: "Tinggi", value: height, unit: "cm" },
             { label: "Diameter", value: diameter, unit: "cm" },
             { label: "Berat", value: weight, unit: "gr" },
@@ -524,9 +523,9 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
               {(product.packaging || []).map((pack, index) => (
                 <div key={index} className="grid grid-cols-1 gap-y-1 text-sm sm:grid-cols-[minmax(9rem,0.8fr)_minmax(0,1.2fr)] sm:gap-x-3 sm:gap-y-3">
                   <span className="text-gray-400">Dimensi Kemasan</span>
-                  <span className="break-words font-medium">{pack.lengthCm || "-"} x {pack.widthCm || "-"} x {pack.heightCm || "-"} cm</span>
+                  <span className="wrap-break-word font-medium">{pack.lengthCm || "-"} x {pack.widthCm || "-"} x {pack.heightCm || "-"} cm</span>
                   <span className="text-gray-400">Berat Paket</span>
-                  <span className="break-words font-medium">{pack.weightKg || "-"} kg</span>
+                  <span className="wrap-break-word font-medium">{pack.weightKg || "-"} kg</span>
                 </div>
               ))}
               <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 leading-relaxed space-y-1">
@@ -563,7 +562,7 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
               value: (
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <div className="h-4 w-4 shrink-0 rounded-full border border-border shadow-sm" style={{ backgroundColor: selectedColorHex }} />
-                  <span className="min-w-0 break-words">{selectedColor}</span>
+                  <span className="min-w-0 wrap-break-word">{selectedColor}</span>
                   <span className="text-xs uppercase text-gray-400">{selectedColorHex}</span>
                 </div>
               )
@@ -571,7 +570,7 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
           ].map((row, i) => (
             <div key={row.label} className={`grid grid-cols-1 text-sm sm:grid-cols-[minmax(9rem,0.8fr)_minmax(0,1.2fr)] ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
               <div className="px-4 pb-1 pt-3 font-medium text-gray-400 sm:px-5 sm:py-3">{row.label}</div>
-              <div className="min-w-0 break-words px-4 pb-3 pt-0 font-medium text-gray-900 sm:px-5 sm:py-3">{row.value || "-"}</div>
+              <div className="min-w-0 wrap-break-word px-4 pb-3 pt-0 font-medium text-gray-900 sm:px-5 sm:py-3">{row.value || "-"}</div>
             </div>
           ))}
         </div>

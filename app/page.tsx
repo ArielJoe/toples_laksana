@@ -1,12 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRightIcon,
-  BadgeCheckIcon,
   MessageCircleIcon,
+  TrendingUp
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -36,14 +37,44 @@ const CATEGORIES = [
   },
 ];
 
-const TRENDING_PRODUCTS = [
-  { name: "Jar Cylinder 200 ml", price: "Rp 2.500", img: "/toples.png" },
-  { name: "Jar Cylinder 350 ml", price: "Rp 3.200", img: "/toples.png" },
-  { name: "Toples Plastik 500 ml", price: "Rp 4.500", img: "/toples.png" },
-  { name: "Jar Kaca Premium", price: "Hubungi Kami", img: "/toples.png" },
-];
+interface TrendingProduct {
+  id: string;
+  name: string;
+  price: string;
+  img: string;
+  clickCount: number;
+}
 
 export default function HomePage() {
+  const [trendingProducts, setTrendingProducts] = useState<TrendingProduct[]>([]);
+  const [isTrendingLoading, setIsTrendingLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/products/trending?limit=4", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { data?: TrendingProduct[] } | null) => {
+        if (payload?.data?.length) {
+          setTrendingProducts(payload.data);
+        }
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error("Failed to load trending products:", error);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsTrendingLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
   return (
     <main className="overflow-hidden bg-white">
       {/* Hero Section */}
@@ -174,9 +205,24 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {TRENDING_PRODUCTS.map((item, index) => (
+            {isTrendingLoading
+              ? Array.from({ length: 4 }).map((_, index) => (
+                <Card
+                  key={`trending-loading-${index}`}
+                  className="h-full overflow-hidden rounded-2xl border border-border bg-white p-0"
+                >
+                  <CardContent className="flex h-full flex-col p-4">
+                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl bg-secondary-50" />
+                    <div className="mt-auto space-y-3">
+                      <div className="h-4 w-3/4 rounded-full bg-secondary-50" />
+                      <div className="h-3 w-1/2 rounded-full bg-secondary-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+              : trendingProducts.map((item, index) => (
               <motion.div
-                key={item.name}
+                key={item.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
@@ -196,7 +242,10 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-1 flex-col justify-end">
                       <h3 className="text-sm font-black text-text-primary sm:text-base">{item.name}</h3>
-                      <p className="mt-2 text-sm font-bold text-primary-500">{item.price}</p>
+                      <div className="mt-2 flex items-center gap-1.5 text-sm font-black text-primary-500">
+                        <TrendingUp className="h-4 w-4 stroke-[2.5]" />
+                        <span>{item.clickCount || 0}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -227,7 +276,7 @@ export default function HomePage() {
               className={cn(buttonVariants({ size: "lg" }), "h-12 rounded-xl bg-primary-500 px-6 font-bold text-white transition-all hover:bg-primary-600")}
             >
               Buka Katalog
-              <BadgeCheckIcon className="size-4" />
+              <ArrowRightIcon className="size-4" />
             </Link>
             <a
               href="https://wa.me/6282240923336?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples."

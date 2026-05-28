@@ -82,7 +82,7 @@ export default function ProductPriceDropdown({
         onPointerEnter={(event) => openMenu(event.pointerType)}
         onPointerLeave={(event) => closeMenu(event.pointerType)}
         className={cn(
-          "inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-white px-2.5 py-1.5 text-left transition-all hover:border-primary-200 hover:bg-primary-50 focus-visible:border-primary-500 focus-visible:outline-none",
+          "inline-flex max-w-full items-center gap-2 rounded-xl border border-border bg-white px-2.5 py-1.5 text-left transition-all hover:border-primary-200 hover:bg-primary-50 focus-visible:border-primary-500 focus-visible:outline-none data-[state=open]:border-primary-200 data-[state=open]:bg-primary-50",
           className,
         )}
       >
@@ -101,7 +101,7 @@ export default function ProductPriceDropdown({
         sideOffset={4}
         onPointerEnter={(event) => openMenu(event.pointerType)}
         onPointerLeave={(event) => closeMenu(event.pointerType)}
-        className="w-80 border border-border bg-white p-2 shadow-xl shadow-black/10"
+        className="w-80 border border-primary-200 bg-white p-2 shadow-xl shadow-black/10 rounded-2xl"
       >
         <div className="px-2 pb-1">
           <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-text-muted">

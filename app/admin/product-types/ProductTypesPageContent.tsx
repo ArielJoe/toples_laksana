@@ -175,7 +175,7 @@ export default function ProductTypesPageContent({ initialProductTypes }: Product
           </div>
 
           <div className="overflow-x-auto">
-            <Table className="min-w-[600px]">
+            <Table className="min-w-150">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
@@ -227,7 +227,7 @@ export default function ProductTypesPageContent({ initialProductTypes }: Product
           </div>
 
           {filteredProductTypes.length > 0 && (
-            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="border-t border-border bg-[#F9FAFB]/30 px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-widest">
                 Menampilkan <span className="text-text-primary font-black">{startIndex}-{endIndex}</span> dari <span className="text-text-primary font-black">{filteredProductTypes.length}</span> data
               </span>

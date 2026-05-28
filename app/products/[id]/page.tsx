@@ -76,8 +76,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const volume = getSpecValue(product, "volume_ml");
   const category = product.categoryName || getCategoryLabel(product.categoryId);
 
+  const volumeString = volume ? `${volume}ml` : "";
+  const nameContainsVolume = volumeString && (
+    product.name.toLowerCase().includes(volumeString.toLowerCase()) || 
+    product.name.toLowerCase().includes(`${volume} ml`.toLowerCase())
+  );
+
+  const displayTitle = nameContainsVolume 
+    ? product.name 
+    : `${product.name}${volumeString ? ` ${volumeString}` : ""}`;
+
   return {
-    title: `${product.name}${volume ? ` ${volume}ml` : ""} - Toples Laksana`,
+    title: `${displayTitle} - Toples Laksana`,
     description: `${product.name}, ${category}. Material: ${product.bodyMaterialName || formatAttributeLabel(product.bodyMaterial)}. ${volume ? `Volume ${volume}ml. ` : ""}Tersedia untuk pembelian ecer dan grosir.`,
   };
 }
