@@ -39,8 +39,7 @@ type TimeFilter = "1W" | "1M" | "3M" | "6M" | "1Y";
 interface InteractionItem {
   id: string;
   userId: string;
-  productId?: string;
-  interactionType: string;
+  productId: string;
   createdAt?: string;
 }
 
@@ -172,10 +171,8 @@ export default function DashboardContent({
 
   const filteredViews = useMemo(
     () =>
-      interactions.filter(
-        (interaction) =>
-          interaction.interactionType === "detail_click" &&
-          isWithinPeriod(interaction.createdAt, period.start, period.end),
+      interactions.filter((interaction) =>
+        isWithinPeriod(interaction.createdAt, period.start, period.end)
       ),
     [interactions, period.end, period.start],
   );

@@ -7,7 +7,6 @@ import WhatsAppLogModel from "@/models/WhatsAppLog";
 
 export interface GetInteractionsParams {
   search?: string;
-  type?: string;
   page?: number;
   limit?: number;
 }
@@ -18,14 +17,10 @@ export interface GetInteractionsParams {
 export async function getInteractions(params: GetInteractionsParams = {}) {
   try {
     await connectDB();
-    const { search, type, page = 1, limit = 50 } = params;
+    const { search, page = 1, limit = 50 } = params;
     const skip = (page - 1) * limit;
 
     const query: Record<string, unknown> = {};
-
-    if (type && type !== "all") {
-      query.interactionType = type;
-    }
 
     // Since searching interactions often involves product names, 
     // we fetch interactions first and then filter/map if needed, 

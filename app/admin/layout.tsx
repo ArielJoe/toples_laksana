@@ -21,7 +21,7 @@ export default async function AdminLayout({
   // Fetch counts for sidebar badges
   const [productCount, interactionCount, waLogsCount] = await Promise.all([
     ProductModel.countDocuments({ deletedAt: null }),
-    InteractionModel.countDocuments({ interactionType: "detail_click" }),
+    InteractionModel.countDocuments(),
     WhatsAppLogModel.countDocuments(),
   ]);
 

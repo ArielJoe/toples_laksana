@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
   const [
     productCount,
     interactionCount,
-    , // pageViews
+    , // pageViews (previously page_view counts)
     productViews,
     waLogsCount,
     interactionsRes,
@@ -26,16 +26,16 @@ export default async function AdminDashboard() {
     rawProducts,
   ] = await Promise.all([
     ProductModel.countDocuments({ deletedAt: null }),
-    InteractionModel.countDocuments({ interactionType: "detail_click" }),
-    InteractionModel.countDocuments({ interactionType: "page_view" }),
-    InteractionModel.countDocuments({ interactionType: "detail_click" }),
+    InteractionModel.countDocuments(),
+    InteractionModel.countDocuments(), // dummy or placeholder to keep destructuring indices
+    InteractionModel.countDocuments(),
     WhatsAppLogModel.countDocuments(),
-    getInteractions({ type: "detail_click", limit: 10000 }),
+    getInteractions({ limit: 10000 }),
     getWaLogs({ limit: 10000 }),
     ProductModel.find({ deletedAt: null }).select("id name sku").lean(),
   ]);
 
-  const interactions = (interactionsRes.data || []) as { id: string; userId: string; productId?: string; interactionType: string; createdAt?: string }[];
+  const interactions = (interactionsRes.data || []) as { id: string; userId: string; productId: string; createdAt?: string }[];
   const waLogs = (waLogsRes.data || []) as { id: string; userId: string; details?: { productId?: string }[]; createdAt?: string }[];
   const products = JSON.parse(JSON.stringify(rawProducts)) as { id: string; name: string; sku: string }[];
 

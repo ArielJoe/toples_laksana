@@ -18,14 +18,10 @@ import {
 } from "@/components/ui/table";
 import { AppIcon } from "@/components/ui/app-icon";
 
-type InteractionType = "page_view" | "view" | "detail_click" | "whatsapp_share" | "promo_click";
-
 interface InteractionItem {
   id: string;
   userId: string;
-  productId?: string;
-  pagePath?: string;
-  interactionType: InteractionType;
+  productId: string;
   createdAt?: string;
 }
 
@@ -256,14 +252,6 @@ export default function InteractionsPageContent({ initialInteractions, products 
                         minute: "2-digit",
                       })}
                     </span>
-                    <Badge variant="secondary" className="shrink-0 bg-secondary-50 text-secondary-600 border-none text-[8px] font-black uppercase px-1.5 h-4.5 flex items-center">
-                      {interaction.interactionType === "page_view" ? "Page View" :
-                       interaction.interactionType === "view" ? "View Product" :
-                       interaction.interactionType === "detail_click" ? "Detail Click" :
-                       interaction.interactionType === "whatsapp_share" ? "WA Share" :
-                       interaction.interactionType === "promo_click" ? "Promo Click" :
-                       interaction.interactionType}
-                    </Badge>
                   </div>
                   <h4 className="text-sm font-black text-text-primary tracking-tight">
                     {productMap[interaction.productId || ""] || interaction.productId || "-"}
