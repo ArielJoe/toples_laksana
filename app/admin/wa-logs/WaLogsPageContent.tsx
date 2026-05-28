@@ -25,7 +25,6 @@ interface WhatsAppLogDetail {
   unit?: string;
   quantity: number;
   priceAtThatTime: number;
-  subtotal: number;
 }
 
 interface WhatsAppLogItem {
@@ -85,7 +84,7 @@ function getLogTotal(log: WhatsAppLogItem) {
     return log.grandTotal;
   }
 
-  return (log.details || []).reduce((sum, detail) => sum + (detail.subtotal || 0), 0);
+  return (log.details || []).reduce((sum, detail) => sum + (detail.quantity * detail.priceAtThatTime || 0), 0);
 }
 
 function getProductSummary(
@@ -294,7 +293,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                                           <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-text-muted">Harga</p>
                                         </div>
                                         <div>
-                                          <p className="font-black text-text-primary">{formatMoney(detail.subtotal)}</p>
+                                          <p className="font-black text-text-primary">{formatMoney(detail.quantity * detail.priceAtThatTime)}</p>
                                           <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-text-muted">Subtotal</p>
                                         </div>
                                       </div>
@@ -391,7 +390,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                                     <span className="text-[9px] uppercase tracking-widest text-text-muted ml-1">x {formatMoney(detail.priceAtThatTime)}</span>
                                   </div>
                                   <span className="font-black text-text-primary">
-                                    {formatMoney(detail.subtotal)}
+                                    {formatMoney(detail.quantity * detail.priceAtThatTime)}
                                   </span>
                                 </div>
                               </div>

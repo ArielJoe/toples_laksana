@@ -141,7 +141,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             unit,
             quantity,
             priceAtThatTime: subtotal / Math.max(quantity, 1),
-            subtotal,
           },
         ],
       }),

@@ -248,7 +248,7 @@ export default function WishlistPage() {
         userId: user?.email || "guest",
         message: buildWishlistInquiryWithPricesMessage(modalItems, priceTypeNames),
         grandTotal: details.reduce((sum, detail) => sum + detail.subtotal, 0),
-        details,
+        details: details.map(({ subtotal, ...rest }) => rest),
       }),
     }).catch(console.error);
 

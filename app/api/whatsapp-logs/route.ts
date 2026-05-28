@@ -9,7 +9,6 @@ interface WhatsAppLogDetailPayload {
   unit?: string;
   quantity?: number;
   priceAtThatTime?: number;
-  subtotal?: number;
 }
 
 interface NormalizedWhatsAppLogDetail {
@@ -18,7 +17,6 @@ interface NormalizedWhatsAppLogDetail {
   unit: string;
   quantity: number;
   priceAtThatTime: number;
-  subtotal: number;
 }
 
 function normalizeUserId(userId: unknown) {
@@ -45,7 +43,6 @@ export async function POST(req: Request) {
             unit: detail.unit || "pcs",
             quantity: Math.max(1, toNumber(detail.quantity)),
             priceAtThatTime: toNumber(detail.priceAtThatTime),
-            subtotal: toNumber(detail.subtotal),
           }))
           .filter((detail) => detail.productId);
 
@@ -57,10 +54,6 @@ export async function POST(req: Request) {
       id: crypto.randomUUID(),
       userId: normalizeUserId(body.userId),
       message: typeof body.message === "string" ? body.message : "",
-      destinationNumber:
-        typeof body.destinationNumber === "string"
-          ? body.destinationNumber
-          : process.env.NEXT_PUBLIC_WA_NUMBER || "",
       grandTotal: toNumber(body.grandTotal),
       details,
     });

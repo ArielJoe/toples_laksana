@@ -6,14 +6,12 @@ export interface IWhatsAppLogDetail {
   unit?: string;
   quantity: number;
   priceAtThatTime: number;
-  subtotal: number;
 }
 
 export interface IWhatsAppLog {
   id: string;
   userId: string;
   message: string;
-  destinationNumber: string;
   grandTotal: number;
   details: IWhatsAppLogDetail[];
   createdAt?: Date;
@@ -26,7 +24,6 @@ const WhatsAppLogDetailSchema = new Schema<IWhatsAppLogDetail>(
     unit: { type: String, default: "pcs" },
     quantity: { type: Number, required: true, default: 1 },
     priceAtThatTime: { type: Number, required: true },
-    subtotal: { type: Number, required: true },
   },
   { _id: false }
 );
@@ -36,7 +33,6 @@ const WhatsAppLogSchema = new Schema<IWhatsAppLog>(
     id: { type: String, required: true, unique: true },
     userId: { type: String, required: true },
     message: { type: String, required: true },
-    destinationNumber: { type: String, required: true },
     grandTotal: { type: Number, required: true, default: 0 },
     details: { type: [WhatsAppLogDetailSchema], required: true, default: [] },
   },
