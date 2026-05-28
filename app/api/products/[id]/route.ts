@@ -10,7 +10,6 @@ const PRODUCT_UPDATE_FIELDS = [
   "name",
   "categoryId",
   "productTypeId",
-  "unitId",
   "lidMaterial",
   "lidVariant",
   "bodyMaterial",

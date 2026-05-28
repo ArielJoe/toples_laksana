@@ -27,7 +27,6 @@ interface PriceTypesPageContentProps {
 const PRICE_TYPE_FIELDS: MasterDataField[] = [
   { name: "id", label: "ID", type: "text", placeholder: "misal: retail", required: true },
   { name: "name", label: "Nama Tipe", type: "text", placeholder: "misal: Retail", required: true },
-  { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi tipe harga (opsional)" },
 ];
 
 const ADMIN_TABLE_PAGE_SIZE = 10;
@@ -41,24 +40,14 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [editingPriceType, setEditingPriceType] = useState<IPriceType | null>(null);
   const [priceTypeToDelete, setPriceTypeToDelete] = useState<string | null>(null);
-  const [filterDescription, setFilterDescription] = useState(""); // "" | "has" | "none"
   
   const router = useRouter();
 
   const filteredPriceTypes = priceTypes.filter(pt => {
     const matchQuery = pt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       pt.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       pt.description?.toLowerCase().includes(searchQuery.toLowerCase());
+                       pt.id.toLowerCase().includes(searchQuery.toLowerCase());
     
-    if (!matchQuery) return false;
-
-    if (filterDescription === "has") {
-      return !!pt.description;
-    } else if (filterDescription === "none") {
-      return !pt.description;
-    }
-
-    return true;
+    return matchQuery;
   });
   const totalPages = Math.max(1, Math.ceil(filteredPriceTypes.length / ADMIN_TABLE_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -179,58 +168,6 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                 className="w-full pl-12 pr-6 py-3 bg-secondary-50/30 border border-border rounded-lg text-sm font-bold text-text-primary focus:bg-white focus:border-primary-500 outline-none transition-all"
               />
             </div>
-            <div className="flex gap-2 lg:gap-3">
-              <Popover>
-                <PopoverTrigger className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                  <AppIcon name="tune" className="text-sm" /> Filter
-                  {filterDescription && (
-                    <span className="size-2 rounded-full bg-primary-500" />
-                  )}
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-64 p-3 space-y-2 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-black/10 ring-0 text-text-primary">
-                  <div className="space-y-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Deskripsi</label>
-                      <Select
-                        value={filterDescription || "__all__"}
-                        onValueChange={(val) => {
-                          setFilterDescription(val === "__all__" || !val ? "" : val);
-                          setPage(1);
-                        }}
-                        items={[
-                          { value: "__all__", label: "Semua" },
-                          { value: "has", label: "Memiliki Deskripsi" },
-                          { value: "none", label: "Tanpa Deskripsi" }
-                        ]}
-                      >
-                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
-                          <SelectValue placeholder="Semua" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectGroup>
-                            <SelectItem value="__all__">Semua</SelectItem>
-                            <SelectItem value="has">Memiliki Deskripsi</SelectItem>
-                            <SelectItem value="none">Tanpa Deskripsi</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {filterDescription && (
-                    <button
-                      onClick={() => {
-                        setFilterDescription("");
-                        setPage(1);
-                      }}
-                      className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center"
-                    >
-                      Reset Filter
-                    </button>
-                  )}
-                </PopoverContent>
-              </Popover>
-            </div>
           </div>
 
           <div className="hidden sm:block overflow-x-auto">
@@ -239,7 +176,6 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">ID</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama</TableHead>
-                  <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Deskripsi</TableHead>
                   <TableHead className="px-8 py-4 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -262,9 +198,6 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                       </TableCell>
                       <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{pt.name}</p>
-                      </TableCell>
-                      <TableCell className="px-8 py-3">
-                        <p className="text-sm text-text-secondary line-clamp-2 max-w-md font-medium">{pt.description || "-"}</p>
                       </TableCell>
                       <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -303,9 +236,6 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                   <div className="flex flex-col gap-1.5 min-w-0">
                     <span className="text-[10px] font-black text-text-muted font-mono tracking-tighter block">{pt.id}</span>
                     <h4 className="text-sm font-black text-text-primary tracking-tight truncate">{pt.name}</h4>
-                    {pt.description && (
-                      <p className="text-xs text-text-secondary line-clamp-2 font-medium mt-0.5">{pt.description}</p>
-                    )}
                   </div>
 
                   <div className="flex items-center justify-end gap-2 pt-2 border-t border-secondary-50/50">

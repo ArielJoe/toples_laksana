@@ -36,7 +36,6 @@ export default async function MaterialsPage() {
             { value: "lid", label: "Tutup Produk" },
           ],
         },
-        { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Catatan singkat bahan" },
       ]}
     />
   );

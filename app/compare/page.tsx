@@ -4,12 +4,12 @@ import connectDB from "@/lib/mongodb";
 import ProductModel from "@/models/Product";
 import { buildInquiryUrl } from "@/lib/whatsapp-builder";
 import type { Metadata } from "next";
-import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getPrimaryImage, getSpecValue, Product } from "@/types/product";
+import { formatAttributeLabel, getAvailabilityLabel, getPrimaryImage, getSpecValue, Product } from "@/types/product";
 import { AppIcon } from "@/components/ui/app-icon";
 import { cn } from "@/lib/utils";
 import { Heart } from "lucide-react";
 import Material from "@/models/Material";
-import LidType from "@/models/LidType";
+import Category from "@/models/Category";
 import LidVariant from "@/models/LidVariant";
 import PriceType from "@/models/PriceType";
 import LidColor from "@/models/LidColor";
@@ -64,16 +64,18 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
     ];
     const lidVariantIds = [...new Set(rawProducts.map((product) => product.lidVariant).filter(Boolean))];
 
-    const [materials, lidVariants, priceTypes, lidColors] = (await Promise.all([
+    const [materials, lidVariants, priceTypes, lidColors, categoryDocs] = (await Promise.all([
       Material.find({ id: { $in: materialIds } }).select("id name").lean(),
-      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name lidTypeId").lean(),
+      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name").lean(),
       PriceType.find().select("id name").lean(),
       LidColor.find().select("id color colorCode hex").lean(),
+      Category.find().select("id name").lean(),
     ])) as [
       LookupDoc[],
-      (LookupDoc & { lidTypeId: string })[],
+      LookupDoc[],
       LookupDoc[],
       (LookupDoc & { color?: string; colorCode?: string; hex?: string })[],
+      LookupDoc[],
     ];
 
     for (const pt of priceTypes) {
@@ -84,21 +86,16 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
     }
 
     const lidVariantMap = new Map(lidVariants.map((v) => [v.id, v]));
-    const lidTypeIds = [...new Set(lidVariants.map((v) => v.lidTypeId).filter(Boolean))];
-
-    const lidTypes = (await LidType.find({ id: { $in: lidTypeIds } }).select("id name").lean()) as LookupDoc[];
-    const lidTypeMap = new Map(lidTypes.map((t) => [t.id, t.name]));
-
     const materialMap = new Map(materials.map((m) => [m.id, m.name]));
+    const categoryMap = new Map(categoryDocs.map((c) => [c.id, c.name]));
 
     products = rawProducts.map((product) => {
       const variantDoc = lidVariantMap.get(product.lidVariant);
-      const lidTypeName = variantDoc ? (lidTypeMap.get(variantDoc.lidTypeId) || "") : "";
       return {
         ...product,
+        categoryName: categoryMap.get(product.categoryId) || "",
         bodyMaterialName: materialMap.get(product.bodyMaterial) || "",
         lidMaterialName: materialMap.get(product.lidMaterial) || "",
-        lidTypeName,
         lidVariantName: variantDoc?.name || "",
       };
     });
@@ -209,18 +206,18 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                   { label: "Bahan Tutup", getter: (p: Product) => p.lidMaterialName || formatAttributeLabel(p.lidMaterial) },
                   { label: "Variasi Tutup", getter: (p: Product) => p.lidVariantName || formatAttributeLabel(p.lidVariant) },
                   { label: "Status", getter: (p: Product) => getAvailabilityLabel(p.isAvailable) },
-                  { label: "Kategori", getter: (p: Product) => getCategoryLabel(p.categoryId) },
+                  { label: "Kategori", getter: (p: Product) => p.categoryName || formatAttributeLabel(p.categoryId) },
                 ].map((row, idx, arr) => (
                   <div key={row.label} className={cn(
                     "grid items-stretch",
                     idx === arr.length - 1 ? "" : "border-b border-border",
                     gridCols,
-                    idx % 2 === 0 ? "bg-slate-50/30" : "bg-white",
+                    "bg-white",
                     "hover:bg-primary-50/10 transition-colors"
                   )}>
-                    <div className="px-6 py-4.5 text-[10px] font-black text-text-secondary uppercase tracking-wider flex items-center border-r border-border bg-slate-50/20">{row.label}</div>
+                    <div className="px-6 py-4.5 text-[10px] font-black text-text-secondary uppercase tracking-wider flex items-center border-r border-border bg-white">{row.label}</div>
                     {products.map((p) => (
-                      <div key={`${p.id}-${row.label}`} className="px-6 py-4.5 text-sm text-center text-text-primary font-bold flex items-center justify-center border-r border-border last:border-r-0 tracking-tight">
+                      <div key={`${p.id}-${row.label}`} className="px-6 py-4.5 text-sm text-center text-text-primary font-bold flex items-center justify-center border-r border-border last:border-r-0 tracking-tight bg-white">
                         {row.getter(p)}
                       </div>
                     ))}
@@ -326,7 +323,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
                         { label: "Bahan Tutup", value: product.lidMaterialName || formatAttributeLabel(product.lidMaterial) },
                         { label: "Variasi Tutup", value: product.lidVariantName || formatAttributeLabel(product.lidVariant) },
                         { label: "Status", value: getAvailabilityLabel(product.isAvailable) },
-                        { label: "Kategori", value: getCategoryLabel(product.categoryId) },
+                        { label: "Kategori", value: product.categoryName || formatAttributeLabel(product.categoryId) },
                       ].map((item) => (
                         <div key={item.label} className="py-2.5 flex justify-between gap-4 text-xs">
                           <span className="font-semibold text-text-secondary">{item.label}</span>

@@ -6,7 +6,7 @@ import LidColor from "@/models/LidColor";
 import Material from "@/models/Material";
 import PriceType from "@/models/PriceType";
 import ProductType from "@/models/ProductType";
-import { getAvailabilityLabel, getCategoryLabel } from "@/types/product";
+import { getAvailabilityLabel } from "@/types/product";
 
 export async function GET() {
   try {
@@ -111,7 +111,7 @@ export async function GET() {
       categories: categories.map((category) => ({
         value: category._id,
         count: category.count,
-        name: categoryNames.get(category._id) || getCategoryLabel(category._id),
+        name: categoryNames.get(category._id) || category._id,
       })),
       materials: materials
         .filter((item) => item.value)

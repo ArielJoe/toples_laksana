@@ -1,6 +1,6 @@
 import type { Product, ProductPrice } from "@/types/product";
 import type { CalculatorResult } from "@/lib/price-calculator";
-import { PRICE_TYPE_IDS, getLidColorLabel, getSpecValue, getLowestRetailPrice, getLowestWholesalePrice } from "@/types/product";
+import { PRICE_TYPE_IDS, getSpecValue, getLowestRetailPrice, getLowestWholesalePrice } from "@/types/product";
 import { formatRupiah } from "@/lib/price-calculator";
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER;
@@ -15,7 +15,7 @@ export function buildWhatsAppMessage(
   calc: CalculatorResult,
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = getLidColorLabel(price?.lidColorId);
+  const color = price?.lidColorName || price?.lidColorId || "-";
 
   const lines: string[] = [
     "Halo Admin Toples Laksana,",
@@ -92,7 +92,7 @@ export function buildBulkInquiryMessage(
   desiredQty: number,
 ): string {
   const volume = getSpecValue(product, "volume_ml");
-  const color = getLidColorLabel(price?.lidColorId);
+  const color = price?.lidColorName || price?.lidColorId || "-";
 
   const lines = [
     "Halo Admin Toples Laksana,",

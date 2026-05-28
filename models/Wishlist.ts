@@ -5,8 +5,6 @@ export interface IWishlist {
   userId: string;
   productId: string;
   lidColorId?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 const WishlistSchema = new Schema<IWishlist>(
@@ -15,8 +13,7 @@ const WishlistSchema = new Schema<IWishlist>(
     userId: { type: String, required: true },
     productId: { type: String, required: true },
     lidColorId: { type: String, default: null },
-  },
-  { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
+  }
 );
 
 WishlistSchema.index(

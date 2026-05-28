@@ -87,6 +87,4 @@ export function formatPrice(amount: number): string {
   }).format(amount);
 }
 
-export function formatUnitType(unitType: string): string {
-  return unitType.charAt(0).toUpperCase() + unitType.slice(1);
-}
+

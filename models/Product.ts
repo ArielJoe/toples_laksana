@@ -37,7 +37,6 @@ export interface IProduct {
   name: string;
   categoryId: string;
   productTypeId?: string;
-  unitId: string;
   lidMaterial: string;
   lidVariant: string;
   bodyMaterial: string;
@@ -50,7 +49,6 @@ export interface IProduct {
   prices?: IProductPrice[];
   deletedAt?: Date | null;
   createdAt?: Date;
-  updatedAt?: Date;
 }
 
 const DimensionSchema = new Schema<IDimension>(
@@ -103,7 +101,6 @@ const ProductSchema = new Schema<IProduct>(
     name: { type: String, required: true },
     categoryId: { type: String, required: true },
     productTypeId: { type: String, default: null },
-    unitId: { type: String, required: true },
     lidMaterial: { type: String, required: true, default: "" },
     lidVariant: { type: String, required: true, default: "" },
     bodyMaterial: { type: String, required: true, default: "" },
@@ -120,7 +117,7 @@ const ProductSchema = new Schema<IProduct>(
     prices: { type: [ProductPriceSchema], default: [] },
     deletedAt: { type: Date, default: null },
   },
-  { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
+  { timestamps: { createdAt: "createdAt", updatedAt: false } }
 );
 
 ProductSchema.index({ categoryId: 1 });

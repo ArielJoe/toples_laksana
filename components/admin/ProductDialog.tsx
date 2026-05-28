@@ -47,7 +47,6 @@ interface ProductDialogProps {
     lidColors: MasterDataItem[];
     priceTypes: MasterDataItem[];
     materials: MasterDataItem[];
-    lidTypes: MasterDataItem[];
     lidVariants: MasterDataItem[];
   };
 }
@@ -58,7 +57,6 @@ const emptyProduct: Partial<Product> = {
   sku: "",
   categoryId: "cat_001",
   productTypeId: "pt_003",
-  unitId: "unit_005",
   bodyMaterial: "",
   lidMaterial: "",
   lidVariant: "",

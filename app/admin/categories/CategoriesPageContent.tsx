@@ -30,7 +30,6 @@ interface CategoriesPageContentProps {
 const CATEGORY_FIELDS: MasterDataField[] = [
   { name: "id", label: "ID", type: "text", placeholder: "misal: toples-bulat", required: true },
   { name: "name", label: "Nama Kategori", type: "text", placeholder: "misal: Toples Bulat", required: true },
-  { name: "description", label: "Deskripsi", type: "textarea", placeholder: "Deskripsi kategori (opsional)" },
 ];
 
 const ADMIN_TABLE_PAGE_SIZE = 10;

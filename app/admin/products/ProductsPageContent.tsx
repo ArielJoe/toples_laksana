@@ -39,7 +39,6 @@ interface ProductsPageContentProps {
     lidColors: MasterDataItem[];
     priceTypes: MasterDataItem[];
     materials: MasterDataItem[];
-    lidTypes: MasterDataItem[];
     lidVariants: MasterDataItem[];
   };
 }

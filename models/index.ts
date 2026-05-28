@@ -2,13 +2,11 @@ import Category from "./Category";
 import ProductType from "./ProductType";
 import LidColor from "./LidColor";
 import Material from "./Material";
-import LidType from "./LidType";
 import LidVariant from "./LidVariant";
 import PriceType from "./PriceType";
 import Product from "./Product";
 import User from "./User";
 import Wishlist from "./Wishlist";
-import InquiryCart from "./InquiryCart";
 import Interaction from "./Interaction";
 import WhatsAppLog from "./WhatsAppLog";
 
@@ -23,9 +21,6 @@ export type { ILidColor } from "./LidColor";
 
 export { Material } from "./Material";
 export type { IMaterial } from "./Material";
-
-export { LidType } from "./LidType";
-export type { ILidType } from "./LidType";
 
 export { LidVariant } from "./LidVariant";
 export type { ILidVariant } from "./LidVariant";
@@ -49,9 +44,6 @@ export type { IUser } from "./User";
 export { Wishlist } from "./Wishlist";
 export type { IWishlist } from "./Wishlist";
 
-export { InquiryCart } from "./InquiryCart";
-export type { IInquiryCart, IInquiryCartItem } from "./InquiryCart";
-
 export { Interaction } from "./Interaction";
 export type { IInteraction } from "./Interaction";
 
@@ -63,13 +55,11 @@ const databaseModels = {
   ProductType,
   LidColor,
   Material,
-  LidType,
   LidVariant,
   PriceType,
   Product,
   User,
   Wishlist,
-  InquiryCart,
   Interaction,
   WhatsAppLog,
 };

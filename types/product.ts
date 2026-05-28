@@ -1,10 +1,6 @@
 // --- Interfaces ---
 
-export interface ProductSpecification {
-  key: string;
-  value: number;
-  type: "number";
-}
+
 
 export interface ProductPrice {
   lidColorId: string;
@@ -48,7 +44,6 @@ export interface Product {
   categoryId: string;
   categoryName?: string;
   productTypeId?: string;
-  unitId: string;
   lidMaterial: string;
   lidVariant: string;
   bodyMaterial: string;
@@ -61,74 +56,49 @@ export interface Product {
   availabilityNote?: string;
   description?: string;
   dimension?: ProductDimension;
-  specifications?: ProductSpecification[];
   packaging?: ProductPackaging[];
   images?: ProductImage[];
   prices?: ProductPrice[];
   deletedAt?: string | null;
   createdAt?: string;
-  updatedAt?: string;
 }
 
-// --- Lookup Tables ---
-
-export const CATEGORY_LABELS: Record<string, string> = {
-  cat_001: "Jar Cylinder",
-  cat_002: "Jar Kaca",
-  cat_003: "Jar Plastik",
-  cat_004: "Botol Plastik",
-  cat_005: "Tin Kaleng",
-};
-
-export const LID_COLOR_LABELS: Record<string, string> = {
-  lc_001: "Bening",
-  lc_002: "Putih",
-  lc_003: "Cling",
-  lc_004: "Silver",
-  lc_005: "Emas",
-  lc_006: "Rose",
-  lc_007: "Hitam",
-};
+// --- Constants ---
 
 export const PRICE_TYPE_IDS = {
   withLid: "ptype_001",
   perBal: "ptype_004",
 } as const;
 
-const PRODUCT_TYPE_LABELS: Record<string, string> = {
-  pt_001: "Premium",
-  pt_002: "Economis",
-  pt_003: "Standard",
-};
-
 // --- Helper Functions ---
 
+// Fallback label when resolved name is not available from the database
 export function getCategoryLabel(categoryId: string): string {
-  return CATEGORY_LABELS[categoryId] || categoryId || "-";
+  return formatAttributeLabel(categoryId);
 }
 
+// Fallback label when resolved name is not available from the database
 export function getLidColorLabel(lidColorId?: string): string {
   if (!lidColorId) return "-";
-  return LID_COLOR_LABELS[lidColorId] || lidColorId;
+  return formatAttributeLabel(lidColorId);
 }
 
+// Fallback label when resolved name is not available from the database
 export function getProductTypeLabel(productTypeId?: string): string {
   if (!productTypeId) return "Reguler";
-  return PRODUCT_TYPE_LABELS[productTypeId] || productTypeId;
+  return formatAttributeLabel(productTypeId);
 }
 
-// Extract a spec value from dimension object or specifications array
+// Extract a spec value from the product dimension object
 export function getSpecValue(product: Product, key: string): number | undefined {
-  if (product.dimension) {
-    const dimMap: Record<string, number | undefined> = {
-      volume_ml: product.dimension.volumeMl,
-      tinggi_cm: product.dimension.heightCm,
-      diameter_badan_cm: product.dimension.diameterCm,
-      berat_total_gr: product.dimension.weightGram,
-    };
-    if (dimMap[key] !== undefined) return dimMap[key];
-  }
-  return product.specifications?.find((s) => s.key === key)?.value;
+  if (!product.dimension) return undefined;
+  const dimMap: Record<string, number | undefined> = {
+    volume_ml: product.dimension.volumeMl,
+    tinggi_cm: product.dimension.heightCm,
+    diameter_badan_cm: product.dimension.diameterCm,
+    berat_total_gr: product.dimension.weightGram,
+  };
+  return dimMap[key];
 }
 
 export function getPrimaryImage(product: Product): string {

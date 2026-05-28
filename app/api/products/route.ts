@@ -4,7 +4,6 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 import LidColor from "@/models/LidColor";
 import Material from "@/models/Material";
-import LidType from "@/models/LidType";
 import LidVariant from "@/models/LidVariant";
 
 type MongoFilter = Record<string, unknown>;
@@ -48,7 +47,6 @@ export async function GET(request: NextRequest) {
     const productTypes = searchParams.getAll("product_type");
     const materialBody = searchParams.getAll("material_body");
     const lidMaterial = searchParams.getAll("lid_material");
-    const lidType = searchParams.getAll("lid_type");
     const colors = searchParams.getAll("colors");
     const availability = searchParams.getAll("availability");
     const volumeMin = searchParams.get("volume_min");
@@ -85,11 +83,6 @@ export async function GET(request: NextRequest) {
       filter.lidMaterial = { $in: lidMaterial };
     }
 
-    if (lidType.length > 0) {
-      const matchingVariants = await LidVariant.find({ lidTypeId: { $in: lidType } }).select("id").lean();
-      const variantIds = matchingVariants.map((v) => v.id);
-      filter.lidVariant = { $in: variantIds };
-    }
 
     if (colors.length > 0) {
       const colorDocs = await LidColor.find({
@@ -270,24 +263,18 @@ export async function GET(request: NextRequest) {
 
     const [materials, lidVariants] = await Promise.all([
       Material.find({ id: { $in: materialIds } }).select("id name").lean(),
-      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name lidTypeId").lean(),
+      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name").lean(),
     ]);
 
-    const lidTypeIds = [...new Set(lidVariants.map((v) => v.lidTypeId).filter(Boolean))];
-    const lidTypes = await LidType.find({ id: { $in: lidTypeIds } }).select("id name").lean();
-
     const materialMap = new Map(materials.map((material) => [material.id, material.name]));
-    const lidTypeMap = new Map(lidTypes.map((lidType) => [lidType.id, lidType.name]));
     const lidVariantMap = new Map(lidVariants.map((lidVariant) => [lidVariant.id, lidVariant]));
 
     const enrichedProducts = products.map((product) => {
       const variantDoc = lidVariantMap.get(product.lidVariant);
-      const lidTypeName = variantDoc ? lidTypeMap.get(variantDoc.lidTypeId) : undefined;
       return {
         ...product,
         bodyMaterialName: materialMap.get(product.bodyMaterial),
         lidMaterialName: materialMap.get(product.lidMaterial),
-        lidTypeName,
         lidVariantName: variantDoc?.name,
       };
     });
@@ -316,9 +303,9 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const body = await request.json();
 
-    if (!body.id || !body.name || !body.sku || !body.categoryId || !body.unitId) {
+    if (!body.id || !body.name || !body.sku || !body.categoryId) {
       return NextResponse.json(
-        { error: "Missing required fields (id, name, sku, categoryId, unitId)" },
+        { error: "Missing required fields (id, name, sku, categoryId)" },
         { status: 400 }
       );
     }

@@ -5,7 +5,7 @@ import LidColor from "@/models/LidColor";
 export async function GET() {
   try {
     await connectDB();
-    const items = await LidColor.find().sort({ order: 1, color: 1 }).lean();
+    const items = await LidColor.find().sort({ color: 1 }).lean();
     return NextResponse.json({ data: items });
   } catch (error) {
     console.error("[API] GET /api/lid-colors error:", error);

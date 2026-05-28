@@ -4,9 +4,6 @@ export interface IMaterial {
   id: string;
   name: string;
   usage: "body" | "lid" | "both";
-  description?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 const MaterialSchema = new Schema<IMaterial>(
@@ -19,9 +16,7 @@ const MaterialSchema = new Schema<IMaterial>(
       required: true,
       default: "both",
     },
-    description: { type: String, default: "" },
-  },
-  { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
+  }
 );
 
 export const Material =
