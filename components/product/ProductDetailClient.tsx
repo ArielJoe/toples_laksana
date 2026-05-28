@@ -9,7 +9,6 @@ import {
   getAvailabilityLabel,
   getLidColorLabel,
   getLowestWholesalePrice,
-  getPricesByType,
   getProductTypeLabel,
   getSpecValue,
   formatAttributeLabel,
@@ -43,40 +42,79 @@ function readPositiveInteger(event: React.ChangeEvent<HTMLInputElement>) {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const { toggleWishlist, isInWishlist, user } = useApp();
   const wishlisted = isInWishlist(product.id);
-  const retailPrices = getPricesByType(product, PRICE_TYPE_IDS.withLid);
   const fallbackPrices = product.prices || [];
-  const priceOptions = retailPrices.length > 0 ? retailPrices : fallbackPrices;
+
+  // Extract unique price types that actually exist on this product
+  const availablePriceTypes = useMemo(() => {
+    const uniqueTypes = new Map<string, { id: string; name: string }>();
+    (product.prices || []).forEach((p) => {
+      if (p.priceTypeId && !uniqueTypes.has(p.priceTypeId)) {
+        uniqueTypes.set(p.priceTypeId, {
+          id: p.priceTypeId,
+          name: p.priceTypeName || p.priceTypeId.replace(/_/g, ' '),
+        });
+      }
+    });
+    return Array.from(uniqueTypes.values());
+  }, [product.prices]);
+
+  // Set default active price type (prefer retail / withLid, otherwise the first one)
+  const defaultPriceTypeId = useMemo(() => {
+    if (availablePriceTypes.length === 0) return "";
+    const hasRetail = availablePriceTypes.find(t => t.id === PRICE_TYPE_IDS.withLid);
+    return hasRetail ? PRICE_TYPE_IDS.withLid : availablePriceTypes[0].id;
+  }, [availablePriceTypes]);
+
+  const [selectedPriceTypeId, setSelectedPriceTypeId] = useState<string>("");
+  const currentPriceTypeId = selectedPriceTypeId || defaultPriceTypeId;
+
+  // Filter colors based on the active price type
+  const priceOptions = useMemo(() => {
+    return (product.prices || []).filter((p) => p.priceTypeId === currentPriceTypeId);
+  }, [product.prices, currentPriceTypeId]);
+
   const [selectedPriceIdx, setSelectedPriceIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [pricingMode, setPricingMode] = useState<"retail" | "wholesale">("retail");
   const [mainImage, setMainImage] = useState(0);
 
-  const selectedPrice = priceOptions[selectedPriceIdx] || fallbackPrices[0];
-  const wholesalePrice = getPricesByType(product, PRICE_TYPE_IDS.perBal).find(
-    (price) => price.lidColorId === selectedPrice?.lidColorId
-  );
-  const activePrice: ProductPrice = pricingMode === "wholesale" && wholesalePrice
-    ? wholesalePrice
-    : selectedPrice;
+  const activePrice = priceOptions[selectedPriceIdx] || fallbackPrices[0];
+  const isPackagePrice = currentPriceTypeId === PRICE_TYPE_IDS.perBal;
+
+  // Get retail price for the same color (for comparison / savings)
+  const retailPrice = useMemo(() => {
+    if (!activePrice) return undefined;
+    return (product.prices || []).find(
+      (p) => p.lidColorId === activePrice.lidColorId && p.priceTypeId === PRICE_TYPE_IDS.withLid
+    );
+  }, [product.prices, activePrice]);
+
+  // Get wholesale price for the same color (for retail mode savings nudge)
+  const wholesalePrice = useMemo(() => {
+    if (!activePrice) return undefined;
+    return (product.prices || []).find(
+      (p) => p.lidColorId === activePrice.lidColorId && p.priceTypeId === PRICE_TYPE_IDS.perBal
+    );
+  }, [product.prices, activePrice]);
+
   const quantityPerPack = product.packaging?.[0]?.quantityPerPack || 1;
+  const activeQuantityPerPack = activePrice?.quantity || (isPackagePrice ? quantityPerPack : 1);
 
   const safeActivePrice = activePrice || EMPTY_PRICE;
-  const safeSelectedPrice = selectedPrice || EMPTY_PRICE;
 
   const calcResult = useMemo(
     () => calculatePrice({
       selectedPrice: safeActivePrice,
-      retailPrice: safeSelectedPrice,
+      retailPrice: retailPrice,
       quantity,
-      mode: pricingMode,
-      quantityPerPack,
+      mode: isPackagePrice ? "wholesale" : "retail",
+      quantityPerPack: activeQuantityPerPack,
     }),
-    [safeActivePrice, safeSelectedPrice, quantity, pricingMode, quantityPerPack]
+    [safeActivePrice, retailPrice, quantity, isPackagePrice, activeQuantityPerPack]
   );
 
   const nudge = useMemo(
-    () => wholesalePrice ? getWholesaleNudge(wholesalePrice, selectedPrice, quantityPerPack) : null,
-    [wholesalePrice, selectedPrice, quantityPerPack]
+    () => wholesalePrice && activePrice ? getWholesaleNudge(wholesalePrice, activePrice, wholesalePrice.quantity || quantityPerPack) : null,
+    [wholesalePrice, activePrice, quantityPerPack]
   );
 
   const images = useMemo(() => {
@@ -120,7 +158,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const handleBulkInquiryClick = () => {
     const wholesalePriceValue = getLowestWholesalePrice(product);
-    const retailFallbackTotal = safeSelectedPrice.price * quantityPerPack;
+    const retailPriceValue = retailPrice?.price || activePrice?.price || 0;
+    const retailFallbackTotal = retailPriceValue * (wholesalePrice?.quantity || quantityPerPack);
     const unitPrice = wholesalePriceValue > 0 ? wholesalePriceValue : retailFallbackTotal;
     logWhatsAppInquiry(
       buildBulkInquiryMessage(product, safeActivePrice, quantity),
@@ -224,51 +263,50 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             Tipe Produk: <span className="font-semibold text-gray-900">{category}</span>
           </p>
 
+          {product.description && (
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 whitespace-pre-wrap">
+              {product.description}
+            </p>
+          )}
+
           {/* Price */}
           <div className="mb-6 flex flex-wrap items-baseline gap-2">
             <span className="break-words text-2xl font-bold text-gray-900">
               {calcResult.pricePerPcs > 0 ? formatPrice(calcResult.pricePerPcs) : "Hubungi Kami"}
             </span>
-            {calcResult.pricePerPcs > 0 && <span className="text-sm text-gray-400">/pcs</span>}
           </div>
 
-          {/* Pricing mode toggle */}
-          <div className="mb-6 grid w-full grid-cols-2 overflow-hidden rounded-xl border border-gray-200 sm:inline-grid sm:w-fit">
-            <button
-              onClick={() => { setPricingMode("retail"); setQuantity(1); }}
-              className={`min-w-0 px-4 py-2 text-sm font-medium transition-all cursor-pointer ${pricingMode === "retail" ? "bg-primary-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-            >
-              Ecer
-            </button>
-            <button
-              disabled={!wholesalePrice}
-              onClick={() => { setPricingMode("wholesale"); setQuantity(1); }}
-              className={`min-w-0 px-4 py-2 text-sm font-medium transition-all disabled:opacity-40 cursor-pointer ${pricingMode === "wholesale" ? "bg-primary-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-            >
-              Per Bal
-            </button>
-          </div>
-
-          {pricingMode === "wholesale" && nudge && (
-            <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="bg-primary-50 text-primary-600 font-semibold px-2 py-1 rounded flex items-center gap-1">
-                <Tag size={12} /> Hemat {nudge.percentage}%
-              </span>
-              <span className="text-gray-400">vs harga ecer</span>
+          {/* Pricing mode badges */}
+          {availablePriceTypes.length > 1 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {availablePriceTypes.map((type) => {
+                const isActive = currentPriceTypeId === type.id;
+                return (
+                  <button
+                    key={type.id}
+                    onClick={() => { setSelectedPriceTypeId(type.id); setQuantity(1); setSelectedPriceIdx(0); }}
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/10"
+                        : "bg-slate-50 text-gray-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {type.name}
+                  </button>
+                );
+              })}
             </div>
           )}
 
-          {/* Color Selection */}
-          {priceOptions.length > 1 && (
+          {/* Color Selection - Rendered immediately below the price type badges */}
+          {priceOptions.length > 0 && (
             <div className="mb-6">
               <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
-                <span>Color:</span>
+                <span>Warna Tutup Tersedia:</span>
                 <span className="font-semibold text-gray-900">{selectedColor}</span>
                 <span className="text-xs text-gray-400 font-normal uppercase">{selectedColorHex}</span>
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {priceOptions.map((price, i) => {
                   const colorLabel = price.lidColorName || getLidColorLabel(price.lidColorId);
                   const hex = price.lidColorHex || COLOR_SWATCHES[price.lidColorId] || "#ccc";
@@ -277,19 +315,27 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     <button
                       key={`${price.lidColorId}-${price.priceTypeId}`}
                       onClick={() => { setSelectedPriceIdx(i); setQuantity(1); }}
-                      className={`flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 transition-all cursor-pointer ${isSelected
-                          ? "border-2 border-primary-500 bg-primary-50 text-primary-700 font-semibold"
+                      className={`flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 transition-all cursor-pointer ${isSelected
+                          ? "border-2 border-primary-500 bg-primary-50/50 text-primary-700 font-bold"
                           : "border-gray-200 hover:border-gray-300 text-gray-600 bg-white"
                         }`}
                       title={colorLabel}
                     >
-                      <span className="w-4 h-4 rounded-full border border-border shadow-sm" style={{ backgroundColor: hex }} />
-                      <span className="min-w-0 truncate text-sm">{colorLabel}</span>
-                      <span className="text-xs opacity-50 uppercase">{hex}</span>
+                      <span className="w-3.5 h-3.5 rounded-full border border-border shadow-sm" style={{ backgroundColor: hex }} />
+                      <span className="min-w-0 truncate text-xs font-semibold">{colorLabel}</span>
                     </button>
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {isPackagePrice && nudge && (
+            <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
+              <span className="bg-primary-50 text-primary-600 font-semibold px-2 py-1 rounded flex items-center gap-1">
+                <Tag size={12} /> Hemat {nudge.percentage}%
+              </span>
+              <span className="text-gray-400">vs harga ecer</span>
             </div>
           )}
 
@@ -311,7 +357,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {/* Quantity */}
           <div className="mb-6">
             <p className="text-sm text-gray-600 mb-2">
-              Quantity: <span className="text-gray-400">({pricingMode === "wholesale" ? "bal" : "pcs"})</span>
+              Quantity: <span className="text-gray-400">({isPackagePrice ? "bal" : "pcs"})</span>
             </p>
             <div className="flex items-center gap-2">
               <input
@@ -322,9 +368,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 className="w-24 px-3 py-2.5 text-sm font-semibold bg-white border border-gray-200 rounded-lg outline-none focus:border-primary-500 transition-all"
               />
             </div>
-            {pricingMode === "wholesale" && (
+            {activeQuantityPerPack > 1 && (
               <p className="text-xs text-gray-400 mt-2">
-                1 bal = {quantityPerPack} pcs. Total: <span className="font-semibold text-gray-900">{calcResult.totalPcs.toLocaleString("id-ID")} pcs</span>
+                1 {isPackagePrice ? "bal" : "pilihan"} = {activeQuantityPerPack} pcs. Total: <span className="font-semibold text-gray-900">{calcResult.totalPcs.toLocaleString("id-ID")} pcs</span>
               </p>
             )}
           </div>
@@ -366,7 +412,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 />
               </button>
             </div>
-            {quantity >= 5 && pricingMode === "wholesale" && (
+            {quantity >= 5 && isPackagePrice && (
               <a
                 href={buildBulkInquiryUrl(product, safeActivePrice, quantity)}
                 target="_blank"
@@ -472,31 +518,25 @@ function SpecTabs({ product, height, diameter, weight, category, selectedColor, 
 
       {activeTab === "packaging" && (
         <div className="max-w-full rounded-xl border border-gray-100 bg-white p-4 sm:p-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Pengemasan</h4>
+          <h4 className="font-semibold text-gray-900 mb-3">Dimensi Pengemasan Paket</h4>
           {(product.packaging || []).length > 0 ? (
             <div className="space-y-4">
               {(product.packaging || []).map((pack, index) => (
                 <div key={index} className="grid grid-cols-1 gap-y-1 text-sm sm:grid-cols-[minmax(9rem,0.8fr)_minmax(0,1.2fr)] sm:gap-x-3 sm:gap-y-3">
-                  <span className="text-gray-400">Tipe Pengemasan</span>
-                  <span className="break-words font-semibold text-primary-600">
-                    {pack.quantityPerPack > 1 ? "Bal (Grosir/Box)" : "Ecer (Eceran/Satuan)"}
-                  </span>
-                  <span className="text-gray-400">Isi per pack</span>
-                  <span className="break-words font-medium">{pack.quantityPerPack} pcs</span>
-                  <span className="text-gray-400">Dimensi</span>
+                  <span className="text-gray-400">Dimensi Kemasan</span>
                   <span className="break-words font-medium">{pack.lengthCm || "-"} x {pack.widthCm || "-"} x {pack.heightCm || "-"} cm</span>
-                  <span className="text-gray-400">Berat</span>
+                  <span className="text-gray-400">Berat Paket</span>
                   <span className="break-words font-medium">{pack.weightKg || "-"} kg</span>
                 </div>
               ))}
               <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 leading-relaxed space-y-1">
-                <span className="font-bold text-gray-700 block mb-1">Catatan Pembelian:</span>
-                <p>• Pembelian <strong>Eceran</strong> dikemas per satuan (pcs) dengan pengemasan ecer standar pabrik.</p>
-                <p>• Pembelian <strong>Grosir/Bal</strong> dikemas langsung per pack/dus (1 bal = {product.packaging?.[0]?.quantityPerPack || 1} pcs) dari pabrik untuk perlindungan ekstra selama pengiriman.</p>
+                <span className="font-bold text-gray-700 block mb-1">Catatan Pengiriman:</span>
+                <p>• Dimensi paket kemasan di atas digunakan oleh pihak ekspedisi untuk menghitung ongkos kirim berdasarkan volume atau berat barang.</p>
+                <p>• Pembelian grosir atau bal dikemas langsung dari pabrik menggunakan perlindungan kemasan ekstra.</p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-400">Informasi pengemasan belum tersedia.</p>
+            <p className="text-sm text-gray-400">Informasi dimensi pengemasan paket belum tersedia.</p>
           )}
         </div>
       )}

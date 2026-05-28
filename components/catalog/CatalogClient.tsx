@@ -102,8 +102,8 @@ function CatalogContent() {
     <div className="bg-white text-gray-900 min-h-screen">
       <main className="w-full">
         {/* Sticky Header: Controls Bar + Active Filters */}
-        <div className="sticky top-18.75 z-30 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:px-6 lg:px-10">
-          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-5 sm:flex-row sm:items-center sm:justify-between sm:py-3">
+        <div className="sticky top-20 z-30 min-h-20 border-b border-border bg-background/95 px-4 backdrop-blur-md sm:h-20 sm:px-6 lg:px-10">
+          <div className="flex min-h-20 flex-col gap-3 pb-3 pt-5 sm:h-full sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <div className="grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-1 sm:items-center">
               {/* Mobile/Tablet filter button */}
               <button
@@ -190,12 +190,12 @@ function CatalogContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] relative">
+        <div className="grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] relative">
           {/* Vertical Border Line (Non-breaking) */}
-          <div className="hidden lg:block absolute left-75 top-0 bottom-0 border-r border-border z-10" />
+          <div className="hidden lg:block absolute left-[340px] top-0 bottom-0 border-r border-border z-10" />
 
-          {/* Desktop Sidebar (Sticky & Fit Height) */}
-          <div className="hidden lg:block sticky top-35 h-fit px-6 pb-10 pt-6 bg-white z-20">
+          {/* Desktop Sidebar (Sticky & Independently Scrollable) */}
+          <div className="hidden lg:block sticky top-40 z-20 h-fit max-h-[calc(100vh-10rem)] overflow-y-auto overscroll-contain bg-white px-7 pb-10 pt-6">
             <FilterSidebar
               filters={filters}
               facets={facets}
@@ -205,7 +205,7 @@ function CatalogContent() {
           </div>
 
           {/* Product Grid Area */}
-          <div className="min-h-150 flex flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+          <div className="min-h-150 min-w-0 flex flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
             {activeFilterCount > 0 && (
               <ActiveFilterBar
                 filters={filters}

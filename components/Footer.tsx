@@ -23,7 +23,7 @@ export default function Footer() {
         </div>
 
         <div className="md:col-span-5 lg:col-span-2">
-          <h5 className="mb-6 text-[0.7rem] font-black uppercase tracking-[0.15em] text-text-primary">Explore</h5>
+          <h5 className="mb-6 text-[0.7rem] font-black uppercase tracking-[0.15em] text-text-primary">Eksplor</h5>
           <ul className="space-y-4 font-semibold text-text-secondary">
             <li><Link className="transition-colors hover:text-primary-500" href="/catalog">Katalog Produk</Link></li>
             <li><Link className="transition-colors hover:text-primary-500" href="/compare">Bandingkan</Link></li>
@@ -32,7 +32,7 @@ export default function Footer() {
         </div>
 
         <div className="md:col-span-7 lg:col-span-4">
-          <h5 className="mb-6 text-[0.7rem] font-black uppercase tracking-[0.15em] text-text-primary">Contact Us</h5>
+          <h5 className="mb-6 text-[0.7rem] font-black uppercase tracking-[0.15em] text-text-primary">Hubungi Kami</h5>
           <div className="space-y-4 text-text-secondary">
             <a
               href={MAPS_URL}

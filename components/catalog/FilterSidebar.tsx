@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import {
   BadgeCheckIcon,
   CheckIcon,
-  ChevronDownIcon,
   FlaskConicalIcon,
   PackageIcon,
   PaletteIcon,
@@ -32,13 +31,18 @@ export default function FilterSidebar({
   onToggleArray,
   onSetFilters,
 }: FilterSidebarProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [volumeMin, setVolumeMin] = useState(filters.volume_min || 0);
   const [volumeMax, setVolumeMax] = useState(filters.volume_max || 1500);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const vRange = facets?.volume_range || { min: 0, max: 1500 };
   const categoryList = facets?.categories || [];
+  const priceTypeList = facets?.price_types?.length
+    ? facets.price_types
+    : [
+        { value: "ptype_001", name: "Harga Per Pcs", count: 0 },
+        { value: "ptype_004", name: "Harga Per Bal", count: 0 },
+      ];
 
   const submitSearch = () => {
     const nextSearch = searchInputRef.current?.value.trim() || "";
@@ -83,10 +87,7 @@ export default function FilterSidebar({
           Satuan Harga
         </h3>
         <div className="space-y-1">
-          {[
-            { value: "ptype_001", name: "Ecer (pcs)" },
-            { value: "ptype_004", name: "Grosir (bal)" },
-          ].map((type) => {
+          {priceTypeList.map((type) => {
             const isActive = !!filters.price_type?.includes(type.value);
             return (
               <label
@@ -100,6 +101,9 @@ export default function FilterSidebar({
                 <span className={`text-xs font-bold flex-1 ${isActive ? "text-primary-700" : "text-text-secondary"} group-hover:text-primary-600 transition-colors`}>
                   {type.name}
                 </span>
+                {type.count > 0 && (
+                  <span className="text-[0.6rem] font-black text-text-muted">{type.count}</span>
+                )}
               </label>
             );
           })}
@@ -193,25 +197,7 @@ export default function FilterSidebar({
         </div>
       </section>
 
-      {/* Advanced Filters Toggle */}
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => setShowAdvanced(!showAdvanced)}
-        className="h-12 w-full justify-between px-4 font-bold text-text-secondary hover:bg-secondary-50 hover:text-text-primary rounded-xl transition-all"
-      >
-        <span className="flex items-center gap-3 text-sm">
-          <SlidersHorizontalIcon className="size-4" />
-          Filter Lanjutan
-        </span>
-        <ChevronDownIcon className={`size-4 text-text-muted transition-transform duration-500 ${showAdvanced ? "rotate-180" : ""}`} />
-      </Button>
-
-      {/* Advanced Filters Panel */}
-      <div
-        className={`space-y-7 overflow-hidden transition-all duration-500 ease-in-out ${showAdvanced ? "max-h-250 opacity-100 mt-5 pb-2" : "max-h-0 opacity-0"
-          }`}
-      >
+      <div className="space-y-7 pb-2">
         {/* Material Body */}
         <section>
           <h3 className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-text-muted mb-4 flex items-center gap-2">

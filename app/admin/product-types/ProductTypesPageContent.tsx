@@ -197,13 +197,13 @@ export default function ProductTypesPageContent({ initialProductTypes }: Product
                 ) : (
                   paginatedProductTypes.map((pt) => (
                     <TableRow key={pt.id} className="transition-all duration-200 group border-border">
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{pt.id}</span>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{pt.name}</p>
                       </TableCell>
-                      <TableCell className="px-8 py-5 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button 
                             onClick={() => openEditDialog(pt)}

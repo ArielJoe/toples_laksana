@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +18,10 @@ import {
 import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import ProductDialog from "@/components/admin/ProductDialog";
+import ProductPriceDropdown from "@/components/admin/ProductPriceDropdown";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useRouter } from "next/navigation";
-import { getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
+import { getCategoryLabel, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
 import type { IInteraction } from "@/models/Interaction";
 
 interface MasterDataItem {
@@ -88,14 +88,13 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
   const [productTypePage, setProductTypePage] = useState(1);
   const [unitPage, setUnitPage] = useState(1);
   const [priceTypePage, setPriceTypePage] = useState(1);
-  const [promoPage, setPromoPage] = useState(1);
   const [interactionPage, setInteractionPage] = useState(1);
   const [waLogPage, setWaLogPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [activeTab, setActiveTab] = useState<"products" | "categories" | "lidColors" | "productTypes" | "units" | "priceTypes" | "promos" | "interactions" | "waLogs">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "categories" | "lidColors" | "productTypes" | "units" | "priceTypes" | "interactions" | "waLogs">("products");
   const router = useRouter();
 
   const waLogs = initialInteractions.filter(i => i.interactionType === "whatsapp_share");
@@ -120,7 +119,10 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
       body: JSON.stringify(productData),
     });
 
-    if (!response.ok) throw new Error("Gagal menyimpan produk");
+    if (!response.ok) {
+      const error = await response.json().catch(() => null) as { error?: string } | null;
+      throw new Error(error?.error || "Gagal menyimpan produk");
+    }
 
     toast.success(isEditing ? "Produk berhasil diperbarui" : "Produk berhasil ditambahkan");
 
@@ -157,7 +159,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
 
 
 
-  type TabId = "products" | "categories" | "lidColors" | "productTypes" | "units" | "priceTypes" | "promos" | "interactions" | "waLogs";
+  type TabId = "products" | "categories" | "lidColors" | "productTypes" | "units" | "priceTypes" | "interactions" | "waLogs";
 
   const NAV_ITEMS: { label: string; icon: string; id: TabId; active: boolean; count?: number }[] = [
     { label: "Dashboard", icon: "dashboard", id: "products", active: activeTab === "products", count: products.length },
@@ -166,7 +168,6 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
     { label: "Tipe Produk", icon: "grade", id: "productTypes", active: activeTab === "productTypes" },
     { label: "Satuan", icon: "straighten", id: "units", active: activeTab === "units" },
     { label: "Tipe Harga", icon: "sell", id: "priceTypes", active: activeTab === "priceTypes" },
-    { label: "Promosi", icon: "campaign", id: "promos", active: activeTab === "promos" },
     { label: "Interaksi", icon: "touch_app", id: "interactions", active: activeTab === "interactions", count: allInteractions.length },
     { label: "WhatsApp Log", icon: "chat", id: "waLogs", active: activeTab === "waLogs", count: waLogs.length },
   ];
@@ -184,18 +185,11 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
   const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
   const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
 
-  const MOCK_PROMOS = [
-    { id: "promo_001", code: "DISKON10", name: "Diskon 10%", type: "percentage" as const, value: 10, isActive: true },
-    { id: "promo_002", code: "HEMAT5K", name: "Potongan Rp5.000", type: "nominal" as const, value: 5000, isActive: true },
-    { id: "promo_003", code: "NEWYEAR", name: "Promo Tahun Baru", type: "percentage" as const, value: 15, isActive: false },
-  ];
-
   const categoryPagination = getTablePagination(CATEGORIES, categoryPage);
   const colorPagination = getTablePagination(COLORS, colorPage);
   const productTypePagination = getTablePagination(masterData.productTypes, productTypePage);
   const unitPagination = getTablePagination(masterData.units, unitPage);
   const priceTypePagination = getTablePagination(masterData.priceTypes, priceTypePage);
-  const promoPagination = getTablePagination(MOCK_PROMOS, promoPage);
   const interactionPagination = getTablePagination(allInteractions, interactionPage);
   const waLogPagination = getTablePagination(waLogs, waLogPage);
 
@@ -401,7 +395,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">SKU & Material</TableHead>
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Kategori</TableHead>
-                        <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga Dasar</TableHead>
+                        <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga</TableHead>
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Status</TableHead>
                         <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
                       </TableRow>
@@ -412,7 +406,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
 
                         return (
                           <TableRow key={p.id} className="transition-all duration-200 group border-border">
-                            <TableCell className="px-8 py-8">
+                            <TableCell className="px-8 py-3">
                               <div className="flex items-center gap-5">
                                 <div className="w-14 h-14 rounded-lg bg-[#F9FAFB] flex items-center justify-center p-1.5 border border-border shrink-0 overflow-hidden group-hover:scale-105 group-hover:border-primary-200 transition-all">
                                   {image ? (
@@ -437,21 +431,23 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="px-8 py-8">
+                            <TableCell className="px-8 py-3">
                               <p className="text-xs font-black text-text-primary font-mono tracking-tighter">{p.sku}</p>
                               <p className="text-[10px] font-bold text-text-muted mt-0.5 uppercase tracking-widest">{materialMap[p.lidMaterial] || p.lidMaterial}</p>
                             </TableCell>
-                            <TableCell className="px-8 py-8">
+                            <TableCell className="px-8 py-3">
                               <Badge variant="outline" className="bg-white border-border text-text-secondary text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5">
                                 {categoryMap[p.categoryId] || getCategoryLabel(p.categoryId)}
                               </Badge>
                             </TableCell>
-                            <TableCell className="px-8 py-8">
-                              <p className="text-sm font-black text-text-primary tracking-tight">
-                                {formatPrice(getLowestRetailPrice(p))}
-                              </p>
+                            <TableCell className="px-8 py-3">
+                              <ProductPriceDropdown
+                                product={p}
+                                priceTypes={masterData.priceTypes}
+                                lidColors={masterData.lidColors}
+                              />
                             </TableCell>
-                            <TableCell className="px-8 py-8">
+                            <TableCell className="px-8 py-3">
                               {!p.deletedAt ? (
                                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
                                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
@@ -464,7 +460,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                                 </div>
                               )}
                             </TableCell>
-                            <TableCell className="px-8 py-8 text-right">
+                            <TableCell className="px-8 py-3 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => handleEdit(p)}
@@ -534,12 +530,12 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                 <TableBody>
                   {categoryPagination.items.map(cat => (
                     <TableRow key={cat.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{cat.id}</TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{cat.name}</TableCell>
-                      <TableCell className="px-8 py-8">
+                      <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{cat.id}</TableCell>
+                      <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{cat.name}</TableCell>
+                      <TableCell className="px-8 py-3">
                         <Badge variant="secondary" className="bg-secondary-50 text-secondary-600 border-none font-bold">{cat.count}</Badge>
                       </TableCell>
-                      <TableCell className="px-8 py-8 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
                           <AppIcon name="edit" className="text-lg" />
                         </button>
@@ -575,14 +571,14 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                 <TableBody>
                   {colorPagination.items.map(color => (
                     <TableRow key={color.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{color.id}</TableCell>
-                      <TableCell className="px-8 py-8">
+                      <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{color.id}</TableCell>
+                      <TableCell className="px-8 py-3">
                         <div className="w-8 h-8 rounded-full border border-border shadow-sm flex items-center justify-center bg-gray-50 overflow-hidden" style={{ backgroundColor: color.hex }}>
                           {color.hex === "#ffffff" && <AppIcon name="texture" className="text-[10px] text-gray-300" />}
                         </div>
                       </TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{color.name}</TableCell>
-                      <TableCell className="px-8 py-8 text-right">
+                      <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{color.name}</TableCell>
+                      <TableCell className="px-8 py-3 text-right">
                         <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
                           <AppIcon name="edit" className="text-lg" />
                         </button>
@@ -617,9 +613,9 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                 <TableBody>
                   {productTypePagination.items.map(type => (
                     <TableRow key={type.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{type.id}</TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{type.name}</TableCell>
-                      <TableCell className="px-8 py-8 text-right">
+                      <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{type.id}</TableCell>
+                      <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{type.name}</TableCell>
+                      <TableCell className="px-8 py-3 text-right">
                         <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
                           <AppIcon name="edit" className="text-lg" />
                         </button>
@@ -655,12 +651,12 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                 <TableBody>
                   {unitPagination.items.map(unit => (
                     <TableRow key={unit.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{unit.id}</TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{unit.name}</TableCell>
-                      <TableCell className="px-8 py-8">
+                      <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{unit.id}</TableCell>
+                      <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{unit.name}</TableCell>
+                      <TableCell className="px-8 py-3">
                         <Badge variant="outline" className="font-mono font-bold text-xs">{unit.symbol}</Badge>
                       </TableCell>
-                      <TableCell className="px-8 py-8 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
                           <AppIcon name="edit" className="text-lg" />
                         </button>
@@ -696,10 +692,10 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                 <TableBody>
                   {priceTypePagination.items.map(pt => (
                     <TableRow key={pt.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{pt.id}</TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{pt.name}</TableCell>
-                      <TableCell className="px-8 py-8 text-sm text-text-secondary">{pt.description}</TableCell>
-                      <TableCell className="px-8 py-8 text-right">
+                      <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{pt.id}</TableCell>
+                      <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{pt.name}</TableCell>
+                      <TableCell className="px-8 py-3 text-sm text-text-secondary">{pt.description}</TableCell>
+                      <TableCell className="px-8 py-3 text-right">
                         <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
                           <AppIcon name="edit" className="text-lg" />
                         </button>
@@ -712,66 +708,7 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
             </Card>
           )}
 
-          {/* Promo Table */}
-          {activeTab === "promos" && (
-            <Card className="border-none ring-0 shadow-sm overflow-hidden bg-white">
-              <div className="px-6 lg:px-8 py-3 flex items-center justify-between bg-white">
-                <div>
-                  <h3 className="font-black text-text-primary text-lg">Promosi</h3>
-                </div>
-                <button className="bg-primary-50 text-primary-600 px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-primary-100 transition-colors uppercase tracking-widest cursor-pointer">
-                  <AppIcon name="add" className="text-sm" /> Tambah Promo
-                </button>
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Kode</TableHead>
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nama Promo</TableHead>
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Tipe</TableHead>
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Nilai</TableHead>
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Status</TableHead>
-                    <TableHead className="px-8 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em] text-right">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {promoPagination.items.map(promo => (
-                    <TableRow key={promo.id} className="transition-all border-border">
-                      <TableCell className="px-8 py-8 font-mono text-xs font-black text-primary-600">{promo.code}</TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{promo.name}</TableCell>
-                      <TableCell className="px-8 py-8">
-                        <Badge variant="outline" className="font-bold text-[0.6rem] uppercase tracking-widest">
-                          {promo.type === "percentage" ? "Persentase" : "Nominal"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-8 py-8 font-black text-sm text-text-primary">
-                        {promo.type === "percentage" ? `${promo.value}%` : `Rp ${promo.value.toLocaleString("id-ID")}`}
-                      </TableCell>
-                      <TableCell className="px-8 py-8">
-                        {promo.isActive ? (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                            <span className="text-[0.6rem] font-black uppercase tracking-widest">Aktif</span>
-                          </div>
-                        ) : (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                            <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
-                            <span className="text-[0.6rem] font-black uppercase tracking-widest">Nonaktif</span>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="px-8 py-8 text-right">
-                        <button className="w-9 h-9 rounded-xl hover:bg-primary-50 text-primary-500 inline-flex items-center justify-center transition-colors cursor-pointer">
-                          <AppIcon name="edit" className="text-lg" />
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {renderTablePagination(promoPagination, setPromoPage)}
-            </Card>
-          )}
+
 
           {/* Interactions Table */}
           {activeTab === "interactions" && (
@@ -807,21 +744,20 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                   ) : interactionPagination.items.map(interaction => {
                     const product = products.find(p => p.id === interaction.productId);
                     return (
-                      <TableRow key={interaction.id} className="transition-all border-border">
-                        <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{interaction.id}</TableCell>
-                        <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{product?.name || interaction.productId}</TableCell>
-                        <TableCell className="px-8 py-8">
+                       <TableRow key={interaction.id} className="transition-all border-border">
+                        <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{interaction.id}</TableCell>
+                        <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{product?.name || interaction.productId}</TableCell>
+                        <TableCell className="px-8 py-3">
                           <Badge variant="outline" className="font-bold text-[0.6rem] uppercase tracking-widest">
                             {interaction.interactionType === "detail_click" && "Klik Detail"}
                             {interaction.interactionType === "view" && "Dilihat"}
                             {interaction.interactionType === "whatsapp_share" && "WhatsApp"}
-                            {interaction.interactionType === "promo_click" && "Klik Promo"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="px-8 py-8 text-sm text-text-secondary">
+                        <TableCell className="px-8 py-3 text-sm text-text-secondary">
                           {interaction.userId.startsWith("user_admin") ? "Admin" : "Pengunjung"}
                         </TableCell>
-                        <TableCell className="px-8 py-8 text-sm text-text-muted">
+                        <TableCell className="px-8 py-3 text-sm text-text-muted">
                           {interaction.createdAt ? new Date(interaction.createdAt).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}
                         </TableCell>
                       </TableRow>
@@ -867,12 +803,12 @@ export default function AdminPageContent({ initialProducts, initialInteractions,
                     const product = products.find(p => p.id === log.productId);
                     return (
                       <TableRow key={log.id} className="transition-all border-border">
-                        <TableCell className="px-8 py-8 font-mono text-xs font-black text-text-muted">{log.id}</TableCell>
-                        <TableCell className="px-8 py-8 font-black text-sm text-text-primary">{product?.name || log.productId}</TableCell>
-                        <TableCell className="px-8 py-8 text-sm text-text-secondary">
+                        <TableCell className="px-8 py-3 font-mono text-xs font-black text-text-muted">{log.id}</TableCell>
+                        <TableCell className="px-8 py-3 font-black text-sm text-text-primary">{product?.name || log.productId}</TableCell>
+                        <TableCell className="px-8 py-3 text-sm text-text-secondary">
                           {log.userId.startsWith("user_admin") ? "Admin" : "Pengunjung"}
                         </TableCell>
-                        <TableCell className="px-8 py-8 text-sm text-text-muted">
+                        <TableCell className="px-8 py-3 text-sm text-text-muted">
                           {log.createdAt ? new Date(log.createdAt).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}
                         </TableCell>
                       </TableRow>

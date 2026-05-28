@@ -6,7 +6,7 @@ import WhatsAppLogModel from "@/models/WhatsAppLog";
 interface WhatsAppLogDetailPayload {
   productId?: string;
   lidColorId?: string;
-  unit?: "pcs" | "bal";
+  unit?: string;
   quantity?: number;
   priceAtThatTime?: number;
   subtotal?: number;
@@ -15,7 +15,7 @@ interface WhatsAppLogDetailPayload {
 interface NormalizedWhatsAppLogDetail {
   productId: string;
   lidColorId: string | null;
-  unit: "pcs" | "bal";
+  unit: string;
   quantity: number;
   priceAtThatTime: number;
   subtotal: number;
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
           .map((detail: WhatsAppLogDetailPayload) => ({
             productId: detail.productId || "",
             lidColorId: detail.lidColorId || null,
-            unit: detail.unit === "bal" ? ("bal" as const) : ("pcs" as const),
+            unit: detail.unit || "pcs",
             quantity: Math.max(1, toNumber(detail.quantity)),
             priceAtThatTime: toNumber(detail.priceAtThatTime),
             subtotal: toNumber(detail.subtotal),
@@ -61,8 +61,6 @@ export async function POST(req: Request) {
         typeof body.destinationNumber === "string"
           ? body.destinationNumber
           : process.env.NEXT_PUBLIC_WA_NUMBER || "",
-      promoAppliedId: body.promoAppliedId || null,
-      totalDiscount: toNumber(body.totalDiscount),
       grandTotal: toNumber(body.grandTotal),
       details,
     });

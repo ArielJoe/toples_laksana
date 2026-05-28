@@ -22,7 +22,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 interface WhatsAppLogDetail {
   productId: string;
   lidColorId?: string | null;
-  unit?: "pcs" | "bal";
+  unit?: string;
   quantity: number;
   priceAtThatTime: number;
   subtotal: number;
@@ -152,7 +152,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
     <>
       <header className="hidden lg:flex h-24 bg-white border-b border-border items-center justify-between px-10 sticky top-0 z-40">
         <div>
-          <h2 className="text-[1.6rem] font-black text-text-primary tracking-tight">Log WhatsApp</h2>
+          <h2 className="text-[1.6rem] font-black text-text-primary tracking-tight">WhatsApp Log</h2>
         </div>
       </header>
 
@@ -244,7 +244,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
 
                     return (
                       <TableRow key={log.id} className="transition-all duration-200 group border-border align-top">
-                        <TableCell className="px-8 py-5">
+                        <TableCell className="px-8 py-3">
                           <p className="text-sm font-black text-text-primary tracking-tight">
                             {new Date(log.createdAt || "").toLocaleString("id-ID", {
                               day: "2-digit",
@@ -258,12 +258,12 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                             {details.length} produk / {itemCount} item
                           </p>
                         </TableCell>
-                        <TableCell className="px-8 py-5">
+                        <TableCell className="px-8 py-3">
                           <p className="font-mono text-xs font-bold text-text-secondary">
                             {getDisplayUser(log.userId)}
                           </p>
                         </TableCell>
-                        <TableCell className="px-8 py-5">
+                        <TableCell className="px-8 py-3">
                           <div className="space-y-3">
                             {details.length === 0 ? (
                               <p className="text-sm font-bold text-text-primary">Tidak ada detail barang</p>
@@ -282,7 +282,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                                           {product?.sku || detail.productId}
                                         </p>
                                       </div>
-                                      <div className="grid grid-cols-3 gap-2 text-right text-xs">
+                                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-right text-xs">
                                         <div>
                                           <p className="font-black text-text-primary">
                                             {detail.quantity} {detail.unit || "pcs"}
@@ -305,7 +305,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="px-8 py-5 text-right">
+                        <TableCell className="px-8 py-3 text-right">
                           <p className="text-sm font-black text-text-primary">{formatMoney(getLogTotal(log))}</p>
                           {Boolean(log.totalDiscount) && (
                             <p className="mt-1 text-[0.62rem] font-black uppercase tracking-[0.14em] text-green-700">

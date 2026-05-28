@@ -199,20 +199,20 @@ export default function LidColorsPageContent({ initialColors }: LidColorsPageCon
                 ) : (
                   paginatedColors.map((color) => (
                     <TableRow key={color.id} className="transition-all duration-200 group border-border">
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{color.id}</span>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <div 
                           className="w-10 h-10 rounded-full border border-border flex items-center justify-center bg-gray-50 overflow-hidden" 
                           style={{ backgroundColor: color.colorCode || "#FFFFFF" }}
                         >
                         </div>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{color.color}</p>
                       </TableCell>
-                      <TableCell className="px-8 py-5 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button 
                             onClick={() => openEditDialog(color)}

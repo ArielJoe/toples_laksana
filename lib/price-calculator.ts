@@ -29,13 +29,15 @@ export interface WholesaleNudge {
 }
 
 export function calculatePrice(state: CalculatorState): CalculatorResult {
-  const quantityPerPack = state.quantityPerPack || 1;
-  const isWholesale = state.mode === "wholesale" || state.selectedPrice.priceTypeId === PRICE_TYPE_IDS.perBal;
-  const totalPcs = isWholesale ? state.quantity * quantityPerPack : state.quantity;
-  const pricePerPcs = isWholesale && quantityPerPack > 1
+  const isPackagePrice = state.selectedPrice.priceTypeId === PRICE_TYPE_IDS.perBal;
+  const quantityPerPack = state.selectedPrice.quantity || (isPackagePrice ? state.quantityPerPack : 1) || 1;
+  const totalPcs = state.quantity * quantityPerPack;
+  const pricePerPcs = isPackagePrice && quantityPerPack > 1
     ? Math.round(state.selectedPrice.price / quantityPerPack)
     : state.selectedPrice.price;
-  const subtotal = isWholesale ? state.selectedPrice.price * state.quantity : pricePerPcs * state.quantity;
+  const subtotal = isPackagePrice
+    ? state.selectedPrice.price * state.quantity
+    : pricePerPcs * totalPcs;
   const retailEquivalent = state.retailPrice ? state.retailPrice.price * totalPcs : subtotal;
   const savingsVsRetail = Math.max(0, retailEquivalent - subtotal);
 
@@ -48,8 +50,8 @@ export function calculatePrice(state: CalculatorState): CalculatorResult {
     savingsPercentage: retailEquivalent > 0
       ? Math.round((savingsVsRetail / retailEquivalent) * 100)
       : 0,
-    unitLabel: isWholesale ? "bal" : "pcs",
-    totalPerUnit: isWholesale ? state.selectedPrice.price : pricePerPcs,
+    unitLabel: isPackagePrice ? "bal" : "pcs",
+    totalPerUnit: isPackagePrice ? state.selectedPrice.price : pricePerPcs,
   };
 }
 

@@ -205,23 +205,23 @@ export default function SimpleMasterDataPage({
                 ) : (
                   paginatedItems.map((item) => (
                     <TableRow key={item.id} className="transition-all duration-200 group border-border">
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{item.id}</span>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{item.name}</p>
                       </TableCell>
                       {showUsageColumn && (
-                        <TableCell className="px-8 py-5">
+                        <TableCell className="px-8 py-3">
                           <span className="inline-flex rounded-lg bg-secondary-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-widest text-text-secondary">
                             {item.usage ? USAGE_LABELS[item.usage] : "-"}
                           </span>
                         </TableCell>
                       )}
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="max-w-md text-sm font-medium text-text-secondary truncate">{item.description || "-"}</p>
                       </TableCell>
-                      <TableCell className="px-8 py-5 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => {

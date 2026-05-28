@@ -30,6 +30,10 @@ function getFilterLabel(key: string, value: string, facets: FacetCounts | null):
       const facetStatus = facets?.availability_statuses?.find((s) => s.value === value);
       return facetStatus?.name || formatAttributeLabel(value);
     }
+    case "price_type": {
+      const facetPriceType = facets?.price_types?.find((p) => p.value === value);
+      return facetPriceType?.name || formatAttributeLabel(value);
+    }
     case "colors": {
       const facetColor = facets?.colors?.find((c) => c.value === value);
       const hex = facetColor?.hex || COLOR_SWATCHES[value] || "#ccc";
@@ -79,6 +83,9 @@ export default function ActiveFilterBar({
   );
   filters.availability?.forEach((v) =>
     pills.push({ key: "availability", value: v, label: getFilterLabel("availability", v, facets) })
+  );
+  filters.price_type?.forEach((v) =>
+    pills.push({ key: "price_type", value: v, label: getFilterLabel("price_type", v, facets) })
   );
 
   if (pills.length === 0) return null;

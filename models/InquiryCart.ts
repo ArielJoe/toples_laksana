@@ -6,7 +6,6 @@ export interface IInquiryCartItem {
   priceTypeId?: string;
   quantity: number;
   note?: string;
-  promoAppliedId?: string;
 }
 
 export interface IInquiryCart {
@@ -25,7 +24,6 @@ const InquiryCartItemSchema = new Schema<IInquiryCartItem>(
     priceTypeId: { type: String, default: null },
     quantity: { type: Number, required: true, default: 1, min: 1 },
     note: { type: String, default: "" },
-    promoAppliedId: { type: String, default: null },
   },
   { _id: false }
 );

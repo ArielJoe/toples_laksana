@@ -26,6 +26,7 @@ export interface IProductPrice {
   lidColorId: string;
   priceTypeId: string;
   price: number;
+  quantity?: number;
   validFrom: Date;
   validUntil?: Date;
 }
@@ -40,7 +41,6 @@ export interface IProduct {
   lidMaterial: string;
   lidVariant: string;
   bodyMaterial: string;
-  lidType: string;
   isAvailable: boolean;
   availabilityNote?: string;
   description?: string;
@@ -89,6 +89,7 @@ const ProductPriceSchema = new Schema<IProductPrice>(
     lidColorId: { type: String, required: true },
     priceTypeId: { type: String, required: true },
     price: { type: Number, required: true },
+    quantity: { type: Number, default: 1 },
     validFrom: { type: Date, required: true, default: Date.now },
     validUntil: { type: Date, default: null },
   },
@@ -106,7 +107,6 @@ const ProductSchema = new Schema<IProduct>(
     lidMaterial: { type: String, required: true, default: "" },
     lidVariant: { type: String, required: true, default: "" },
     bodyMaterial: { type: String, required: true, default: "" },
-    lidType: { type: String, required: true, default: "" },
     isAvailable: {
       type: Boolean,
       required: true,
@@ -129,7 +129,6 @@ ProductSchema.index({ isAvailable: 1 });
 ProductSchema.index({ bodyMaterial: 1 });
 ProductSchema.index({ lidMaterial: 1 });
 ProductSchema.index({ lidVariant: 1 });
-ProductSchema.index({ lidType: 1 });
 
 export const Product = models.Product || model<IProduct>("Product", ProductSchema);
 

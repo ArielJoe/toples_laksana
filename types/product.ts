@@ -10,10 +10,12 @@ export interface ProductPrice {
   lidColorId: string;
   priceTypeId: string;
   price: number;
+  quantity?: number;
   validFrom?: string;
   validUntil?: string;
   lidColorName?: string;
   lidColorHex?: string;
+  priceTypeName?: string;
 }
 
 export interface ProductImage {
@@ -50,7 +52,7 @@ export interface Product {
   lidMaterial: string;
   lidVariant: string;
   bodyMaterial: string;
-  lidType: string;
+  lidType?: string;
   lidMaterialName?: string;
   lidVariantName?: string;
   bodyMaterialName?: string;
@@ -196,6 +198,7 @@ export interface FacetCounts {
   materials: { value: string; count: number; name?: string }[];
   lid_materials: { value: string; count: number; name?: string }[];
   colors: { value: string; count: number; name?: string; hex?: string }[];
+  price_types?: { value: string; count: number; name?: string }[];
   volume_range: { min: number; max: number };
   price_range: { min: number; max: number };
   availability_statuses?: { value: string; count: number; name?: string }[];

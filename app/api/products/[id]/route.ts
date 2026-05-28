@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
 
+type ProductUpdateInput = Record<string, unknown>;
+
+const PRODUCT_UPDATE_FIELDS = [
+  "id",
+  "sku",
+  "name",
+  "categoryId",
+  "productTypeId",
+  "unitId",
+  "lidMaterial",
+  "lidVariant",
+  "bodyMaterial",
+  "isAvailable",
+  "availabilityNote",
+  "description",
+  "dimension",
+  "packaging",
+  "images",
+  "prices",
+] as const;
+
 function productLookup(id: string) {
   const or: Record<string, string>[] = [{ id }, { sku: id }];
 
@@ -13,6 +34,18 @@ function productLookup(id: string) {
     deletedAt: null,
     $or: or,
   };
+}
+
+function sanitizeProductUpdate(input: ProductUpdateInput) {
+  const update: ProductUpdateInput = {};
+
+  for (const field of PRODUCT_UPDATE_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(input, field)) {
+      update[field] = input[field];
+    }
+  }
+
+  return update;
 }
 
 export async function GET(
@@ -42,9 +75,14 @@ export async function PATCH(
   try {
     await connectDB();
     const { id } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as ProductUpdateInput;
+    const update = sanitizeProductUpdate(body);
 
-    const product = await Product.findOneAndUpdate(productLookup(id), body, {
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: "No valid product fields to update" }, { status: 400 });
+    }
+
+    const product = await Product.findOneAndUpdate(productLookup(id), { $set: update }, {
       new: true,
       runValidators: true,
     });

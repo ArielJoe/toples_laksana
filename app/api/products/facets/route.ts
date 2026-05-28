@@ -4,6 +4,7 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 import LidColor from "@/models/LidColor";
 import Material from "@/models/Material";
+import PriceType from "@/models/PriceType";
 import { getAvailabilityLabel, getCategoryLabel } from "@/types/product";
 
 export async function GET() {
@@ -21,8 +22,10 @@ export async function GET() {
       availabilityStatuses,
       volumeRange,
       priceRange,
+      priceTypes,
       lidColorDocs,
       materialDocs,
+      priceTypeDocs,
     ] = await Promise.all([
       Product.aggregate([
         { $match: activeFilter },
@@ -77,13 +80,22 @@ export async function GET() {
         },
         { $project: { _id: 0 } },
       ]),
+      Product.aggregate([
+        { $match: activeFilter },
+        { $unwind: "$prices" },
+        { $match: { "prices.priceTypeId": { $ne: "" }, "prices.price": { $gt: 0 } } },
+        { $group: { _id: "$prices.priceTypeId", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
       LidColor.find().select("id color colorCode").lean(),
       Material.find().select("id name").lean(),
+      PriceType.find().select("id name").lean(),
     ]);
 
     const categoryNames = new Map(categoryDocs.map((category) => [category.id, category.name]));
     const lidColorMap = new Map(lidColorDocs.map((lc) => [lc.id, lc]));
     const materialMap = new Map(materialDocs.map((material) => [material.id, material.name]));
+    const priceTypeMap = new Map(priceTypeDocs.map((priceType) => [priceType.id, priceType.name]));
 
     return NextResponse.json({
       categories: categories.map((category) => ({
@@ -106,6 +118,13 @@ export async function GET() {
           hex: doc?.colorCode,
         };
       }),
+      price_types: priceTypes
+        .filter((item) => item._id)
+        .map((item) => ({
+          value: item._id,
+          count: item.count,
+          name: priceTypeMap.get(item._id) || item._id,
+        })),
       availability_statuses: availabilityStatuses
         .filter((item) => item.value !== undefined && item.value !== null)
         .map((item) => ({

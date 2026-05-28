@@ -47,30 +47,35 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
 
     const rawProducts = JSON.parse(JSON.stringify(fetched)) as Product[];
 
-    // Fetch and map metadata from DB for Bahan Badan, Bahan Tutup, Variasi Tutup, etc.
     const materialIds = [
       ...new Set(rawProducts.flatMap((product) => [product.bodyMaterial, product.lidMaterial]).filter(Boolean)),
     ];
-    const lidTypeIds = [...new Set(rawProducts.map((product) => product.lidType).filter(Boolean))];
     const lidVariantIds = [...new Set(rawProducts.map((product) => product.lidVariant).filter(Boolean))];
 
-    const [materials, lidTypes, lidVariants] = (await Promise.all([
+    const [materials, lidVariants] = (await Promise.all([
       Material.find({ id: { $in: materialIds } }).select("id name").lean(),
-      LidType.find({ id: { $in: lidTypeIds } }).select("id name").lean(),
-      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name").lean(),
-    ])) as [LookupDoc[], LookupDoc[], LookupDoc[]];
+      LidVariant.find({ id: { $in: lidVariantIds } }).select("id name lidTypeId").lean(),
+    ])) as [LookupDoc[], (LookupDoc & { lidTypeId: string })[]];
+
+    const lidVariantMap = new Map(lidVariants.map((v) => [v.id, v]));
+    const lidTypeIds = [...new Set(lidVariants.map((v) => v.lidTypeId).filter(Boolean))];
+
+    const lidTypes = (await LidType.find({ id: { $in: lidTypeIds } }).select("id name").lean()) as LookupDoc[];
+    const lidTypeMap = new Map(lidTypes.map((t) => [t.id, t.name]));
 
     const materialMap = new Map(materials.map((m) => [m.id, m.name]));
-    const lidTypeMap = new Map(lidTypes.map((t) => [t.id, t.name]));
-    const lidVariantMap = new Map(lidVariants.map((v) => [v.id, v.name]));
 
-    products = rawProducts.map((product) => ({
-      ...product,
-      bodyMaterialName: materialMap.get(product.bodyMaterial) || "",
-      lidMaterialName: materialMap.get(product.lidMaterial) || "",
-      lidTypeName: lidTypeMap.get(product.lidType) || "",
-      lidVariantName: lidVariantMap.get(product.lidVariant) || "",
-    }));
+    products = rawProducts.map((product) => {
+      const variantDoc = lidVariantMap.get(product.lidVariant);
+      const lidTypeName = variantDoc ? (lidTypeMap.get(variantDoc.lidTypeId) || "") : "";
+      return {
+        ...product,
+        bodyMaterialName: materialMap.get(product.bodyMaterial) || "",
+        lidMaterialName: materialMap.get(product.lidMaterial) || "",
+        lidTypeName,
+        lidVariantName: variantDoc?.name || "",
+      };
+    });
 
     products.sort((a, b) => idArray.indexOf(a.id) - idArray.indexOf(b.id));
   }

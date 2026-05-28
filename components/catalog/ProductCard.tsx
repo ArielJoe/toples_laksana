@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import type { Product } from "@/types/product";
+import type { Product, ProductPrice } from "@/types/product";
 import {
   getAvailabilityLabel,
   getLowestRetailPrice,
@@ -15,6 +15,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Heart, PackageIcon } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
+
+function formatPriceTypeLabel(priceTypeId: string) {
+  return priceTypeId.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getLowestPriceForType(product: Product, priceTypeId: string): ProductPrice | null {
+  return (product.prices || [])
+    .filter((price) => price.priceTypeId === priceTypeId && price.price > 0)
+    .sort((a, b) => a.price - b.price)[0] || null;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -47,9 +57,34 @@ export default function ProductCard({
 
   const priceContent = (() => {
     const priceTypes = priceType || [];
+    const selectedPriceTypes = priceTypes
+      .map((type) => getLowestPriceForType(product, type))
+      .filter(Boolean) as ProductPrice[];
     const onlyWholesale = priceTypes.length === 1 && priceTypes.includes("ptype_004");
     const onlyRetail = priceTypes.length === 1 && priceTypes.includes("ptype_001");
-    const showBoth = priceTypes.length === 2 || priceTypes.length === 0;
+    const showBoth = priceTypes.length === 0 || (
+      priceTypes.length === 2 &&
+      priceTypes.includes("ptype_001") &&
+      priceTypes.includes("ptype_004")
+    );
+
+    if (priceTypes.length > 0 && selectedPriceTypes.length > 0 && !onlyWholesale && !onlyRetail && !showBoth) {
+      return (
+        <div className="space-y-0.5">
+          {selectedPriceTypes.map((price) => (
+            <div key={price.priceTypeId} className="flex flex-wrap items-baseline gap-x-1">
+              <span className="text-base font-bold text-text-primary">{formatPrice(price.price)}</span>
+              <span className="text-[10px] font-medium text-text-muted">
+                / {price.quantity && price.quantity > 1 ? `${price.quantity} pcs` : "pcs"}
+              </span>
+              <span className="basis-full text-[9px] font-black uppercase tracking-wide text-primary-600">
+                {price.priceTypeName || formatPriceTypeLabel(price.priceTypeId)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
 
     const retailPrice = getLowestRetailPrice(product);
     const wholesalePrice = getLowestWholesalePrice(product);
@@ -123,7 +158,7 @@ export default function ProductCard({
       {/* WhatsApp Selection Checkbox */}
       {onInquiryToggle && (
         <div
-          className="absolute top-3 left-3 z-10 flex items-center justify-center p-1"
+          className="absolute top-3 left-3 z-20 flex items-center justify-center p-1"
           onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
@@ -141,7 +176,7 @@ export default function ProductCard({
           toggleWishlist(product.id);
         }}
         className={cn(
-          "absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
+          "absolute top-3 right-3 z-20 flex size-8 items-center justify-center rounded-full border border-border bg-white text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer",
           wishlisted && "text-red-500 border-red-100 bg-red-50"
         )}
         title={wishlisted ? "Hapus dari Wishlist" : "Tambah ke Wishlist"}

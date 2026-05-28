@@ -138,14 +138,14 @@ export default function Navbar() {
                 {/* Dropdown Menu */}
                 {profileDropdownOpen && (
                   <div className="absolute right-0 top-full pt-2 z-130">
-                    <div className="w-56 bg-white border border-border rounded-xl py-2 shadow-none flex flex-col">
-                      <div className="px-4 py-2.5 border-b border-border mb-1.5 min-w-0">
-                        <p className="text-xs font-black text-text-primary truncate">{user.displayName || "User"}</p>
-                        <p className="text-[10px] font-bold text-text-muted truncate mt-0.5">{user.email || ""}</p>
+                    <div className="w-52 bg-white border border-border rounded-xl p-1 shadow-md shadow-black/5 flex flex-col">
+                      <div className="px-3 py-2 border-b border-border mb-1 min-w-0">
+                        <p className="text-sm font-black text-text-primary truncate">{user.displayName || "User"}</p>
+                        <p className="text-[11px] font-semibold text-text-muted truncate mt-0.5">{user.email || ""}</p>
                       </div>
                       <button
                         onClick={logout}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer border-none bg-transparent"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[13px] font-bold text-red-600 hover:bg-red-50/80 active:bg-red-50 rounded-lg transition-colors text-left cursor-pointer border-none bg-transparent"
                       >
                         <AppIcon name="logout" className="text-sm text-red-500" />
                         <span>Keluar</span>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useApp } from "@/context/AppContext";
 import ProductCard from "@/components/catalog/ProductCard";
-import { Product, getLowestRetailPrice, getLowestWholesalePrice } from "@/types/product";
+import { Product, ProductPrice, getLowestRetailPrice, getLowestWholesalePrice, PRICE_TYPE_IDS } from "@/types/product";
 import { Heart } from "lucide-react";
 import { AppIcon } from "@/components/ui/app-icon";
 import {
@@ -18,6 +18,7 @@ interface ModalItem {
   product: Product;
   quantity: number;
   unit: "pcs" | "bal";
+  priceTypeId?: string;
 }
 
 export default function WishlistPage() {
@@ -30,9 +31,26 @@ export default function WishlistPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<ModalItem[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [priceTypeNames, setPriceTypeNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
+    const fetchPriceTypes = async () => {
+      try {
+        const res = await fetch("/api/price-types");
+        const data = await res.json();
+        if (data.data) {
+          const map: Record<string, string> = {};
+          data.data.forEach((pt: { id: string; name: string }) => {
+            map[pt.id] = pt.name;
+          });
+          setPriceTypeNames(map);
+        }
+      } catch (err) {
+        console.error("Failed to fetch price types", err);
+      }
+    };
+    fetchPriceTypes();
   }, []);
 
   useEffect(() => {
@@ -94,10 +112,22 @@ export default function WishlistPage() {
       .map((sel) => {
         const product = products.find((p) => p.id === sel.id);
         if (!product) return null;
+
+        const productPrices = product.prices || [];
+        let defaultPriceType = "";
+        if (sel.unit === "bal") {
+          const wholesalePrice = productPrices.find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal && p.price > 0);
+          defaultPriceType = wholesalePrice ? wholesalePrice.priceTypeId : PRICE_TYPE_IDS.perBal;
+        } else {
+          const retailPrice = productPrices.find(p => p.priceTypeId !== PRICE_TYPE_IDS.perBal && p.price > 0);
+          defaultPriceType = retailPrice ? retailPrice.priceTypeId : PRICE_TYPE_IDS.withLid;
+        }
+
         return {
           product,
           quantity: 1,
           unit: sel.unit,
+          priceTypeId: defaultPriceType,
         };
       })
       .filter(Boolean) as ModalItem[];
@@ -116,40 +146,92 @@ export default function WishlistPage() {
     );
   };
 
-  // Update unit inside the modal
-  const handleUpdateUnit = (productId: string, newUnit: "pcs" | "bal") => {
+  const getPriceTypeLabel = (priceTypeId?: string, price?: ProductPrice | null) => {
+    if (price?.priceTypeName) return price.priceTypeName;
+    if (priceTypeId && priceTypeNames[priceTypeId]) return priceTypeNames[priceTypeId];
+    if (priceTypeId === PRICE_TYPE_IDS.withLid) return "Harga Per Pcs";
+    if (priceTypeId === PRICE_TYPE_IDS.perBal) return "Harga Per Bal";
+    return priceTypeId ? priceTypeId.replace(/[_-]+/g, " ") : "Harga";
+  };
+
+  const getSelectedPriceVariant = (item: ModalItem) => {
+    if (!item.priceTypeId) return null;
+
+    const matches = (item.product.prices || [])
+      .filter((price) => price.priceTypeId === item.priceTypeId && price.price > 0)
+      .sort((a, b) => a.price - b.price);
+
+    return matches[0] || null;
+  };
+
+  const getPriceVariantOptions = (product: Product) => {
+    const options = new Map<string, { id: string; name: string; quantity: number; price: number }>();
+
+    (product.prices || []).forEach((price) => {
+      if (!price.priceTypeId || price.price <= 0) return;
+
+      const existing = options.get(price.priceTypeId);
+      if (existing && existing.price <= price.price) return;
+
+      options.set(price.priceTypeId, {
+        id: price.priceTypeId,
+        name: getPriceTypeLabel(price.priceTypeId, price),
+        quantity: price.quantity || 1,
+        price: price.price,
+      });
+    });
+
+    return Array.from(options.values());
+  };
+
+  // Update price type inside the modal
+  const handleUpdatePriceType = (productId: string, priceTypeId: string) => {
+    const isBal = priceTypeId === PRICE_TYPE_IDS.perBal;
     setModalItems((prev) =>
       prev.map((item) =>
         item.product.id === productId
-          ? { ...item, unit: newUnit }
+          ? { ...item, priceTypeId, unit: isBal ? "bal" : "pcs" }
           : item
       )
     );
   };
 
   const getModalItemPricing = (item: ModalItem) => {
-    const isWholesale = item.unit === "bal";
-    const wholesalePrice = getLowestWholesalePrice(item.product);
-    const retailPrice = getLowestRetailPrice(item.product);
-    const unitPrice = isWholesale && wholesalePrice > 0
-      ? wholesalePrice
-      : isWholesale
-      ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
-      : retailPrice;
+    const selectedPrice = getSelectedPriceVariant(item);
+    let unitPrice = selectedPrice?.price || 0;
+    let variantQuantity = selectedPrice?.quantity || (item.unit === "bal" ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1);
+    let isPackagePrice = selectedPrice?.priceTypeId === PRICE_TYPE_IDS.perBal || item.priceTypeId === PRICE_TYPE_IDS.perBal;
+    const priceTypeLabel = getPriceTypeLabel(item.priceTypeId, selectedPrice);
+
+    if (unitPrice === 0) {
+      const isWholesale = item.unit === "bal";
+      const wholesalePrice = getLowestWholesalePrice(item.product);
+      const retailPrice = getLowestRetailPrice(item.product);
+      isPackagePrice = isWholesale;
+      variantQuantity = isWholesale ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1;
+      unitPrice = isWholesale && wholesalePrice > 0
+        ? wholesalePrice
+        : isWholesale
+        ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
+        : retailPrice;
+    }
 
     return {
       unitPrice,
-      subtotal: unitPrice * item.quantity,
+      variantQuantity,
+      totalPcs: item.quantity * variantQuantity,
+      priceTypeLabel,
+      subtotal: isPackagePrice ? unitPrice * item.quantity : unitPrice * item.quantity * variantQuantity,
     };
   };
 
   const handleSendWishlistInquiry = () => {
     const details = modalItems.map((item) => {
-      const { unitPrice, subtotal } = getModalItemPricing(item);
+      const { unitPrice, subtotal, variantQuantity } = getModalItemPricing(item);
 
       return {
         productId: item.product.id,
-        unit: item.unit,
+        unit: variantQuantity > 1 ? `x ${variantQuantity} pcs` : "pcs",
         quantity: item.quantity,
         priceAtThatTime: unitPrice,
         subtotal,
@@ -161,7 +243,7 @@ export default function WishlistPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: user?.email || "guest",
-        message: buildWishlistInquiryWithPricesMessage(modalItems),
+        message: buildWishlistInquiryWithPricesMessage(modalItems, priceTypeNames),
         grandTotal: details.reduce((sum, detail) => sum + detail.subtotal, 0),
         details,
       }),
@@ -232,19 +314,19 @@ export default function WishlistPage() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold text-text-primary mr-1">
-                  Terpilih: <span className="font-black text-primary-500">{inquiryIds.length}</span> produk
+                  Terpilih: <span className="font-black text-text-primary">{inquiryIds.length}</span> produk
                 </span>
                 {inquiryIds.length > 0 && (
                   <>
                     <button
                       onClick={() => setInquirySelections([])}
-                      className="px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-100 cursor-pointer transition-all active:scale-[0.97]"
+                      className="px-5 py-2.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center cursor-pointer transition-all active:scale-[0.97] shadow-sm"
                     >
                       Reset Pilihan
                     </button>
                     <button
                       onClick={handleOpenModal}
-                      className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all active:scale-[0.97] border border-emerald-600 shadow-sm"
+                      className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.97] border border-emerald-600 shadow-sm"
                     >
                       <AppIcon name="chat" className="text-sm" />
                       Tanya via WhatsApp
@@ -356,17 +438,8 @@ export default function WishlistPage() {
               {modalItems.map((item, idx) => {
                 const product = item.product;
                 const image = product.images?.[0]?.imageUrl || "/toples.png";
-                const isWholesale = item.unit === "bal";
-                const wholesalePrice = getLowestWholesalePrice(product);
-                const retailPrice = getLowestRetailPrice(product);
-
-                const unitPrice = isWholesale && wholesalePrice > 0
-                  ? wholesalePrice
-                  : isWholesale
-                  ? retailPrice * (product.packaging?.[0]?.quantityPerPack || 50)
-                  : retailPrice;
-
-                const subtotal = unitPrice * item.quantity;
+                const { unitPrice, subtotal, variantQuantity, totalPcs } = getModalItemPricing(item);
+                const priceOptions = getPriceVariantOptions(product);
 
                 return (
                   <div key={product.id} className={`flex items-center gap-4 ${idx > 0 ? "pt-4" : ""}`}>
@@ -379,36 +452,48 @@ export default function WishlistPage() {
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-black text-text-primary truncate">{product.name}</h4>
                       <p className="text-[10px] text-text-secondary font-mono tracking-wider mt-0.5">{product.sku}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {priceOptions.length === 0 ? (
+                          <span className="inline-block px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-primary-500 text-white border border-primary-500">
+                            {item.unit === "bal" ? "Harga Per Bal" : "Harga Per Pcs"}
+                          </span>
+                        ) : priceOptions.map((option) => {
+                          const isActive = item.priceTypeId
+                            ? option.id === item.priceTypeId
+                            : (item.unit === "bal" && option.id === PRICE_TYPE_IDS.perBal) ||
+                              (item.unit === "pcs" && option.id === PRICE_TYPE_IDS.withLid) ||
+                              (priceOptions.length === 1);
+
+                          return (
+                            <button
+                              key={option.id}
+                              onClick={() => {
+                                handleUpdatePriceType(product.id, option.id);
+                              }}
+                              className={`flex min-w-28 flex-col rounded-md border px-2 py-1 text-left transition-all cursor-pointer ${
+                                isActive
+                                  ? "bg-primary-500 text-white border-primary-500 shadow-xs"
+                                  : "bg-slate-50 text-gray-500 border-slate-200 hover:bg-slate-100 hover:text-gray-700"
+                              }`}
+                            >
+                              <span className="text-[9px] font-black uppercase tracking-wider leading-tight">{option.name}</span>
+                              <span className={`mt-0.5 text-[9px] font-bold leading-tight ${isActive ? "text-white/80" : "text-text-muted"}`}>
+                                {option.quantity} pcs / {formatPrice(option.price)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                       <p className="text-xs font-black text-primary-500 mt-1">
-                        {formatPrice(unitPrice)} <span className="text-[10px] text-text-muted font-normal">/ {item.unit}</span>
+                        {formatPrice(unitPrice)} <span className="text-[10px] font-bold text-text-muted">/ {variantQuantity} pcs</span>
+                      </p>
+                      <p className="text-[10px] font-bold text-text-muted mt-0.5">
+                        Jumlah: {item.quantity} x {variantQuantity} pcs = {totalPcs} pcs
                       </p>
                     </div>
 
-                    {/* Unit Selector & Quantity Controller & Price */}
+                    {/* Quantity Controller & Price */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      {/* Unit Selector */}
-                      <div className="flex border border-border rounded-lg overflow-hidden bg-gray-50 p-0.5">
-                        <button
-                          onClick={() => handleUpdateUnit(product.id, "pcs")}
-                          className={`px-2.5 py-1 text-[10px] font-black uppercase transition-all rounded-md cursor-pointer border-none bg-transparent ${
-                            item.unit === "pcs"
-                              ? "bg-white text-primary-500 shadow-xs"
-                              : "text-text-secondary hover:text-text-primary"
-                          }`}
-                        >
-                          Pcs
-                        </button>
-                        <button
-                          onClick={() => handleUpdateUnit(product.id, "bal")}
-                          className={`px-2.5 py-1 text-[10px] font-black uppercase transition-all rounded-md cursor-pointer border-none bg-transparent ${
-                            item.unit === "bal"
-                              ? "bg-white text-primary-500 shadow-xs"
-                              : "text-text-secondary hover:text-text-primary"
-                          }`}
-                        >
-                          Bal
-                        </button>
-                      </div>
 
                       {/* Quantity Controller */}
                       <div className="flex items-center gap-1 bg-gray-50 border border-border rounded-lg p-0.5">
@@ -435,6 +520,9 @@ export default function WishlistPage() {
                       <span className="text-xs font-black text-text-primary">
                         Total: {formatPrice(subtotal)}
                       </span>
+                      <span className="text-[10px] font-bold text-text-muted">
+                        {totalPcs} pcs
+                      </span>
                     </div>
                   </div>
                 );
@@ -448,15 +536,8 @@ export default function WishlistPage() {
                 <span className="text-xl font-black text-primary-600">
                   {formatPrice(
                     modalItems.reduce((acc, item) => {
-                      const isWholesale = item.unit === "bal";
-                      const wholesalePrice = getLowestWholesalePrice(item.product);
-                      const retailPrice = getLowestRetailPrice(item.product);
-                      const unitPrice = isWholesale && wholesalePrice > 0
-                        ? wholesalePrice
-                        : isWholesale
-                        ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
-                        : retailPrice;
-                      return acc + (unitPrice * item.quantity);
+                      const { subtotal } = getModalItemPricing(item);
+                      return acc + subtotal;
                     }, 0)
                   )}
                 </span>
@@ -469,7 +550,7 @@ export default function WishlistPage() {
                   Batal
                 </button>
                 <a
-                  href={buildWishlistInquiryWithPricesUrl(modalItems)}
+                  href={buildWishlistInquiryWithPricesUrl(modalItems, priceTypeNames)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleSendWishlistInquiry}

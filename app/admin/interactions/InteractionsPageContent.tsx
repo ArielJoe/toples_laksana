@@ -207,7 +207,7 @@ export default function InteractionsPageContent({ initialInteractions, products 
                 ) : (
                   paginatedInteractions.map((interaction) => (
                     <TableRow key={interaction.id} className="transition-all duration-200 group border-border">
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary tracking-tight">
                           {new Date(interaction.createdAt || "").toLocaleString("id-ID", {
                             day: "2-digit",
@@ -218,12 +218,12 @@ export default function InteractionsPageContent({ initialInteractions, products 
                           })}
                         </p>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-bold text-text-primary group-hover:text-primary-600 transition-colors line-clamp-1">
                           {productMap[interaction.productId || ""] || interaction.productId || "-"}
                         </p>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="font-mono text-xs font-bold text-text-secondary">
                           {getDisplayUser(interaction.userId)}
                         </p>

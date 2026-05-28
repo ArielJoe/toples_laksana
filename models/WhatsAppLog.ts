@@ -3,7 +3,7 @@ import { Schema, model, models } from "mongoose";
 export interface IWhatsAppLogDetail {
   productId: string;
   lidColorId?: string;
-  unit?: "pcs" | "bal";
+  unit?: string;
   quantity: number;
   priceAtThatTime: number;
   subtotal: number;
@@ -14,8 +14,6 @@ export interface IWhatsAppLog {
   userId: string;
   message: string;
   destinationNumber: string;
-  promoAppliedId?: string;
-  totalDiscount: number;
   grandTotal: number;
   details: IWhatsAppLogDetail[];
   createdAt?: Date;
@@ -25,7 +23,7 @@ const WhatsAppLogDetailSchema = new Schema<IWhatsAppLogDetail>(
   {
     productId: { type: String, required: true },
     lidColorId: { type: String, default: null },
-    unit: { type: String, enum: ["pcs", "bal"], default: "pcs" },
+    unit: { type: String, default: "pcs" },
     quantity: { type: Number, required: true, default: 1 },
     priceAtThatTime: { type: Number, required: true },
     subtotal: { type: Number, required: true },
@@ -39,8 +37,6 @@ const WhatsAppLogSchema = new Schema<IWhatsAppLog>(
     userId: { type: String, required: true },
     message: { type: String, required: true },
     destinationNumber: { type: String, required: true },
-    promoAppliedId: { type: String, default: null },
-    totalDiscount: { type: Number, required: true, default: 0 },
     grandTotal: { type: Number, required: true, default: 0 },
     details: { type: [WhatsAppLogDetailSchema], required: true, default: [] },
   },

@@ -210,18 +210,18 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
                 ) : (
                   paginatedCategories.map((cat) => (
                     <TableRow key={cat.id} className="transition-all duration-200 group border-border">
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <span className="text-xs font-black text-text-muted font-mono tracking-tighter">{cat.id}</span>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <p className="text-sm font-black text-text-primary group-hover:text-primary-600 transition-colors tracking-tight">{cat.name}</p>
                       </TableCell>
-                      <TableCell className="px-8 py-5">
+                      <TableCell className="px-8 py-3">
                         <Badge variant="secondary" className="bg-secondary-50 text-secondary-600 border-none text-[0.65rem] font-black uppercase px-2 h-5">
                           {cat.count} Produk
                         </Badge>
                       </TableCell>
-                      <TableCell className="px-8 py-5 text-right">
+                      <TableCell className="px-8 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button 
                             onClick={() => openEditDialog(cat)}

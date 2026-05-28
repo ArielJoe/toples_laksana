@@ -63,7 +63,6 @@ const emptyProduct: Partial<Product> = {
   bodyMaterial: "",
   lidMaterial: "",
   lidVariant: "",
-  lidType: "",
   isAvailable: true,
   availabilityNote: "",
   description: "",
@@ -78,22 +77,6 @@ const emptyProduct: Partial<Product> = {
   packaging: [],
   deletedAt: null,
 };
-
-function deriveLidTypeIdFromVariant(
-  variantId: string | undefined,
-  lidVariants: MasterDataItem[],
-  lidTypes: MasterDataItem[]
-) {
-  if (!variantId) return "";
-
-  const variant = lidVariants.find((item) => item.id === variantId);
-  const matchingType = lidTypes.find((item) => {
-    if (item.id === variantId.replace(/^lv_/, "lt_")) return true;
-    return variant?.name && item.name.toLowerCase() === variant.name.toLowerCase();
-  });
-
-  return matchingType?.id || "";
-}
 
 function clampNonNegative(value: number) {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -217,13 +200,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
         finalImages = finalImages.map((img, i) => ({ ...img, isPrimary: i === firstPrimaryIndex }));
       }
 
-      const derivedLidType = deriveLidTypeIdFromVariant(
-        formData.lidVariant,
-        masterData.lidVariants,
-        masterData.lidTypes
-      );
-
-      await onSave({ ...formData, lidType: formData.lidType || derivedLidType, images: finalImages });
+      await onSave({ ...formData, images: finalImages });
       
       // Cleanup
       pendingFiles.forEach(f => URL.revokeObjectURL(f.preview));
@@ -239,7 +216,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden flex flex-col p-0">
         <DialogHeader className="sticky top-0 z-10 border-b border-border bg-white/90 px-8 py-6 backdrop-blur-md">
           <DialogTitle className="text-xl font-black text-text-primary">
             {product ? "Edit Produk" : "Tambah Produk Baru"}
@@ -304,7 +281,6 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                   onChange={(value) => setFormData({
                     ...formData,
                     lidVariant: value,
-                    lidType: deriveLidTypeIdFromVariant(value, masterData.lidVariants, masterData.lidTypes) || formData.lidType,
                   })}
                   options={masterData.lidVariants.map(v => [v.id, v.name])}
                   fallbackLabel={formData.lidVariant}
@@ -315,10 +291,10 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
             <div className="space-y-4 pt-4 border-t border-border">
               <h4 className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-primary-600">Dimensi</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <NumberField label="Tinggi cm" value={formData.dimension?.heightCm || 0} onChange={(value) => updateDimension("heightCm", value)} />
-                <NumberField label="Diameter cm" value={formData.dimension?.diameterCm || 0} onChange={(value) => updateDimension("diameterCm", value)} />
-                <NumberField label="Volume ml" value={formData.dimension?.volumeMl || 0} onChange={(value) => updateDimension("volumeMl", value)} />
-                <NumberField label="Berat gr" value={formData.dimension?.weightGram || 0} onChange={(value) => updateDimension("weightGram", value)} />
+                <NumberField label="Tinggi (cm)" value={formData.dimension?.heightCm || 0} onChange={(value) => updateDimension("heightCm", value)} />
+                <NumberField label="Diameter (cm)" value={formData.dimension?.diameterCm || 0} onChange={(value) => updateDimension("diameterCm", value)} />
+                <NumberField label="Volume (ml)" value={formData.dimension?.volumeMl || 0} onChange={(value) => updateDimension("volumeMl", value)} />
+                <NumberField label="Berat (gr)" value={formData.dimension?.weightGram || 0} onChange={(value) => updateDimension("weightGram", value)} />
               </div>
             </div>
 
@@ -471,18 +447,19 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                   type="button"
                   onClick={() => setFormData(prev => ({
                     ...prev,
-                    prices: [...(prev.prices || []), { lidColorId: masterData.lidColors[0]?.id || "", priceTypeId: masterData.priceTypes[0]?.id || "", price: 0, validFrom: new Date().toISOString() }]
+                    prices: [...(prev.prices || []), { lidColorId: masterData.lidColors[0]?.id || "", priceTypeId: masterData.priceTypes[0]?.id || "", price: 0, quantity: 1, validFrom: new Date().toISOString() }]
                   }))}
-                  className="h-8 px-3 text-[0.6rem] font-black uppercase tracking-widest gap-2 border border-border rounded-lg hover:bg-secondary-50 transition-colors flex items-center"
+                  className="h-8 px-3 text-[0.6rem] font-black uppercase tracking-widest gap-2 border border-border rounded-lg hover:bg-secondary-50 transition-colors flex items-center cursor-pointer"
                 >
                   <AppIcon name="add" className="text-sm" /> Tambah Harga
                 </button>
               </div>
               <div className="space-y-3">
                 {(formData.prices || []).map((price, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_0.75fr_auto] gap-3 items-end bg-secondary-50/50 p-4 rounded-xl border border-border relative">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-[1.2fr_1.2fr_0.6fr_0.8fr_auto] gap-3 items-start bg-secondary-50/50 p-4 rounded-xl border border-border relative">
                     <SelectField
                       label="Warna Tutup"
+                      labelClassName="text-[0.65rem] uppercase tracking-wider opacity-60"
                       value={price.lidColorId}
                       onChange={(val) => {
                         setFormData(prev => {
@@ -501,6 +478,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                     />
                     <SelectField
                       label="Tipe Harga"
+                      labelClassName="text-[0.65rem] uppercase tracking-wider opacity-60"
                       value={price.priceTypeId}
                       onChange={(val) => {
                         setFormData(prev => {
@@ -511,6 +489,22 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                       }}
                       options={masterData.priceTypes.map(t => [t.id, t.name.replace(/_/g, ' ')])}
                     />
+                    <div className="space-y-2">
+                      <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Isi (Pcs)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={price.quantity ?? 1}
+                        onChange={(e) => {
+                          const val = Math.max(1, parseInt(e.target.value) || 1);
+                          setFormData(prev => {
+                            const newPrices = [...(prev.prices || [])];
+                            if (newPrices[index]) newPrices[index].quantity = val;
+                            return { ...prev, prices: newPrices };
+                          });
+                        }}
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Harga (Rp)</Label>
                       <Input
@@ -533,7 +527,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                         ...prev,
                         prices: (prev.prices || []).filter((_, i) => i !== index)
                       }))}
-                      className="h-10 w-10 justify-self-start md:justify-self-end text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-red-100"
+                      className="h-12 w-12 self-end justify-self-start md:justify-self-end text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors flex items-center justify-center border border-transparent hover:border-red-100 cursor-pointer"
                     >
                       <AppIcon name="delete" />
                     </button>
@@ -558,51 +552,36 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
               </div>
               <div className="space-y-3">
                 {(formData.packaging || []).map((pack, index) => (
-                  <div key={index} className="bg-secondary-50/50 p-4 rounded-xl border border-border relative space-y-4">
+                  <div key={index} className="bg-secondary-50/50 p-4 rounded-xl border border-border relative space-y-3">
                     <div className="flex justify-between items-center">
-                      <div className="flex-1 max-w-30">
-                        <Label className="text-[0.65rem] uppercase tracking-wider opacity-60">Isi Per Bal</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={pack.quantityPerPack}
-                          onChange={(e) => {
-                            const val = readNonNegativeNumber(e);
-                            setFormData(prev => {
-                              const newPack = [...(prev.packaging || [])];
-                              if (newPack[index]) newPack[index].quantityPerPack = val;
-                              return { ...prev, packaging: newPack };
-                            });
-                          }}
-                        />
-                      </div>
+                      <span className="text-[0.65rem] uppercase tracking-wider opacity-60 font-black text-primary-600">Dimensi Paket</span>
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({
                           ...prev,
                           packaging: (prev.packaging || []).filter((_, i) => i !== index)
                         }))}
-                        className="text-red-500 hover:bg-red-50 text-[0.6rem] font-black uppercase tracking-widest h-8 px-3 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                        className="text-red-500 hover:bg-red-50 text-[0.6rem] font-black uppercase tracking-widest h-8 px-3 rounded-lg transition-colors border border-transparent hover:border-red-100 cursor-pointer"
                       >
                         Hapus
                       </button>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <NumberField label="P (cm)" value={pack.lengthCm || 0} onChange={(val) => {
+                      <NumberField label="Panjang (cm)" value={pack.lengthCm || 0} onChange={(val) => {
                         setFormData(prev => {
                           const newPack = [...(prev.packaging || [])];
                           if (newPack[index]) newPack[index].lengthCm = val;
                           return { ...prev, packaging: newPack };
                         });
                       }} />
-                      <NumberField label="L (cm)" value={pack.widthCm || 0} onChange={(val) => {
+                      <NumberField label="Lebar (cm)" value={pack.widthCm || 0} onChange={(val) => {
                         setFormData(prev => {
                           const newPack = [...(prev.packaging || [])];
                           if (newPack[index]) newPack[index].widthCm = val;
                           return { ...prev, packaging: newPack };
                         });
                       }} />
-                      <NumberField label="T (cm)" value={pack.heightCm || 0} onChange={(val) => {
+                      <NumberField label="Tinggi (cm)" value={pack.heightCm || 0} onChange={(val) => {
                         setFormData(prev => {
                           const newPack = [...(prev.packaging || [])];
                           if (newPack[index]) newPack[index].heightCm = val;
@@ -705,12 +684,14 @@ function SelectField({
   onChange,
   options,
   fallbackLabel,
+  labelClassName,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: [string, ReactNode][];
   fallbackLabel?: ReactNode;
+  labelClassName?: string;
 }) {
   const selectedOption = options.find(([optValue]) => optValue === value);
   const safeOptions = selectedOption || !value
@@ -720,7 +701,7 @@ function SelectField({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label className={labelClassName}>{label}</Label>
       <Select value={value} onValueChange={(val) => onChange(val || "")}>
         <SelectTrigger className="h-12 w-full bg-background px-3 font-bold text-left">
           <SelectValue>{selectedLabel}</SelectValue>

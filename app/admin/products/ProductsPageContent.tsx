@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { formatPrice } from "@/lib/price-calculator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +17,10 @@ import {
 import { Card } from "@/components/ui/card";
 import { AppIcon } from "@/components/ui/app-icon";
 import ProductDialog from "@/components/admin/ProductDialog";
+import ProductPriceDropdown from "@/components/admin/ProductPriceDropdown";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useRouter } from "next/navigation";
-import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getLowestRetailPrice, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
+import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
 
 interface MasterDataItem {
   id: string;
@@ -100,7 +100,10 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
       body: JSON.stringify(productData),
     });
 
-    if (!response.ok) throw new Error("Gagal menyimpan produk");
+    if (!response.ok) {
+      const error = await response.json().catch(() => null) as { error?: string } | null;
+      throw new Error(error?.error || "Gagal menyimpan produk");
+    }
 
     toast.success(isEditing ? "Produk berhasil diperbarui" : "Produk berhasil ditambahkan");
 
@@ -231,7 +234,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Info Produk</TableHead>
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">SKU & Material</TableHead>
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Kategori</TableHead>
-                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga Dasar</TableHead>
+                    <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Harga</TableHead>
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Status</TableHead>
                     <TableHead className="px-4 py-3 text-[0.65rem] font-black text-text-muted uppercase tracking-[0.2em]">Aksi</TableHead>
                   </TableRow>
@@ -290,9 +293,11 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                             </Badge>
                           </TableCell>
                           <TableCell className="px-4 py-3">
-                            <p className="text-xs font-black text-text-primary tracking-tight">
-                              {formatPrice(getLowestRetailPrice(p))}
-                            </p>
+                            <ProductPriceDropdown
+                              product={p}
+                              priceTypes={masterData.priceTypes}
+                              lidColors={masterData.lidColors}
+                            />
                           </TableCell>
                           <TableCell className="px-4 py-3">
                             {!p.deletedAt ? (

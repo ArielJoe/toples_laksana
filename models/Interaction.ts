@@ -5,7 +5,7 @@ export interface IInteraction {
   userId: string;
   productId?: string;
   pagePath?: string;
-  interactionType: "page_view" | "view" | "detail_click" | "whatsapp_share" | "promo_click";
+  interactionType: "page_view" | "view" | "detail_click" | "whatsapp_share";
   createdAt?: Date;
 }
 
@@ -17,7 +17,7 @@ const InteractionSchema = new Schema<IInteraction>(
     pagePath: { type: String, default: "" },
     interactionType: {
       type: String,
-      enum: ["page_view", "view", "detail_click", "whatsapp_share", "promo_click"],
+      enum: ["page_view", "view", "detail_click", "whatsapp_share"],
       required: true,
     },
   },

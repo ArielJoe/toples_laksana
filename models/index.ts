@@ -6,7 +6,6 @@ import Material from "./Material";
 import LidType from "./LidType";
 import LidVariant from "./LidVariant";
 import PriceType from "./PriceType";
-import Promo from "./Promo";
 import Product from "./Product";
 import User from "./User";
 import Wishlist from "./Wishlist";
@@ -38,8 +37,6 @@ export type { ILidVariant } from "./LidVariant";
 export { PriceType } from "./PriceType";
 export type { IPriceType } from "./PriceType";
 
-export { Promo } from "./Promo";
-export type { IPromo } from "./Promo";
 
 export { Product } from "./Product";
 export type {
@@ -74,7 +71,6 @@ const databaseModels = {
   LidType,
   LidVariant,
   PriceType,
-  Promo,
   Product,
   User,
   Wishlist,
