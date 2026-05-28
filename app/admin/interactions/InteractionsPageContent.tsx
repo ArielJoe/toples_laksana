@@ -184,7 +184,7 @@ export default function InteractionsPageContent({ initialInteractions, products 
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table className="min-w-190">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
@@ -233,6 +233,47 @@ export default function InteractionsPageContent({ initialInteractions, products 
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile View: Cards List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredInteractions.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="touch_app" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">Interaksi tidak ditemukan</p>
+                <p className="text-xs font-medium mt-1">Coba gunakan kata kunci lain.</p>
+              </div>
+            ) : (
+              paginatedInteractions.map((interaction) => (
+                <div key={interaction.id} className="p-5 flex flex-col gap-2 hover:bg-secondary-50/10 transition-colors">
+                  <div className="flex justify-between items-start gap-4">
+                    <span className="text-[10px] font-black text-text-muted">
+                      {new Date(interaction.createdAt || "").toLocaleString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <Badge variant="secondary" className="shrink-0 bg-secondary-50 text-secondary-600 border-none text-[8px] font-black uppercase px-1.5 h-4.5 flex items-center">
+                      {interaction.interactionType === "page_view" ? "Page View" :
+                       interaction.interactionType === "view" ? "View Product" :
+                       interaction.interactionType === "detail_click" ? "Detail Click" :
+                       interaction.interactionType === "whatsapp_share" ? "WA Share" :
+                       interaction.interactionType === "promo_click" ? "Promo Click" :
+                       interaction.interactionType}
+                    </Badge>
+                  </div>
+                  <h4 className="text-sm font-black text-text-primary tracking-tight">
+                    {productMap[interaction.productId || ""] || interaction.productId || "-"}
+                  </h4>
+                  <div className="mt-0.5 text-[11px] font-medium text-text-secondary">
+                    <span className="font-mono truncate">{getDisplayUser(interaction.userId)}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {filteredInteractions.length > 0 && (

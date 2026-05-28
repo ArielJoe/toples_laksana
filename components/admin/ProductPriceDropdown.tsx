@@ -101,7 +101,7 @@ export default function ProductPriceDropdown({
         sideOffset={4}
         onPointerEnter={(event) => openMenu(event.pointerType)}
         onPointerLeave={(event) => closeMenu(event.pointerType)}
-        className="w-80 border border-primary-200 bg-white p-2 shadow-xl shadow-black/10 rounded-2xl"
+        className="w-80 border border-slate-200 bg-white p-2 shadow-xl shadow-black/10 rounded-2xl ring-0"
       >
         <div className="px-2 pb-1">
           <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-text-muted">

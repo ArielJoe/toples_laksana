@@ -649,7 +649,7 @@ export default function InvoicePageContent() {
                         <PopoverContent
                           align="end"
                           sideOffset={8}
-                          className="w-auto border border-border bg-white p-0 text-text-primary"
+                          className="w-auto border border-border bg-white p-0 text-text-primary ring-0"
                         >
                           <Calendar
                             mode="single"
@@ -690,7 +690,7 @@ export default function InvoicePageContent() {
 
 
               <div className="mt-14 overflow-x-auto -mx-6 px-6 sm:-mx-9 sm:px-9 lg:mx-0 lg:px-0">
-                <div className="min-w-[810px]">
+                <div className="min-w-202.5">
                   <div className="grid grid-cols-[minmax(320px,1fr)_110px_150px_190px_40px] items-center rounded-t-xl bg-primary-500 px-6 py-3.5 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white">
                     <div>Item</div>
                     <div className="text-center">Jumlah</div>

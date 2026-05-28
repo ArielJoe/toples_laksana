@@ -608,7 +608,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                 Batal
               </Button>
               <Button type="submit" disabled={loading} className="flex-2 h-12 font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 text-xs rounded-xl bg-primary-500 hover:bg-primary-600 text-white">
-                {loading ? "Menyimpan..." : product ? "Simpan Perubahan" : "Tambah Produk"}
+                {loading ? "Menyimpan..." : product ? "Simpan Perubahan" : "Tambah"}
               </Button>
             </div>
           </div>

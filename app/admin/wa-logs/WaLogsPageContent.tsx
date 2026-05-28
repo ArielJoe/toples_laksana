@@ -216,7 +216,7 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table className="min-w-260">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
@@ -319,6 +319,91 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile View: Cards List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredLogs.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="chat" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">Log tidak ditemukan</p>
+                <p className="text-xs font-medium mt-1">Coba gunakan kata kunci atau tanggal lain.</p>
+              </div>
+            ) : (
+              paginatedLogs.map((log) => {
+                const details = log.details || [];
+                const itemCount = details.reduce((sum, detail) => sum + (detail.quantity || 0), 0);
+
+                return (
+                  <div key={log.id} className="p-5 flex flex-col gap-3 hover:bg-secondary-50/10 transition-colors">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black text-text-muted block">
+                          {new Date(log.createdAt || "").toLocaleString("id-ID", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        <p className="mt-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-text-muted">
+                          {details.length} produk / {itemCount} item
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-black text-text-primary">{formatMoney(getLogTotal(log))}</p>
+                        {Boolean(log.totalDiscount) && (
+                          <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-green-700">
+                            Diskon {formatMoney(log.totalDiscount)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] font-medium text-text-secondary bg-secondary-50/50 p-2 rounded-lg">
+                      <span className="font-mono truncate">{getDisplayUser(log.userId)}</span>
+                    </div>
+
+                    <div className="space-y-2 mt-1">
+                      {details.length === 0 ? (
+                        <p className="text-xs font-bold text-text-primary">Tidak ada detail barang</p>
+                      ) : (
+                        details.map((detail, index) => {
+                          const product = productMap[detail.productId];
+
+                          return (
+                            <div key={`${log.id}-${detail.productId}-${index}`} className="rounded-xl border border-border bg-[#F9FAFB]/40 p-3">
+                              <div className="flex flex-col gap-1.5">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-black text-text-primary line-clamp-1">
+                                    {product?.name || detail.productId}
+                                  </p>
+                                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                                    {product?.sku || detail.productId}
+                                  </p>
+                                </div>
+                                <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-border/40">
+                                  <div>
+                                    <span className="font-bold text-text-primary">
+                                      {detail.quantity} {detail.unit || "pcs"}
+                                    </span>
+                                    <span className="text-[9px] uppercase tracking-widest text-text-muted ml-1">x {formatMoney(detail.priceAtThatTime)}</span>
+                                  </div>
+                                  <span className="font-black text-text-primary">
+                                    {formatMoney(detail.subtotal)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {filteredLogs.length > 0 && (

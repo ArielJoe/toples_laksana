@@ -178,7 +178,7 @@ export default function SimpleMasterDataPage({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table className="min-w-175">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
@@ -248,6 +248,58 @@ export default function SimpleMasterDataPage({
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile View: Cards List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredItems.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="inventory_2" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">{emptyTitle}</p>
+                <p className="text-xs font-medium mt-1">{emptyMessage}</p>
+              </div>
+            ) : (
+              paginatedItems.map((item) => (
+                <div key={item.id} className="p-5 flex flex-col gap-3 hover:bg-secondary-50/10 transition-colors">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-black text-text-muted font-mono tracking-tighter block mb-0.5">{item.id}</span>
+                      <h4 className="text-sm font-black text-text-primary tracking-tight truncate">{item.name}</h4>
+                    </div>
+                    {showUsageColumn && item.usage && (
+                      <span className="shrink-0 inline-flex rounded-lg bg-secondary-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-text-secondary">
+                        {USAGE_LABELS[item.usage]}
+                      </span>
+                    )}
+                  </div>
+
+                  {item.description && (
+                    <p className="text-xs font-medium text-text-secondary line-clamp-2">{item.description}</p>
+                  )}
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-secondary-50/50">
+                    <button
+                      onClick={() => {
+                        setEditingItem(item);
+                        setIsDialogOpen(true);
+                      }}
+                      className="h-8 px-3.5 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="edit" className="text-xs" /> Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItemToDelete(item.id);
+                        setIsConfirmOpen(true);
+                      }}
+                      className="h-8 px-3.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="delete" className="text-xs" /> Hapus
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {filteredItems.length > 0 && (

@@ -191,7 +191,7 @@ export default function MasterDataDialog({
                 disabled={isSubmitting}
                 className="flex-[2] bg-primary-500 hover:bg-primary-600 text-white font-black uppercase tracking-widest text-xs h-12 rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-50"
               >
-                {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+                {isSubmitting ? "Menyimpan..." : initialData ? "Simpan Perubahan" : "Tambah"}
               </Button>
             </div>
           </form>

@@ -19,6 +19,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CategoriesPageContentProps {
   initialProducts: Product[];
@@ -45,13 +47,24 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [filterProductsCount, setFilterProductsCount] = useState(""); // "" | "has" | "none"
   
   const router = useRouter();
 
-  const filteredCategories = categories.filter(cat => 
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cat.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCategories = categories.filter(cat => {
+    const matchQuery = cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       cat.id.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchQuery) return false;
+
+    if (filterProductsCount === "has") {
+      return cat.count > 0;
+    } else if (filterProductsCount === "none") {
+      return cat.count === 0;
+    }
+
+    return true;
+  });
   const totalPages = Math.max(1, Math.ceil(filteredCategories.length / ADMIN_TABLE_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const startIndex = filteredCategories.length === 0
@@ -177,16 +190,60 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
               />
             </div>
             <div className="flex gap-2 lg:gap-3">
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="tune" className="text-sm" /> Filter
-              </button>
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="download" className="text-sm" /> Ekspor
-              </button>
+              <Popover>
+                <PopoverTrigger className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
+                  <AppIcon name="tune" className="text-sm" /> Filter
+                  {filterProductsCount && (
+                    <span className="size-2 rounded-full bg-primary-500" />
+                  )}
+                </PopoverTrigger>
+                 <PopoverContent align="end" className="w-64 p-3 space-y-2 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-black/10 ring-0 text-text-primary">
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Jumlah Produk</label>
+                      <Select
+                        value={filterProductsCount || "__all__"}
+                        onValueChange={(val) => {
+                          setFilterProductsCount(val === "__all__" || !val ? "" : val);
+                          setPage(1);
+                        }}
+                        items={[
+                          { value: "__all__", label: "Semua" },
+                          { value: "has", label: "Memiliki Produk (Ada)" },
+                          { value: "none", label: "Kosong (Tidak Ada)" }
+                        ]}
+                      >
+                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
+                          <SelectValue placeholder="Semua" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectGroup>
+                            <SelectItem value="__all__">Semua</SelectItem>
+                            <SelectItem value="has">Memiliki Produk (Ada)</SelectItem>
+                            <SelectItem value="none">Kosong (Tidak Ada)</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {filterProductsCount && (
+                    <button
+                      onClick={() => {
+                        setFilterProductsCount("");
+                        setPage(1);
+                      }}
+                      className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center"
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table className="min-w-175">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
@@ -242,6 +299,46 @@ export default function CategoriesPageContent({ initialProducts, initialCategori
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile View: Cards List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredCategories.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="category" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">Kategori tidak ditemukan</p>
+                <p className="text-xs font-medium mt-1">Coba gunakan kata kunci pencarian lain.</p>
+              </div>
+            ) : (
+              paginatedCategories.map((cat) => (
+                <div key={cat.id} className="p-5 flex flex-col gap-3 hover:bg-secondary-50/10 transition-colors">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-black text-text-muted font-mono tracking-tighter block mb-0.5">{cat.id}</span>
+                      <h4 className="text-sm font-black text-text-primary tracking-tight truncate">{cat.name}</h4>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0 bg-secondary-50 text-secondary-600 border-none text-[9px] font-black uppercase px-2 h-5 flex items-center">
+                      {cat.count} Produk
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-secondary-50/50">
+                    <button
+                      onClick={() => openEditDialog(cat)}
+                      className="h-8 px-3.5 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="edit" className="text-xs" /> Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteConfirm(cat.id)}
+                      className="h-8 px-3.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="delete" className="text-xs" /> Hapus
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {filteredCategories.length > 0 && (

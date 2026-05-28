@@ -19,6 +19,8 @@ import { AppIcon } from "@/components/ui/app-icon";
 import ProductDialog from "@/components/admin/ProductDialog";
 import ProductPriceDropdown from "@/components/admin/ProductPriceDropdown";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { formatAttributeLabel, getAvailabilityLabel, getCategoryLabel, getPrimaryImage, getProductTypeLabel, Product } from "@/types/product";
 
@@ -53,18 +55,37 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterProductType, setFilterProductType] = useState("");
+  const [filterAvailability, setFilterAvailability] = useState("");
   const router = useRouter();
 
   // Filter products based on search query
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
+    let result = products;
+
+    // Apply category filter
+    if (filterCategory) {
+      result = result.filter(p => p.categoryId === filterCategory);
+    }
+    // Apply product type filter
+    if (filterProductType) {
+      result = result.filter(p => p.productTypeId === filterProductType);
+    }
+    // Apply availability filter
+    if (filterAvailability) {
+      const isAvail = filterAvailability === "available";
+      result = result.filter(p => (p.isAvailable !== false) === isAvail);
+    }
+
+    if (!searchQuery.trim()) return result;
     const query = searchQuery.toLowerCase();
     const materialMap = Object.fromEntries(masterData.materials.map(m => [m.id, m.name]));
     const categoryMap = Object.fromEntries(masterData.categories.map(c => [c.id, c.name]));
     const typeMap = Object.fromEntries(masterData.productTypes.map(t => [t.id, t.name]));
     const lidVariantMap = Object.fromEntries(masterData.lidVariants.map(t => [t.id, t.name]));
 
-    return products.filter((p) => {
+    return result.filter((p) => {
       const skuMatch = p.sku?.toLowerCase().includes(query);
       const nameMatch = p.name?.toLowerCase().includes(query);
       
@@ -78,7 +99,7 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
 
       return skuMatch || nameMatch || materialMatch || categoryMatch || typeMatch || lidVariantMatch;
     });
-  }, [products, searchQuery, masterData]);
+  }, [products, searchQuery, filterCategory, filterProductType, filterAvailability, masterData]);
 
   const productTotalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PAGE_SIZE));
   const safeProductPage = Math.min(productPage, productTotalPages);
@@ -208,17 +229,117 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
               />
             </div>
             <div className="flex gap-2 lg:gap-3">
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="tune" className="text-sm" /> Filter
-              </button>
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="download" className="text-sm" /> Ekspor
-              </button>
+              <Popover>
+                <PopoverTrigger className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
+                  <AppIcon name="tune" className="text-sm" /> Filter
+                  {(filterCategory || filterProductType || filterAvailability) && (
+                    <span className="size-2 rounded-full bg-primary-500" />
+                  )}
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-72 p-3 space-y-2 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-black/10 ring-0 text-text-primary">
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Kategori</label>
+                      <Select
+                        value={filterCategory || "__all__"}
+                        onValueChange={(val) => {
+                          setFilterCategory(val === "__all__" || !val ? "" : val);
+                          setProductPage(1);
+                        }}
+                        items={[
+                          { value: "__all__", label: "Semua Kategori" },
+                          ...masterData.categories.map((c) => ({ value: c.id, label: c.name }))
+                        ]}
+                      >
+                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
+                          <SelectValue placeholder="Semua Kategori" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectGroup>
+                            <SelectItem value="__all__">Semua Kategori</SelectItem>
+                            {masterData.categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Tipe Produk</label>
+                      <Select
+                        value={filterProductType || "__all__"}
+                        onValueChange={(val) => {
+                          setFilterProductType(val === "__all__" || !val ? "" : val);
+                          setProductPage(1);
+                        }}
+                        items={[
+                          { value: "__all__", label: "Semua Tipe" },
+                          ...masterData.productTypes.map((t) => ({ value: t.id, label: t.name }))
+                        ]}
+                      >
+                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
+                          <SelectValue placeholder="Semua Tipe" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectGroup>
+                            <SelectItem value="__all__">Semua Tipe</SelectItem>
+                            {masterData.productTypes.map((t) => (
+                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Status Ketersediaan</label>
+                      <Select
+                        value={filterAvailability || "__all__"}
+                        onValueChange={(val) => {
+                          setFilterAvailability(val === "__all__" || !val ? "" : val);
+                          setProductPage(1);
+                        }}
+                        items={[
+                          { value: "__all__", label: "Semua Status" },
+                          { value: "available", label: "Tersedia" },
+                          { value: "unavailable", label: "Tidak Tersedia" }
+                        ]}
+                      >
+                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
+                          <SelectValue placeholder="Semua Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectGroup>
+                            <SelectItem value="__all__">Semua Status</SelectItem>
+                            <SelectItem value="available">Tersedia</SelectItem>
+                            <SelectItem value="unavailable">Tidak Tersedia</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {(filterCategory || filterProductType || filterAvailability) && (
+                    <button
+                      onClick={() => {
+                        setFilterCategory("");
+                        setFilterProductType("");
+                        setFilterAvailability("");
+                        setProductPage(1);
+                      }}
+                      className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center"
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             {products.length === 0 ? (
               <div className="p-20 flex flex-col items-center justify-center text-text-muted text-center">
                 <div className="flex items-center justify-center mb-6">
@@ -355,6 +476,121 @@ export default function ProductsPageContent({ initialProducts, masterData }: Pro
                 )}
                 </TableBody>
               </Table>
+            )}
+          </div>
+
+          {/* Mobile Card List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredProducts.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="inventory_2" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">Produk tidak ditemukan</p>
+                <p className="text-xs font-medium mt-1">Coba gunakan kata kunci pencarian lain.</p>
+              </div>
+            ) : (
+              paginatedProducts.map(p => {
+                const image = getPrimaryImage(p);
+
+                return (
+                  <div key={p.id} className="p-5 flex flex-col gap-4 hover:bg-secondary-50/10 transition-colors">
+                    <div className="flex gap-4">
+                      <div className="w-16 h-16 rounded-xl bg-[#F9FAFB] flex items-center justify-center p-1 border border-border shrink-0 overflow-hidden">
+                        {image ? (
+                          <Image
+                            className="object-cover rounded-lg"
+                            alt={p.name}
+                            src={image}
+                            width={64}
+                            height={64}
+                          />
+                        ) : (
+                          <AppIcon name="inventory_2" className="text-2xl opacity-30" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-black text-text-muted font-mono tracking-tighter block mb-0.5">{p.sku}</span>
+                        <h4 className="text-sm font-black text-text-primary tracking-tight line-clamp-1">{p.name}</h4>
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          <Badge variant="secondary" className="bg-secondary-50 text-secondary-600 border-none text-[9px] font-black uppercase px-1.5 h-4.5">
+                            {typeMap[p.productTypeId || ""] || getProductTypeLabel(p.productTypeId)}
+                          </Badge>
+                          <Badge variant="outline" className="bg-white border-border text-text-secondary text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5">
+                            {categoryMap[p.categoryId] || getCategoryLabel(p.categoryId)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 bg-secondary-50/30 p-3 rounded-xl border border-border/50 text-xs">
+                      <div>
+                        <span className="text-[9px] font-black text-text-muted uppercase tracking-wider block">Bahan Tutup</span>
+                        <span className="font-bold text-text-secondary mt-0.5 block">{materialMap[p.lidMaterial] || formatAttributeLabel(p.lidMaterial)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-black text-text-muted uppercase tracking-wider block">Harga Varian</span>
+                        <div className="mt-0.5">
+                          <ProductPriceDropdown
+                            product={p}
+                            priceTypes={masterData.priceTypes}
+                            lidColors={masterData.lidColors}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 pt-2 border-t border-secondary-50/50">
+                      {!p.deletedAt ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleAvailability(p)}
+                            className={cn(
+                              "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none p-0.5 border-none outline-none shadow-none",
+                              p.isAvailable !== false ? "bg-emerald-500" : "bg-red-500"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out",
+                                p.isAvailable !== false ? "translate-x-4" : "translate-x-0"
+                              )}
+                            />
+                          </button>
+                          <span className={cn(
+                            "text-[10px] font-black uppercase tracking-widest",
+                            p.isAvailable !== false ? "text-emerald-600" : "text-red-500"
+                          )}>
+                            {getAvailabilityLabel(p.isAvailable)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1 py-0.5 px-2 bg-slate-100 rounded-full text-slate-500 border border-slate-200 text-[9px] font-black uppercase tracking-widest">
+                          Draft
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleEdit(p)}
+                          className="h-8 w-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Edit"
+                        >
+                          <AppIcon name="edit" className="text-base" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setProductToDelete(p.id);
+                            setIsConfirmOpen(true);
+                          }}
+                          className="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Hapus"
+                        >
+                          <AppIcon name="delete" className="text-base" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
 

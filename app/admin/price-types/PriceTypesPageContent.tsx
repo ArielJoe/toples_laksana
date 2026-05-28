@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import MasterDataDialog, { MasterDataField, MasterDataForm } from "@/components/admin/MasterDataDialog";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IPriceType } from "@/models/PriceType";
 
 interface PriceTypesPageContentProps {
@@ -39,14 +41,25 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [editingPriceType, setEditingPriceType] = useState<IPriceType | null>(null);
   const [priceTypeToDelete, setPriceTypeToDelete] = useState<string | null>(null);
+  const [filterDescription, setFilterDescription] = useState(""); // "" | "has" | "none"
   
   const router = useRouter();
 
-  const filteredPriceTypes = priceTypes.filter(pt => 
-    pt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    pt.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    pt.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPriceTypes = priceTypes.filter(pt => {
+    const matchQuery = pt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       pt.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       pt.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchQuery) return false;
+
+    if (filterDescription === "has") {
+      return !!pt.description;
+    } else if (filterDescription === "none") {
+      return !pt.description;
+    }
+
+    return true;
+  });
   const totalPages = Math.max(1, Math.ceil(filteredPriceTypes.length / ADMIN_TABLE_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const startIndex = filteredPriceTypes.length === 0
@@ -167,16 +180,60 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
               />
             </div>
             <div className="flex gap-2 lg:gap-3">
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="tune" className="text-sm" /> Filter
-              </button>
-              <button className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
-                <AppIcon name="download" className="text-sm" /> Ekspor
-              </button>
+              <Popover>
+                <PopoverTrigger className="flex-1 sm:flex-none px-5 lg:px-6 py-3 text-[0.7rem] font-black bg-white border border-border rounded-xl text-text-secondary flex items-center justify-center gap-2 hover:bg-secondary-50 hover:text-text-primary transition-all uppercase tracking-widest cursor-pointer">
+                  <AppIcon name="tune" className="text-sm" /> Filter
+                  {filterDescription && (
+                    <span className="size-2 rounded-full bg-primary-500" />
+                  )}
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-3 space-y-2 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-black/10 ring-0 text-text-primary">
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-wider ml-1">Deskripsi</label>
+                      <Select
+                        value={filterDescription || "__all__"}
+                        onValueChange={(val) => {
+                          setFilterDescription(val === "__all__" || !val ? "" : val);
+                          setPage(1);
+                        }}
+                        items={[
+                          { value: "__all__", label: "Semua" },
+                          { value: "has", label: "Memiliki Deskripsi" },
+                          { value: "none", label: "Tanpa Deskripsi" }
+                        ]}
+                      >
+                        <SelectTrigger className="h-10 w-full bg-secondary-50/30 border-border font-bold text-xs rounded-xl px-3.5">
+                          <SelectValue placeholder="Semua" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectGroup>
+                            <SelectItem value="__all__">Semua</SelectItem>
+                            <SelectItem value="has">Memiliki Deskripsi</SelectItem>
+                            <SelectItem value="none">Tanpa Deskripsi</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {filterDescription && (
+                    <button
+                      onClick={() => {
+                        setFilterDescription("");
+                        setPage(1);
+                      }}
+                      className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer text-center"
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table className="min-w-200">
               <TableHeader>
                 <TableRow className="bg-transparent hover:bg-transparent border-b border-border">
@@ -230,6 +287,44 @@ export default function PriceTypesPageContent({ initialPriceTypes }: PriceTypesP
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile View: Cards List */}
+          <div className="block sm:hidden divide-y divide-border bg-white">
+            {filteredPriceTypes.length === 0 ? (
+              <div className="p-16 text-center text-text-muted">
+                <AppIcon name="sell" className="text-5xl opacity-10 mb-4" />
+                <p className="text-base font-black text-text-primary">Tipe harga tidak ditemukan</p>
+                <p className="text-xs font-medium mt-1">Coba gunakan kata kunci pencarian lain.</p>
+              </div>
+            ) : (
+              paginatedPriceTypes.map((pt) => (
+                <div key={pt.id} className="p-5 flex flex-col gap-3 hover:bg-secondary-50/10 transition-colors">
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <span className="text-[10px] font-black text-text-muted font-mono tracking-tighter block">{pt.id}</span>
+                    <h4 className="text-sm font-black text-text-primary tracking-tight truncate">{pt.name}</h4>
+                    {pt.description && (
+                      <p className="text-xs text-text-secondary line-clamp-2 font-medium mt-0.5">{pt.description}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-secondary-50/50">
+                    <button
+                      onClick={() => openEditDialog(pt)}
+                      className="h-8 px-3.5 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="edit" className="text-xs" /> Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteConfirm(pt.id)}
+                      className="h-8 px-3.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <AppIcon name="delete" className="text-xs" /> Hapus
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {filteredPriceTypes.length > 0 && (
