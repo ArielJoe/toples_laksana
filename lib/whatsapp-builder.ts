@@ -197,8 +197,11 @@ export function buildWishlistInquiryWithPricesMessage(
   items.forEach((item, index) => {
     const volume = getSpecValue(item.product, "volume_ml");
 
+    const wholesalePriceObj = (item.product.prices || []).find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal);
+    const defaultBalQuantity = wholesalePriceObj?.quantity || 50;
+
     let unitPrice = 0;
-    let unitPcs = item.unit === "bal" ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1;
+    let unitPcs = item.unit === "bal" ? defaultBalQuantity : 1;
     let isPackagePrice = item.priceTypeId === PRICE_TYPE_IDS.perBal;
     let priceTypeLabel = getWishlistPriceTypeLabel(item.priceTypeId, null, priceTypeNames);
     if (item.priceTypeId) {
@@ -219,11 +222,11 @@ export function buildWishlistInquiryWithPricesMessage(
       const retailPrice = getLowestRetailPrice(item.product);
 
       isPackagePrice = isWholesale;
-      unitPcs = isWholesale ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1;
+      unitPcs = isWholesale ? defaultBalQuantity : 1;
       unitPrice = isWholesale && wholesalePrice > 0
         ? wholesalePrice
         : isWholesale
-        ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
+        ? retailPrice * defaultBalQuantity
         : retailPrice;
     }
 

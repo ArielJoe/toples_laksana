@@ -198,8 +198,11 @@ export default function WishlistPage() {
 
   const getModalItemPricing = (item: ModalItem) => {
     const selectedPrice = getSelectedPriceVariant(item);
+    const wholesalePriceObj = (item.product.prices || []).find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal);
+    const defaultBalQuantity = wholesalePriceObj?.quantity || 50;
+
     let unitPrice = selectedPrice?.price || 0;
-    let variantQuantity = selectedPrice?.quantity || (item.unit === "bal" ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1);
+    let variantQuantity = selectedPrice?.quantity || (item.unit === "bal" ? defaultBalQuantity : 1);
     let isPackagePrice = selectedPrice?.priceTypeId === PRICE_TYPE_IDS.perBal || item.priceTypeId === PRICE_TYPE_IDS.perBal;
     const priceTypeLabel = getPriceTypeLabel(item.priceTypeId, selectedPrice);
 
@@ -208,11 +211,11 @@ export default function WishlistPage() {
       const wholesalePrice = getLowestWholesalePrice(item.product);
       const retailPrice = getLowestRetailPrice(item.product);
       isPackagePrice = isWholesale;
-      variantQuantity = isWholesale ? item.product.packaging?.[0]?.quantityPerPack || 1 : 1;
+      variantQuantity = isWholesale ? defaultBalQuantity : 1;
       unitPrice = isWholesale && wholesalePrice > 0
         ? wholesalePrice
         : isWholesale
-        ? retailPrice * (item.product.packaging?.[0]?.quantityPerPack || 50)
+        ? retailPrice * defaultBalQuantity
         : retailPrice;
     }
 

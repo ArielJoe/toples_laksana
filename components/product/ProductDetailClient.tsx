@@ -96,7 +96,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     );
   }, [product.prices, activePrice]);
 
-  const quantityPerPack = product.packaging?.[0]?.quantityPerPack || 1;
+  const quantityPerPack = (product.prices || []).find(p => p.priceTypeId === PRICE_TYPE_IDS.perBal)?.quantity || 50;
   const activeQuantityPerPack = activePrice?.quantity || (isPackagePrice ? quantityPerPack : 1);
 
   const safeActivePrice = activePrice || EMPTY_PRICE;
@@ -119,9 +119,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const images = useMemo(() => {
     if (!product.images || product.images.length === 0) {
-      return [{ imageUrl: "/toples.png", isPrimary: true, order: 0 }];
+      return [{ imageUrl: "/toples.png", isPrimary: true }];
     }
-    return [...product.images].sort((a, b) => a.order - b.order);
+    return product.images;
   }, [product.images]);
 
   const heroImage = images[mainImage]?.imageUrl || "/toples.png";

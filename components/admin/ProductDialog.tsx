@@ -61,7 +61,6 @@ const emptyProduct: Partial<Product> = {
   lidMaterial: "",
   lidVariant: "",
   isAvailable: true,
-  availabilityNote: "",
   description: "",
   dimension: {
     heightCm: 0,
@@ -182,7 +181,6 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
 
         const uploadedImages = uploadResult.map((res, i) => ({
           imageUrl: res.url,
-          order: finalImages.length + i,
           isPrimary: pendingFiles[i].isPrimary
         }));
         finalImages = [...finalImages, ...uploadedImages];
@@ -439,7 +437,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                   type="button"
                   onClick={() => setFormData(prev => ({
                     ...prev,
-                    prices: [...(prev.prices || []), { lidColorId: masterData.lidColors[0]?.id || "", priceTypeId: masterData.priceTypes[0]?.id || "", price: 0, quantity: 1, validFrom: new Date().toISOString() }]
+                    prices: [...(prev.prices || []), { lidColorId: masterData.lidColors[0]?.id || "", priceTypeId: masterData.priceTypes[0]?.id || "", price: 0, quantity: 1 }]
                   }))}
                   className="h-8 px-3 text-[0.6rem] font-black uppercase tracking-widest gap-2 border border-border rounded-lg hover:bg-secondary-50 transition-colors flex items-center cursor-pointer"
                 >
@@ -535,7 +533,7 @@ export default function ProductDialog({ isOpen, onClose, product, onSave, master
                   type="button"
                   onClick={() => setFormData(prev => ({
                     ...prev,
-                    packaging: [...(prev.packaging || []), { quantityPerPack: 1, lengthCm: 0, widthCm: 0, heightCm: 0, weightKg: 0 }]
+                    packaging: [...(prev.packaging || []), { lengthCm: 0, widthCm: 0, heightCm: 0, weightKg: 0 }]
                   }))}
                   className="h-8 px-3 text-[0.6rem] font-black uppercase tracking-widest gap-2 border border-border rounded-lg hover:bg-secondary-50 transition-colors flex items-center"
                 >

@@ -7,8 +7,6 @@ export interface ProductPrice {
   priceTypeId: string;
   price: number;
   quantity?: number;
-  validFrom?: string;
-  validUntil?: string;
   lidColorName?: string;
   lidColorHex?: string;
   priceTypeName?: string;
@@ -16,9 +14,7 @@ export interface ProductPrice {
 
 export interface ProductImage {
   imageUrl: string;
-  order: number;
   isPrimary: boolean;
-  createdAt?: string;
 }
 
 export interface ProductPackaging {
@@ -26,7 +22,6 @@ export interface ProductPackaging {
   widthCm?: number;
   heightCm?: number;
   weightKg?: number;
-  quantityPerPack: number;
 }
 
 export interface ProductDimension {
@@ -53,7 +48,6 @@ export interface Product {
   bodyMaterialName?: string;
   lidTypeName?: string;
   isAvailable?: boolean;
-  availabilityNote?: string;
   description?: string;
   dimension?: ProductDimension;
   packaging?: ProductPackaging[];

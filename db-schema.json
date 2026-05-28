@@ -36,7 +36,6 @@
         "lidVariant": { "type": "String", "required": true, "default": "", "ref": "lidvariants" },
         "bodyMaterial": { "type": "String", "required": true, "default": "", "ref": "materials" },
         "isAvailable": { "type": "Boolean", "required": true, "default": true },
-        "availabilityNote": { "type": "String", "default": "" },
         "description": { "type": "String", "default": "" },
         "dimension": { "type": "Embedded:Dimension", "default": null },
         "packaging": { "type": "Array<Embedded:Packaging>", "default": [] },
@@ -60,17 +59,14 @@
             "lengthCm": { "type": "Number", "default": null },
             "widthCm": { "type": "Number", "default": null },
             "heightCm": { "type": "Number", "default": null },
-            "weightKg": { "type": "Number", "default": null },
-            "quantityPerPack": { "type": "Number", "required": true }
+            "weightKg": { "type": "Number", "default": null }
           }
         },
         "ProductImage": {
           "_id": false,
           "fields": {
             "imageUrl": { "type": "String", "required": true },
-            "order": { "type": "Number", "default": 0 },
-            "isPrimary": { "type": "Boolean", "default": false },
-            "createdAt": { "type": "Date", "default": "Date.now" }
+            "isPrimary": { "type": "Boolean", "default": false }
           }
         },
         "ProductPrice": {
@@ -79,9 +75,7 @@
             "lidColorId": { "type": "String", "required": true, "ref": "lidcolors" },
             "priceTypeId": { "type": "String", "required": true, "ref": "pricetypes" },
             "price": { "type": "Number", "required": true },
-            "quantity": { "type": "Number", "default": 1 },
-            "validFrom": { "type": "Date", "required": true, "default": "Date.now" },
-            "validUntil": { "type": "Date", "default": null }
+            "quantity": { "type": "Number", "default": 1 }
           }
         }
       },

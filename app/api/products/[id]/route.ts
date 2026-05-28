@@ -14,7 +14,6 @@ const PRODUCT_UPDATE_FIELDS = [
   "lidVariant",
   "bodyMaterial",
   "isAvailable",
-  "availabilityNote",
   "description",
   "dimension",
   "packaging",

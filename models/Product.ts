@@ -12,14 +12,11 @@ export interface IPackaging {
   widthCm?: number;
   heightCm?: number;
   weightKg?: number;
-  quantityPerPack: number;
 }
 
 export interface IProductImage {
   imageUrl: string;
-  order: number;
   isPrimary: boolean;
-  createdAt?: Date;
 }
 
 export interface IProductPrice {
@@ -27,8 +24,6 @@ export interface IProductPrice {
   priceTypeId: string;
   price: number;
   quantity?: number;
-  validFrom: Date;
-  validUntil?: Date;
 }
 
 export interface IProduct {
@@ -41,7 +36,6 @@ export interface IProduct {
   lidVariant: string;
   bodyMaterial: string;
   isAvailable: boolean;
-  availabilityNote?: string;
   description?: string;
   dimension?: IDimension;
   packaging?: IPackaging[];
@@ -67,7 +61,6 @@ const PackagingSchema = new Schema<IPackaging>(
     widthCm: { type: Number, default: null },
     heightCm: { type: Number, default: null },
     weightKg: { type: Number, default: null },
-    quantityPerPack: { type: Number, required: true },
   },
   { _id: false }
 );
@@ -75,9 +68,7 @@ const PackagingSchema = new Schema<IPackaging>(
 const ProductImageSchema = new Schema<IProductImage>(
   {
     imageUrl: { type: String, required: true },
-    order: { type: Number, default: 0 },
     isPrimary: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
@@ -88,8 +79,6 @@ const ProductPriceSchema = new Schema<IProductPrice>(
     priceTypeId: { type: String, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, default: 1 },
-    validFrom: { type: Date, required: true, default: Date.now },
-    validUntil: { type: Date, default: null },
   },
   { _id: false }
 );
@@ -109,7 +98,6 @@ const ProductSchema = new Schema<IProduct>(
       required: true,
       default: true,
     },
-    availabilityNote: { type: String, default: "" },
     description: { type: String, default: "" },
     dimension: { type: DimensionSchema, default: null },
     packaging: { type: [PackagingSchema], default: [] },
