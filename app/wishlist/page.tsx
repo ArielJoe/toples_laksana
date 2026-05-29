@@ -584,10 +584,10 @@ export default function WishlistPage() {
                   )}
                 </span>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 border border-border bg-white text-text-secondary rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-100 hover:text-text-primary transition-all active:scale-[0.97] cursor-pointer"
+                  className="w-full sm:flex-1 py-3 border border-border bg-white text-text-secondary rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-100 hover:text-text-primary transition-all active:scale-[0.97] cursor-pointer whitespace-nowrap"
                 >
                   Batal
                 </button>
@@ -596,7 +596,7 @@ export default function WishlistPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleSendWishlistInquiry}
-                  className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-600 shadow-sm transition-all active:scale-[0.97] cursor-pointer"
+                  className="w-full sm:flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-600 shadow-sm transition-all active:scale-[0.97] cursor-pointer whitespace-nowrap"
                 >
                   Kirim ke WhatsApp
                 </a>
