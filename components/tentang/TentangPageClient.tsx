@@ -261,7 +261,7 @@ export default function TentangPageClient() {
               Buka Google Maps
             </a>
             <a
-              href="https://wa.me/6282240923336?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples."
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || "6282119668009"}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl px-6 font-bold border-border transition-all hover:bg-secondary-50 cursor-pointer")}

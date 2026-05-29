@@ -282,7 +282,7 @@ export default function HomePage() {
               <ArrowRightIcon className="size-4" />
             </Link>
             <a
-              href="https://wa.me/6282240923336?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples."
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || "6282119668009"}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl border-border bg-white px-6 font-bold transition-all hover:bg-secondary-50")}

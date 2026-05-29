@@ -33,7 +33,7 @@ export function getCleanPriceTypeName(priceTypeId?: string, priceTypeMap: Record
 }
 
 function buildWhatsAppUrlFromMessage(message: string): string {
-  return `https://wa.me/${WA_NUMBER || "6281234567890"}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${WA_NUMBER || "6282119668009"}?text=${encodeURIComponent(message)}`;
 }
 
 export function buildWhatsAppMessage(
