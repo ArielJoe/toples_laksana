@@ -44,11 +44,11 @@ export default function Footer() {
               <span className="font-medium">Jl. Raya Kopo No.125, Situsaeur, Kec. Bojongloa Kidul, Kota Bandung, Jawa Barat 40232</span>
             </a>
             <a
-              href="tel:+6282240923336"
+              href="tel:+6282119668009"
               className="flex items-center gap-3 transition-colors hover:text-primary-500"
             >
               <PhoneIcon className="size-5 shrink-0 text-primary-500" />
-              <span className="font-mono text-base font-medium">+62 822-4092-3336</span>
+              <span className="font-mono text-base font-medium">+62 821-1966-8009</span>
             </a>
             <div className="flex items-start gap-3">
               <MailIcon className="mt-0.5 size-5 shrink-0 text-primary-500" />
