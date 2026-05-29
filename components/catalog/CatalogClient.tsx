@@ -112,7 +112,7 @@ function CatalogContent() {
       <main className="w-full">
         {/* Sticky Header: Controls Bar + Active Filters */}
         <div className="sticky top-16 lg:top-20 z-40 min-h-20 border-b border-border bg-background/95 px-4 backdrop-blur-md lg:h-20 sm:px-6 lg:px-10 py-3.5 lg:py-0">
-          <div className="flex min-h-20 flex-col gap-3 pt-12 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:py-0">
+          <div className="flex min-h-20 flex-col gap-3 pt-2 sm:pt-6 lg:h-full lg:flex-row lg:items-center lg:justify-between lg:py-0">
             <div className="grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-1 sm:items-center sm:gap-4">
               {/* Mobile/Tablet filter button */}
               <button

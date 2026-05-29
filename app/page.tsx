@@ -13,6 +13,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { getCleanWANumber } from "@/lib/whatsapp-builder";
 
 const CATEGORIES = [
   {
@@ -78,7 +79,7 @@ export default function HomePage() {
   return (
     <main className="overflow-hidden bg-white">
       {/* Hero Section */}
-      <section className="relative flex min-h-svh flex-col lg:flex-row lg:items-stretch w-full bg-white pt-20 lg:pt-0 lg:h-screen lg:min-h-0 overflow-hidden">
+      <section className="relative flex min-h-svh flex-col lg:flex-row lg:items-stretch w-full bg-white pt-17 lg:pt-0 lg:h-screen lg:min-h-0 overflow-hidden">
         {/* Left: Text Content */}
         <div className="w-full lg:w-1/2 flex items-center px-6 py-12 lg:px-16 lg:pt-20 lg:pb-8 lg:h-full">
           <motion.div
@@ -282,7 +283,7 @@ export default function HomePage() {
               <ArrowRightIcon className="size-4" />
             </Link>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || "6282119668009"}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
+              href={`https://wa.me/${getCleanWANumber()}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl border-border bg-white px-6 font-bold transition-all hover:bg-secondary-50")}

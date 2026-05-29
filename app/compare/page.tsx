@@ -114,7 +114,7 @@ export default async function ComparisonPage({ searchParams }: ComparePageProps)
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-125 bg-linear-to-b from-primary-50/20 to-transparent -z-10" />
 
-      <main className="max-w-7xl mx-auto px-4 pt-10 pb-6 sm:px-6 sm:pt-12 lg:px-12 lg:py-6 relative">
+      <main className="max-w-7xl mx-auto px-4 pt-6 pb-6 sm:px-6 sm:pt-12 lg:px-12 lg:py-6 relative">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-3">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { getCleanWANumber } from "@/lib/whatsapp-builder";
 
 const MAPS_URL =
   "https://www.google.com/maps/place/Toko+Toples+Laksana/@-6.9219723,107.5995147,823m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2e68e623958f611b:0xb6da297f1c6b25f!8m2!3d-6.9219723!4d107.6020896!16s%2Fg%2F11cjj829nv?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D";
@@ -44,11 +45,17 @@ export default function Footer() {
               <span className="font-medium">Jl. Raya Kopo No.125, Situsaeur, Kec. Bojongloa Kidul, Kota Bandung, Jawa Barat 40232</span>
             </a>
             <a
-              href="tel:+6282119668009"
+              href={`tel:+${getCleanWANumber()}`}
               className="flex items-center gap-3 transition-colors hover:text-primary-500"
             >
               <PhoneIcon className="size-5 shrink-0 text-primary-500" />
-              <span className="font-mono text-base font-medium">+62 821-1966-8009</span>
+              <span className="font-mono text-base font-medium">
+                {(() => {
+                  const num = getCleanWANumber();
+                  if (num === "6282119668009") return "+62 821-1966-8009";
+                  return `+${num}`;
+                })()}
+              </span>
             </a>
             <div className="flex items-start gap-3">
               <MailIcon className="mt-0.5 size-5 shrink-0 text-primary-500" />

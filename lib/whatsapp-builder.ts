@@ -3,7 +3,12 @@ import type { CalculatorResult } from "@/lib/price-calculator";
 import { PRICE_TYPE_IDS, getSpecValue, getLowestRetailPrice, getLowestWholesalePrice } from "@/types/product";
 import { formatRupiah } from "@/lib/price-calculator";
 
-const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER;
+export function getCleanWANumber(): string {
+  const rawNumber = process.env.NEXT_PUBLIC_WA_NUMBER;
+  if (!rawNumber) return "6282119668009";
+  // Clean all non-digit characters (quotes, spaces, plus signs, dashes, etc.)
+  return rawNumber.replace(/[^0-9]/g, "");
+}
 
 export function getCleanColorName(colorId?: string, colorMap: Record<string, string> = {}): string {
   if (!colorId) return "-";
@@ -33,7 +38,7 @@ export function getCleanPriceTypeName(priceTypeId?: string, priceTypeMap: Record
 }
 
 function buildWhatsAppUrlFromMessage(message: string): string {
-  return `https://wa.me/${WA_NUMBER || "6282119668009"}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${getCleanWANumber()}?text=${encodeURIComponent(message)}`;
 }
 
 export function buildWhatsAppMessage(

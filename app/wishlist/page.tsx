@@ -273,7 +273,7 @@ export default function WishlistPage() {
   };
 
   return (
-    <main className="bg-white min-h-[70vh] px-4 py-8 sm:px-6 lg:px-12 lg:py-8 relative">
+    <main className="bg-white min-h-[70vh] px-4 pt-2 pb-8 sm:px-6 sm:pt-6 lg:px-12 lg:py-6 relative">
       <div className="mx-auto max-w-screen-2xl">
         <div className="mb-6">
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">

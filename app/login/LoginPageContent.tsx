@@ -57,7 +57,7 @@ export default function LoginPageContent() {
           </Link>
         </div>
 
-        <Card className="w-full max-w-110 overflow-hidden border border-border bg-white/90 py-0 backdrop-blur-2xl transition-all duration-500">
+        <Card className="w-full max-w-110 overflow-hidden border border-border bg-white/90 py-0 backdrop-blur-2xl transition-all duration-500 shadow-[0_20px_25px_-15px_rgba(0,0,0,0.05)]">
           <div className="px-6 pb-6 pt-10 text-center sm:px-10 sm:pt-12">
             <Link href="/" className="mb-6 inline-block text-2xl font-extrabold tracking-tight text-primary-500">
               Toples Laksana

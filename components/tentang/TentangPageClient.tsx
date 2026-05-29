@@ -9,6 +9,7 @@ import { ArrowRightIcon, BadgeCheckIcon, BoxesIcon, ClockIcon, HandshakeIcon, Ma
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { getCleanWANumber } from "@/lib/whatsapp-builder";
 
 const MAPS_URL =
   "https://www.google.com/maps/place/Toko+Toples+Laksana/@-6.9219723,107.5995147,823m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2e68e623958f611b:0xb6da297f1c6b25f!8m2!3d-6.9219723!4d107.6020896!16s%2Fg%2F11cjj829nv?entry=ttu&g_ep=EgoyMDI2MDUyMC4wIKXMDSoASAFQAw%3D%3D";
@@ -38,7 +39,7 @@ export default function TentangPageClient() {
   return (
     <main className="bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative flex min-h-svh w-full flex-col justify-center overflow-hidden pb-8 pt-8 lg:block lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-0">
+      <section className="relative flex min-h-svh w-full flex-col justify-center overflow-hidden pb-8 pt-6 lg:block lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:py-0">
         <div className="z-10 mx-auto grid w-full max-w-screen-2xl grid-cols-1 items-center gap-8 px-6 lg:h-full lg:grid-cols-2 lg:gap-12 lg:px-12">
           {/* Hero Left Content */}
           <motion.div
@@ -261,7 +262,7 @@ export default function TentangPageClient() {
               Buka Google Maps
             </a>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER || "6282119668009"}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
+              href={`https://wa.me/${getCleanWANumber()}?text=Halo%20Toples%20Laksana%2C%20saya%20ingin%20bertanya%20stok%20toples.`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 rounded-xl px-6 font-bold border-border transition-all hover:bg-secondary-50 cursor-pointer")}
