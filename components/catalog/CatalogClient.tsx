@@ -274,8 +274,8 @@ function CatalogContent() {
                 <div
                   className={
                     viewMode === "grid"
-                      ? "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                      : "grid grid-cols-1 items-stretch gap-4"
+                      ? "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                      : "grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2"
                   }
                 >
                   {Array.from({ length: 8 }).map((_, i) =>
@@ -297,7 +297,7 @@ function CatalogContent() {
                         className="h-full overflow-hidden rounded-xl border border-border bg-white animate-pulse"
                       >
                         <div className="flex min-h-36 flex-row">
-                          <div className="w-30 shrink-0 bg-secondary-50 sm:size-40 lg:size-44" />
+                          <div className="w-30 shrink-0 bg-secondary-50 sm:size-40 lg:h-auto lg:w-28 xl:w-36 2xl:size-40" />
                           <div className="flex-1 space-y-3 border-l border-border/60 p-4 sm:p-5">
                             <div className="h-4 bg-secondary-50 w-3/4 rounded" />
                             <div className="h-3 bg-secondary-50 w-1/2 rounded" />
@@ -336,7 +336,7 @@ function CatalogContent() {
                 <>
                   {viewMode === "grid" ? (
                     /* Product Cards Grid */
-                    <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {products.map((product) => (
                         <ProductCard
                           key={product.id}
@@ -348,7 +348,7 @@ function CatalogContent() {
                     </div>
                   ) : (
                     /* Product List View */
-                    <div className="grid grid-cols-1 items-stretch gap-4">
+                    <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
                       {products.map((product) => (
                         <ProductCard
                           key={product.id}

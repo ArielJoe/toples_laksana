@@ -118,6 +118,61 @@ function getProductSummary(
 
 const WA_LOGS_PAGE_SIZE = 10;
 
+function InquiryMetric({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`min-w-0 rounded-lg border px-3 py-2 ${highlight ? "border-primary-100 bg-primary-50/40" : "border-border/70 bg-secondary-50/40"}`}>
+      <p className="text-[0.58rem] font-black uppercase leading-none tracking-[0.14em] text-text-muted">
+        {label}
+      </p>
+      <p className="mt-1.5 truncate text-sm font-black leading-tight text-text-primary">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function ProductInquiryCard({
+  detail,
+  product,
+}: {
+  detail: WhatsAppLogDetail;
+  product?: ProductOption;
+}) {
+  const productName = product?.name || detail.productId;
+  const productSku = product?.sku || detail.productId;
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-3.5 shadow-xs sm:p-4">
+      <div className="min-w-0">
+        <p className="break-words text-sm font-black leading-snug text-text-primary sm:text-[0.95rem]">
+          {productName}
+        </p>
+        <p className="mt-1 break-all font-mono text-[0.62rem] font-black uppercase tracking-[0.14em] text-text-muted">
+          {productSku}
+        </p>
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
+        <InquiryMetric label="Jumlah" value={`${detail.quantity} ${detail.unit || "pcs"}`} />
+        <InquiryMetric label="Harga" value={formatMoney(detail.priceAtThatTime)} />
+        <InquiryMetric
+          label="Subtotal"
+          value={formatMoney(detail.quantity * detail.priceAtThatTime)}
+          highlight
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -285,34 +340,11 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                                 const product = productMap[detail.productId];
 
                                 return (
-                                  <div key={`${log.id}-${detail.productId}-${index}`} className="rounded-lg border border-border bg-secondary-50/30 p-3">
-                                    <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-                                      <div className="min-w-0">
-                                        <p className="text-sm font-black text-text-primary line-clamp-1">
-                                          {product?.name || detail.productId}
-                                        </p>
-                                        <p className="mt-0.5 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-text-muted">
-                                          {product?.sku || detail.productId}
-                                        </p>
-                                      </div>
-                                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-right text-xs">
-                                        <div>
-                                          <p className="font-black text-text-primary">
-                                            {detail.quantity} {detail.unit || "pcs"}
-                                          </p>
-                                          <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-text-muted">Jumlah</p>
-                                        </div>
-                                        <div>
-                                          <p className="font-black text-text-primary">{formatMoney(detail.priceAtThatTime)}</p>
-                                          <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-text-muted">Harga</p>
-                                        </div>
-                                        <div>
-                                          <p className="font-black text-text-primary">{formatMoney(detail.quantity * detail.priceAtThatTime)}</p>
-                                          <p className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-text-muted">Subtotal</p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
+                                  <ProductInquiryCard
+                                    key={`${log.id}-${detail.productId}-${index}`}
+                                    detail={detail}
+                                    product={product}
+                                  />
                                 );
                               })
                             )}
@@ -386,29 +418,11 @@ export default function WaLogsPageContent({ initialLogs, products }: WaLogsPageC
                           const product = productMap[detail.productId];
 
                           return (
-                            <div key={`${log.id}-${detail.productId}-${index}`} className="rounded-xl border border-border bg-[#F9FAFB]/40 p-3">
-                              <div className="flex flex-col gap-1.5">
-                                <div className="min-w-0">
-                                  <p className="text-xs font-black text-text-primary line-clamp-1">
-                                    {product?.name || detail.productId}
-                                  </p>
-                                  <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
-                                    {product?.sku || detail.productId}
-                                  </p>
-                                </div>
-                                <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-border/40">
-                                  <div>
-                                    <span className="font-bold text-text-primary">
-                                      {detail.quantity} {detail.unit || "pcs"}
-                                    </span>
-                                    <span className="text-[9px] uppercase tracking-widest text-text-muted ml-1">x {formatMoney(detail.priceAtThatTime)}</span>
-                                  </div>
-                                  <span className="font-black text-text-primary">
-                                    {formatMoney(detail.quantity * detail.priceAtThatTime)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                            <ProductInquiryCard
+                              key={`${log.id}-${detail.productId}-${index}`}
+                              detail={detail}
+                              product={product}
+                            />
                           );
                         })
                       )}

@@ -118,7 +118,7 @@ export default function ProductCard({
         <div
           className={cn(
             "relative block shrink-0 overflow-hidden bg-secondary-50",
-            isList ? "h-auto w-30 p-3 sm:size-40 lg:size-44" : "aspect-square w-full p-5"
+            isList ? "h-auto w-30 p-3 sm:size-40 lg:h-auto lg:w-28 xl:w-36 2xl:size-40" : "aspect-square w-full p-5"
           )}
         >
           {heroImage ? (
